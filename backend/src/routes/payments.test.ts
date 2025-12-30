@@ -163,7 +163,7 @@ describe('Payments Routes', () => {
       const mockPayment = {
         paymentId: 'pay-1',
         sent: 10000,
-        fees: 100,
+        fees: 100000, // fees are in millisatoshis (msat)
         isPaid: true,
       };
 

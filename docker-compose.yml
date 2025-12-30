@@ -8,13 +8,13 @@ services:
     dns:
       - 8.8.8.8
       - 1.1.1.1
-    command: "--agree-to-terms-of-service --http-bind-ip 0.0.0.0"
+    command: '--agree-to-terms-of-service --http-bind-ip 0.0.0.0'
     ports:
-      - "9740:9740"
+      - '9740:9740'
     volumes:
       - ./data/phoenixd:/phoenix/.phoenix
     healthcheck:
-      test: ["CMD-SHELL", "echo 'healthcheck'"]
+      test: ['CMD-SHELL', "echo 'healthcheck'"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -31,12 +31,16 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-phoenixd_secret}
       POSTGRES_DB: ${POSTGRES_DB:-phoenixd_dashboard}
     ports:
-      - "5433:5432"
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-phoenixd} -d ${POSTGRES_DB:-phoenixd_dashboard}"]
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-phoenixd} -d ${POSTGRES_DB:-phoenixd_dashboard}',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -56,7 +60,7 @@ services:
       PHOENIXD_URL: http://phoenixd:9740
       PHOENIXD_PASSWORD: ${PHOENIXD_PASSWORD:-}
     ports:
-      - "4001:4000"
+      - '4001:4000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -65,7 +69,7 @@ services:
     volumes:
       - ./backend/src:/app/src:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -83,7 +87,7 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:4001
       NEXT_PUBLIC_WS_URL: ws://localhost:4001
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       - backend
     volumes:

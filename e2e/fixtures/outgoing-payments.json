@@ -7,7 +7,7 @@
     "preimage": "6666777788889999000011112222333344445555aaaabbbbccccddddeeee6666",
     "isPaid": true,
     "sent": 2500,
-    "fees": 5,
+    "fees": 5000,
     "invoice": "lnbc25n1pj...",
     "completedAt": 1703966400000,
     "createdAt": 1703966300000
@@ -20,7 +20,7 @@
     "preimage": "7777888899990000111122223333444455556666aaaabbbbccccddddeeee7777",
     "isPaid": true,
     "sent": 15000,
-    "fees": 15,
+    "fees": 15000,
     "invoice": "lnbc150u1pj...",
     "completedAt": 1703880000000,
     "createdAt": 1703879900000
@@ -32,7 +32,7 @@
     "txId": "onchain123456789abcdef...",
     "isPaid": true,
     "sent": 50000,
-    "fees": 500,
+    "fees": 500000,
     "completedAt": 1703793600000,
     "createdAt": 1703793500000
   },
@@ -44,7 +44,7 @@
     "preimage": "8888999900001111222233334444555566667777aaaabbbbccccddddeeee8888",
     "isPaid": true,
     "sent": 8000,
-    "fees": 8,
+    "fees": 8000,
     "completedAt": 1703707200000,
     "createdAt": 1703707100000
   }

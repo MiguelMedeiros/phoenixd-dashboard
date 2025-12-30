@@ -58,6 +58,7 @@ export interface OutgoingPayment {
   preimage?: string;
   isPaid: boolean;
   sent: number;
+  /** Fees in millisatoshis (msat) - divide by 1000 to get satoshis */
   fees: number;
   invoice?: string;
   completedAt?: number;

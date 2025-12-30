@@ -1,0 +1,7 @@
+{
+  "recipientAmountSat": 1000,
+  "routingFeeSat": 5,
+  "paymentId": "pay-lnaddress-001",
+  "paymentHash": "lnaddress1234567890abcdef1234567890abcdef1234567890abcdef12345678",
+  "paymentPreimage": "preimage1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+}

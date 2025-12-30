@@ -123,7 +123,10 @@ export default function PaymentsPage() {
     .filter((p) => p.isPaid)
     .reduce((acc, p) => acc + p.receivedSat, 0);
   const totalSent = outgoingPayments.filter((p) => p.isPaid).reduce((acc, p) => acc + p.sent, 0);
-  const totalFees = outgoingPayments.filter((p) => p.isPaid).reduce((acc, p) => acc + p.fees, 0);
+  // Note: fees come from phoenixd API in millisatoshis (msat), need to convert to sats
+  const totalFees = Math.floor(
+    outgoingPayments.filter((p) => p.isPaid).reduce((acc, p) => acc + p.fees, 0) / 1000
+  );
 
   if (loading) {
     return (
@@ -355,7 +358,7 @@ export default function PaymentsPage() {
                           </span>
                           {payment.fees > 0 && (
                             <span className="text-[10px] md:text-xs text-muted-foreground hidden sm:inline">
-                              Fee: {formatSats(payment.fees)}
+                              Fee: {formatSats(Math.floor(payment.fees / 1000))}
                             </span>
                           )}
                         </div>
@@ -416,7 +419,7 @@ export default function PaymentsPage() {
                 )}
                 {'fees' in selectedPayment && selectedPayment.fees > 0 && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    Fee: {formatSats(selectedPayment.fees)}
+                    Fee: {formatSats(Math.floor(selectedPayment.fees / 1000))}
                   </p>
                 )}
               </div>
