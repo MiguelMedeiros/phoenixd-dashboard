@@ -66,3 +66,15 @@ nodeRouter.get("/estimatefees", async (req: Request, res: Response) => {
     res.status(500).json({ error: (error as Error).message });
   }
 });
+
+// Get Connection Details
+nodeRouter.get("/connection", async (_req: Request, res: Response) => {
+  try {
+    const endpoint = process.env.PHOENIXD_URL || "http://phoenixd:9740";
+    const apiKey = process.env.PHOENIXD_PASSWORD || "";
+    res.json({ endpoint, apiKey });
+  } catch (error) {
+    console.error("Error getting connection details:", error);
+    res.status(500).json({ error: (error as Error).message });
+  }
+});

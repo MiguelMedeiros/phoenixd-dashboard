@@ -106,6 +106,13 @@ export async function estimateLiquidityFees(params: { amountSat: number }) {
   }>(`/api/node/estimatefees?amountSat=${params.amountSat}`);
 }
 
+export async function getConnectionDetails() {
+  return request<{
+    endpoint: string;
+    apiKey: string;
+  }>("/api/node/connection");
+}
+
 // Payments - Create
 export async function createInvoice(params: {
   description?: string;

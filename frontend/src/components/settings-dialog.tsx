@@ -15,10 +15,15 @@ import {
   Monitor,
   Palette,
   Sparkles,
+  Copy,
+  Eye,
+  EyeOff,
+  Key,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getNodeInfo } from "@/lib/api";
+import { getNodeInfo, getConnectionDetails } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -52,22 +57,29 @@ const funMessages = [
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [nodeInfo, setNodeInfo] = useState<NodeInfo | null>(null);
+  const [connectionDetails, setConnectionDetails] = useState<{ endpoint: string; apiKey: string } | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const { theme, setTheme } = useTheme();
-  const [funMessage] = useState(() => 
+  const { toast } = useToast();
+  const [funMessage] = useState(() =>
     funMessages[Math.floor(Math.random() * funMessages.length)]
   );
 
   useEffect(() => {
     if (open && !nodeInfo) {
       setLoading(true);
-      getNodeInfo()
-        .then((data) => {
+      Promise.all([
+        getNodeInfo(),
+        getConnectionDetails(),
+      ])
+        .then(([nodeData, connectionData]) => {
           setNodeInfo({
-            nodeId: data.nodeId,
-            chain: data.chain,
-            version: data.version,
+            nodeId: nodeData.nodeId,
+            chain: nodeData.chain,
+            version: nodeData.version,
           });
+          setConnectionDetails(connectionData);
         })
         .catch(console.error)
         .finally(() => setLoading(false));
@@ -100,6 +112,14 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     { id: "light", label: "Light", icon: Sun, description: "Light mode" },
     { id: "system", label: "Auto", icon: Monitor, description: "Follow system" },
   ];
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: `${label} copied to clipboard`,
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -165,8 +185,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     </div>
                     <span className={cn(
                       "text-sm font-medium px-2 py-0.5 rounded-full",
-                      nodeInfo.chain === "mainnet" 
-                        ? "bg-bitcoin/10 text-bitcoin" 
+                      nodeInfo.chain === "mainnet"
+                        ? "bg-bitcoin/10 text-bitcoin"
                         : "bg-blue-500/10 text-blue-500"
                     )}>
                       {nodeInfo.chain}
@@ -182,6 +202,69 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-2">
                   Unable to load node info
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Connection Details */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+              <Key className="h-4 w-4" />
+              Connection Details
+            </h3>
+            <div className="glass-card rounded-xl p-4 space-y-3">
+              {loading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Zap className="h-5 w-5 text-primary animate-pulse" />
+                </div>
+              ) : connectionDetails ? (
+                <>
+                  {/* Endpoint */}
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1.5 block">Endpoint</label>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 truncate rounded-lg bg-black/5 dark:bg-white/5 px-3 py-2 font-mono text-xs">
+                        {connectionDetails.endpoint}
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(connectionDetails.endpoint, "Endpoint")}
+                        className="h-8 w-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* API Key */}
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1.5 block">API Key</label>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 truncate rounded-lg bg-black/5 dark:bg-white/5 px-3 py-2 font-mono text-xs">
+                        {showApiKey ? connectionDetails.apiKey : "•".repeat(32)}
+                      </div>
+                      <button
+                        onClick={() => setShowApiKey(!showApiKey)}
+                        className="h-8 w-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0"
+                      >
+                        {showApiKey ? (
+                          <EyeOff className="h-3.5 w-3.5" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard(connectionDetails.apiKey, "API Key")}
+                        className="h-8 w-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-2">
+                  Unable to load connection details
                 </p>
               )}
             </div>

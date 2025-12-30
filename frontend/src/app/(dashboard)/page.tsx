@@ -12,11 +12,11 @@ import {
   Wrench,
   Link2,
 } from "lucide-react";
-import { 
-  getNodeInfo, 
-  getBalance, 
-  listChannels, 
-  getIncomingPayments, 
+import {
+  getNodeInfo,
+  getBalance,
+  listChannels,
+  getIncomingPayments,
   getOutgoingPayments,
   type Channel,
   type IncomingPayment,
@@ -195,9 +195,9 @@ export default function OverviewPage() {
       </div>
 
       {/* Payment Activity Chart */}
-      <PaymentsChart 
-        incomingPayments={allIncoming} 
-        outgoingPayments={allOutgoing} 
+      <PaymentsChart
+        incomingPayments={allIncoming}
+        outgoingPayments={allOutgoing}
       />
 
       {/* Quick Actions - Horizontal Grid - Hidden on mobile since we have bottom nav */}
