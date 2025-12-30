@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Cypress artifacts
+screenshots/
+downloads/
+videos/
+
+# Misc
+.DS_Store
+*.log

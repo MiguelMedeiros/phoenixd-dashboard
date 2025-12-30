@@ -104,8 +104,22 @@ describe('Node Routes', () => {
   describe('GET /channels', () => {
     it('should return list of channels', async () => {
       const mockChannels = [
-        { channelId: 'ch-1', state: 'NORMAL', balanceSat: 100000 },
-        { channelId: 'ch-2', state: 'CLOSING', balanceSat: 50000 },
+        {
+          channelId: 'ch-1',
+          state: 'NORMAL',
+          balanceSat: 100000,
+          inboundLiquiditySat: 900000,
+          capacitySat: 1000000,
+          fundingTxId: 'tx-1',
+        },
+        {
+          channelId: 'ch-2',
+          state: 'CLOSING',
+          balanceSat: 50000,
+          inboundLiquiditySat: 450000,
+          capacitySat: 500000,
+          fundingTxId: 'tx-2',
+        },
       ];
 
       mockPhoenixd.listChannels.mockResolvedValueOnce(mockChannels);

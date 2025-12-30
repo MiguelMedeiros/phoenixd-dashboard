@@ -206,6 +206,34 @@ describe('Phoenixd Routes', () => {
 
       expect(response.status).toBe(500);
     });
+
+    it('should handle phoenixd returning reason field in response', async () => {
+      // When phoenixd returns HTTP 200 but with a reason field indicating failure
+      // Use type assertion since phoenixd can return error responses with different shape
+      mockPhoenixd.payInvoice.mockResolvedValueOnce({
+        reason: 'payment could not be sent through existing channels',
+      } as unknown as ReturnType<typeof phoenixd.payInvoice> extends Promise<infer T> ? T : never);
+
+      const response = await request(app)
+        .post('/api/phoenixd/payinvoice')
+        .send({ invoice: 'lnbc1...' });
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('payment could not be sent through existing channels');
+    });
+
+    it('should handle phoenixd returning no_route_to_recipient reason', async () => {
+      mockPhoenixd.payInvoice.mockResolvedValueOnce({
+        reason: 'no_route_to_recipient',
+      } as unknown as ReturnType<typeof phoenixd.payInvoice> extends Promise<infer T> ? T : never);
+
+      const response = await request(app)
+        .post('/api/phoenixd/payinvoice')
+        .send({ invoice: 'lnbc1...' });
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('no_route_to_recipient');
+    });
   });
 
   describe('POST /payoffer', () => {
@@ -265,6 +293,62 @@ describe('Phoenixd Routes', () => {
         .send({ address: 'invalid', amountSat: '1000' });
 
       expect(response.status).toBe(500);
+    });
+
+    it('should handle phoenixd returning reason field in LN address payment', async () => {
+      // When phoenixd returns HTTP 200 but with a reason field indicating failure
+      // Use type assertion since phoenixd can return error responses with different shape
+      mockPhoenixd.payLnAddress.mockResolvedValueOnce({
+        reason: 'payment could not be sent through existing channels',
+      } as unknown as ReturnType<typeof phoenixd.payLnAddress> extends Promise<infer T>
+        ? T
+        : never);
+
+      const response = await request(app).post('/api/phoenixd/paylnaddress').send({
+        address: 'user@getalby.com',
+        amountSat: '1000',
+      });
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('payment could not be sent through existing channels');
+    });
+
+    it('should handle DNS resolution failure', async () => {
+      mockPhoenixd.payLnAddress.mockRejectedValueOnce(
+        new Error('cannot resolve address: could not connect to domain.com')
+      );
+
+      const response = await request(app).post('/api/phoenixd/paylnaddress').send({
+        address: 'user@domain.com',
+        amountSat: '1000',
+      });
+
+      // Should fail since manual LNURL resolution would also fail
+      expect(response.status).toBe(500);
+    });
+
+    it('should pass message parameter to phoenixd', async () => {
+      const mockResult = {
+        recipientAmountSat: 1000,
+        routingFeeSat: 5,
+        paymentId: 'pay-4',
+        paymentHash: 'g'.repeat(64),
+        paymentPreimage: 'h'.repeat(64),
+      };
+
+      mockPhoenixd.payLnAddress.mockResolvedValueOnce(mockResult);
+
+      await request(app).post('/api/phoenixd/paylnaddress').send({
+        address: 'user@getalby.com',
+        amountSat: '1000',
+        message: 'Payment for services',
+      });
+
+      expect(mockPhoenixd.payLnAddress).toHaveBeenCalledWith({
+        address: 'user@getalby.com',
+        amountSat: 1000,
+        message: 'Payment for services',
+      });
     });
   });
 

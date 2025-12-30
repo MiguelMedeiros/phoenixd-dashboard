@@ -42,3 +42,6 @@ prisma/migrations/*.sql.backup
 
 # TypeScript
 *.tsbuildinfo
+
+# Backups (contain sensitive data - NEVER commit!)
+backups/

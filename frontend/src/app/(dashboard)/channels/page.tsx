@@ -53,7 +53,8 @@ export default function ChannelsPage() {
   };
 
   const getStateColor = (state: string) => {
-    switch (state) {
+    const normalizedState = state.toUpperCase();
+    switch (normalizedState) {
       case 'NORMAL':
         return 'bg-success/10 text-success';
       case 'SYNCING':
@@ -213,7 +214,10 @@ export default function ChannelsPage() {
                   </button>
                   <button
                     onClick={() => handleCloseChannel(channel.channelId)}
-                    disabled={closingChannel === channel.channelId || channel.state !== 'NORMAL'}
+                    disabled={
+                      closingChannel === channel.channelId ||
+                      channel.state.toUpperCase() !== 'NORMAL'
+                    }
                     className="glass-button flex items-center justify-center gap-2 text-destructive hover:bg-destructive/10 disabled:opacity-50"
                   >
                     {closingChannel === channel.channelId ? (

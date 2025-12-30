@@ -82,7 +82,10 @@ export class PhoenixdService {
   }
 
   async listChannels() {
-    return this.request<unknown[]>('GET', '/listchannels');
+    // Use /getinfo instead of /listchannels because /listchannels returns a complex nested structure
+    // that doesn't match our expected Channel interface
+    const info = await this.getInfo();
+    return info.channels;
   }
 
   async closeChannel(params: { channelId: string; address: string; feerateSatByte: number }) {

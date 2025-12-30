@@ -1,0 +1,7 @@
+{
+  "recipientAmountSat": 1000,
+  "routingFeeSat": 2,
+  "paymentId": "pay-new-001",
+  "paymentHash": "newpayment1234567890abcdef1234567890abcdef1234567890abcdef1234567",
+  "paymentPreimage": "preimage1234567890abcdef1234567890abcdef1234567890abcdef123456789"
+}

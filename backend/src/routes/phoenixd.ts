@@ -55,10 +55,16 @@ phoenixdRouter.get('/getlnaddress', async (_req: Request, res: Response) => {
 phoenixdRouter.post('/payinvoice', async (req: Request, res: Response) => {
   try {
     const { invoice, amountSat } = req.body;
-    const result = await phoenixd.payInvoice({
+    const result = (await phoenixd.payInvoice({
       invoice,
       amountSat: amountSat ? parseInt(amountSat) : undefined,
-    });
+    })) as { reason?: string; paymentPreimage?: string };
+
+    // Check if payment actually succeeded (phoenixd returns 200 even on failure)
+    if (result.reason) {
+      throw new Error(result.reason);
+    }
+
     res.json(result);
   } catch (error) {
     console.error('Error paying invoice:', error);
@@ -70,11 +76,17 @@ phoenixdRouter.post('/payinvoice', async (req: Request, res: Response) => {
 phoenixdRouter.post('/payoffer', async (req: Request, res: Response) => {
   try {
     const { offer, amountSat, message } = req.body;
-    const result = await phoenixd.payOffer({
+    const result = (await phoenixd.payOffer({
       offer,
       amountSat: parseInt(amountSat),
       message,
-    });
+    })) as { reason?: string; paymentPreimage?: string };
+
+    // Check if payment actually succeeded (phoenixd returns 200 even on failure)
+    if (result.reason) {
+      throw new Error(result.reason);
+    }
+
     res.json(result);
   } catch (error) {
     console.error('Error paying offer:', error);
@@ -82,15 +94,117 @@ phoenixdRouter.post('/payoffer', async (req: Request, res: Response) => {
   }
 });
 
-// Pay Lightning Address
+// Pay Lightning Address (with fallback to manual LNURL resolution)
 phoenixdRouter.post('/paylnaddress', async (req: Request, res: Response) => {
   try {
     const { address, amountSat, message } = req.body;
-    const result = await phoenixd.payLnAddress({
-      address,
-      amountSat: parseInt(amountSat),
-      message,
-    });
+    const amount = parseInt(amountSat);
+
+    // Try phoenixd's native paylnaddress first
+    try {
+      const result = (await phoenixd.payLnAddress({
+        address,
+        amountSat: amount,
+        message,
+      })) as { reason?: string; paymentPreimage?: string };
+
+      // Check if payment actually succeeded (phoenixd returns 200 even on failure)
+      if (result.reason) {
+        throw new Error(result.reason);
+      }
+
+      res.json(result);
+      return;
+    } catch (phoenixdError) {
+      const errorMessage = (phoenixdError as Error).message;
+      // If it's a network/DNS error from phoenixd connecting to the LN address domain,
+      // try manual resolution. For other errors (including payment failures), throw immediately.
+      const isNetworkError =
+        errorMessage.includes('could not connect') || errorMessage.includes('cannot resolve');
+
+      if (isNetworkError) {
+        console.log('Phoenixd cannot resolve address, trying manual LNURL resolution...');
+      } else {
+        // For payment failures and other errors, throw immediately
+        throw phoenixdError;
+      }
+    }
+
+    // Manual LNURL resolution as fallback
+    // Parse Lightning Address (user@domain.com -> https://domain.com/.well-known/lnurlp/user)
+    const [user, domain] = address.split('@');
+    if (!user || !domain) {
+      throw new Error('Invalid Lightning Address format');
+    }
+
+    // Fetch LNURL metadata
+    const lnurlUrl = `https://${domain}/.well-known/lnurlp/${user}`;
+    console.log(`Fetching LNURL from: ${lnurlUrl}`);
+    const lnurlResponse = await fetch(lnurlUrl);
+    if (!lnurlResponse.ok) {
+      throw new Error(`Failed to fetch LNURL: ${lnurlResponse.status}`);
+    }
+
+    const lnurlData = (await lnurlResponse.json()) as {
+      status?: string;
+      tag?: string;
+      callback?: string;
+      minSendable?: number;
+      maxSendable?: number;
+      commentAllowed?: number;
+    };
+
+    if (lnurlData.status === 'ERROR') {
+      throw new Error(`LNURL error: ${JSON.stringify(lnurlData)}`);
+    }
+
+    if (lnurlData.tag !== 'payRequest') {
+      throw new Error('Not a valid LNURL-pay endpoint');
+    }
+
+    // Check amount bounds (LNURL uses millisats)
+    const amountMsat = amount * 1000;
+    if (lnurlData.minSendable && amountMsat < lnurlData.minSendable) {
+      throw new Error(`Amount too low. Minimum: ${lnurlData.minSendable / 1000} sats`);
+    }
+    if (lnurlData.maxSendable && amountMsat > lnurlData.maxSendable) {
+      throw new Error(`Amount too high. Maximum: ${lnurlData.maxSendable / 1000} sats`);
+    }
+
+    // Request invoice from callback
+    const callbackUrl = new URL(lnurlData.callback!);
+    callbackUrl.searchParams.set('amount', amountMsat.toString());
+    if (message && lnurlData.commentAllowed && message.length <= lnurlData.commentAllowed) {
+      callbackUrl.searchParams.set('comment', message);
+    }
+
+    console.log(`Requesting invoice from: ${callbackUrl.toString()}`);
+    const invoiceResponse = await fetch(callbackUrl.toString());
+    if (!invoiceResponse.ok) {
+      throw new Error(`Failed to get invoice: ${invoiceResponse.status}`);
+    }
+
+    const invoiceData = (await invoiceResponse.json()) as {
+      status?: string;
+      pr?: string;
+      routes?: unknown[];
+    };
+
+    if (invoiceData.status === 'ERROR' || !invoiceData.pr) {
+      throw new Error(`Failed to get invoice: ${JSON.stringify(invoiceData)}`);
+    }
+
+    // Pay the invoice using phoenixd
+    console.log('Paying invoice via phoenixd...');
+    const result = (await phoenixd.payInvoice({
+      invoice: invoiceData.pr,
+    })) as { reason?: string; paymentPreimage?: string };
+
+    // Check if payment actually succeeded (phoenixd returns 200 even on failure)
+    if (result.reason) {
+      throw new Error(result.reason);
+    }
+
     res.json(result);
   } catch (error) {
     console.error('Error paying LN address:', error);

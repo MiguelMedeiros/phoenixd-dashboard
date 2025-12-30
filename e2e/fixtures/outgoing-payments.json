@@ -1,0 +1,51 @@
+[
+  {
+    "type": "bolt11",
+    "subType": "invoice",
+    "paymentId": "pay-001-abc123",
+    "paymentHash": "ffff6666777788889999000011112222333344445555aaaabbbbccccddddeeee",
+    "preimage": "6666777788889999000011112222333344445555aaaabbbbccccddddeeee6666",
+    "isPaid": true,
+    "sent": 2500,
+    "fees": 5,
+    "invoice": "lnbc25n1pj...",
+    "completedAt": 1703966400000,
+    "createdAt": 1703966300000
+  },
+  {
+    "type": "bolt11",
+    "subType": "invoice",
+    "paymentId": "pay-002-def456",
+    "paymentHash": "11117777888899990000111122223333444455556666aaaabbbbccccddddeeee",
+    "preimage": "7777888899990000111122223333444455556666aaaabbbbccccddddeeee7777",
+    "isPaid": true,
+    "sent": 15000,
+    "fees": 15,
+    "invoice": "lnbc150u1pj...",
+    "completedAt": 1703880000000,
+    "createdAt": 1703879900000
+  },
+  {
+    "type": "onchain",
+    "subType": "swap",
+    "paymentId": "pay-003-onchain",
+    "txId": "onchain123456789abcdef...",
+    "isPaid": true,
+    "sent": 50000,
+    "fees": 500,
+    "completedAt": 1703793600000,
+    "createdAt": 1703793500000
+  },
+  {
+    "type": "bolt12",
+    "subType": "offer",
+    "paymentId": "pay-004-bolt12",
+    "paymentHash": "22228888999900001111222233334444555566667777aaaabbbbccccddddeeee",
+    "preimage": "8888999900001111222233334444555566667777aaaabbbbccccddddeeee8888",
+    "isPaid": true,
+    "sent": 8000,
+    "fees": 8,
+    "completedAt": 1703707200000,
+    "createdAt": 1703707100000
+  }
+]

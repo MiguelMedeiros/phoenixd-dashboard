@@ -1,0 +1,23 @@
+{
+  "name": "phoenixd-dashboard-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end tests for Phoenixd Dashboard",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test": "cypress run",
+    "test:send": "cypress run --spec 'e2e/send.cy.ts'",
+    "test:receive": "cypress run --spec 'e2e/receive.cy.ts'",
+    "test:payments": "cypress run --spec 'e2e/payments.cy.ts'",
+    "test:channels": "cypress run --spec 'e2e/channels.cy.ts'",
+    "test:dashboard": "cypress run --spec 'e2e/dashboard.cy.ts'",
+    "test:lnurl": "cypress run --spec 'e2e/lnurl.cy.ts'",
+    "test:navigation": "cypress run --spec 'e2e/navigation.cy.ts'",
+    "test:tools": "cypress run --spec 'e2e/tools.cy.ts'"
+  },
+  "devDependencies": {
+    "cypress": "^14.3.3",
+    "typescript": "^5.8.3"
+  }
+}

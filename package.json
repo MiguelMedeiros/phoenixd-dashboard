@@ -26,7 +26,10 @@
     "test:frontend": "npm run test --prefix frontend",
     "test:backend": "npm run test --prefix backend",
     "test:watch": "concurrently \"npm run test:watch --prefix frontend\" \"npm run test:watch --prefix backend\"",
-    "install:all": "npm install && npm install --prefix frontend && npm install --prefix backend"
+    "test:e2e": "npm run test --prefix e2e",
+    "test:e2e:open": "npm run cypress:open --prefix e2e",
+    "test:all": "npm run test && npm run test:e2e",
+    "install:all": "npm install && npm install --prefix frontend && npm install --prefix backend && npm install --prefix e2e"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

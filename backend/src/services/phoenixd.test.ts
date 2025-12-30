@@ -123,10 +123,15 @@ describe('PhoenixdService', () => {
 
     describe('listChannels', () => {
       it('should return empty array when no channels', async () => {
+        // listChannels now calls getInfo internally
         mockFetch.mockResolvedValueOnce({
           ok: true,
           headers: { get: () => 'application/json' },
-          json: () => Promise.resolve([]),
+          json: () =>
+            Promise.resolve({
+              nodeId: 'test-node-id',
+              channels: [],
+            }),
         });
 
         const result = await service.listChannels();
@@ -135,18 +140,39 @@ describe('PhoenixdService', () => {
 
       it('should return channels array', async () => {
         const mockChannels = [
-          { channelId: 'ch1', state: 'NORMAL' },
-          { channelId: 'ch2', state: 'CLOSING' },
+          {
+            channelId: 'ch1',
+            state: 'NORMAL',
+            balanceSat: 100000,
+            inboundLiquiditySat: 900000,
+            capacitySat: 1000000,
+            fundingTxId: 'tx1',
+          },
+          {
+            channelId: 'ch2',
+            state: 'CLOSING',
+            balanceSat: 50000,
+            inboundLiquiditySat: 450000,
+            capacitySat: 500000,
+            fundingTxId: 'tx2',
+          },
         ];
 
+        // listChannels now calls getInfo internally
         mockFetch.mockResolvedValueOnce({
           ok: true,
           headers: { get: () => 'application/json' },
-          json: () => Promise.resolve(mockChannels),
+          json: () =>
+            Promise.resolve({
+              nodeId: 'test-node-id',
+              channels: mockChannels,
+            }),
         });
 
         const result = await service.listChannels();
         expect(result).toHaveLength(2);
+        expect(result[0].channelId).toBe('ch1');
+        expect(result[1].channelId).toBe('ch2');
       });
     });
 
