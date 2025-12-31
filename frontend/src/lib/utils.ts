@@ -40,7 +40,7 @@ export async function copyToClipboard(text: string): Promise<void> {
 
 export function getMempoolUrl(chain: string, txId?: string): string {
   const isTestnet = chain !== 'mainnet';
-  const baseUrl = isTestnet ? 'https://mempool.space/testnet4' : 'https://mempool.space';
+  const baseUrl = isTestnet ? 'https://mempool.space/testnet' : 'https://mempool.space';
 
   if (txId) {
     return `${baseUrl}/tx/${txId}`;
