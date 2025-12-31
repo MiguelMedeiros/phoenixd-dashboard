@@ -8,7 +8,7 @@ services:
     dns:
       - 8.8.8.8
       - 1.1.1.1
-    command: '--agree-to-terms-of-service --http-bind-ip 0.0.0.0'
+    command: '--agree-to-terms-of-service --http-bind-ip 0.0.0.0 ${PHOENIXD_CHAIN:+--chain=${PHOENIXD_CHAIN}}'
     ports:
       - '9740:9740'
     volumes:
@@ -34,7 +34,6 @@ services:
       - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test:
         [

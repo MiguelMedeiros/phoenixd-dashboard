@@ -87,11 +87,11 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-repo/phoenixd-dashboard
+git clone https://github.com/MiguelMedeiros/phoenixd-dashboard
 cd phoenixd-dashboard
 
 # Run the setup script (recommended for first time)
-./setup.sh
+./scripts/setup.sh
 
 # Open the dashboard
 open http://localhost:3000
@@ -126,7 +126,7 @@ chmod 777 ./data/phoenixd
 rm -rf ./data/phoenixd
 
 # Run setup again
-./setup.sh
+./scripts/setup.sh
 ```
 
 **Manual start** (if you've already run setup):
@@ -189,71 +189,114 @@ graph LR
 
 ### Environment Variables
 
-| Variable            | Description                    | Default              |
-| ------------------- | ------------------------------ | -------------------- |
-| `PHOENIXD_PASSWORD` | API password from phoenix.conf | **Required**         |
-| `POSTGRES_USER`     | PostgreSQL username            | `phoenixd`           |
-| `POSTGRES_PASSWORD` | PostgreSQL password            | `phoenixd_secret`    |
-| `POSTGRES_DB`       | PostgreSQL database name       | `phoenixd_dashboard` |
+Copy `.env.example` to `.env` and adjust as needed:
+
+```bash
+cp .env.example .env
+```
+
+| Variable            | Description                                       | Default              |
+| ------------------- | ------------------------------------------------- | -------------------- |
+| `PHOENIXD_CHAIN`    | Network: empty for mainnet, `testnet` for testnet | _(empty = mainnet)_  |
+| `PHOENIXD_PASSWORD` | API password from phoenix.conf                    | _(auto-read)_        |
+| `POSTGRES_USER`     | PostgreSQL username                               | `phoenixd`           |
+| `POSTGRES_PASSWORD` | PostgreSQL password                               | `phoenixd_secret`    |
+| `POSTGRES_DB`       | PostgreSQL database name                          | `phoenixd_dashboard` |
+
+### Switching Between Mainnet and Testnet
+
+The dashboard runs phoenixd on **mainnet** by default. You can easily switch to **testnet** using the `.env` file.
+
+#### Using Testnet
+
+```bash
+# In your .env file, add:
+PHOENIXD_CHAIN=testnet
+```
+
+Then restart the containers:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+#### Using Mainnet (default)
+
+```bash
+# In your .env file, comment out or remove the PHOENIXD_CHAIN line:
+# PHOENIXD_CHAIN=testnet
+```
+
+Then restart the containers:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+> 💡 **Tip:** When switching networks, phoenixd will create a separate database for each network. Your mainnet data remains safe when running on testnet.
 
 ### ⚠️ Network Warning
 
-The dashboard runs phoenixd on **mainnet** by default.
-
-> **You're dealing with real funds!** Always backup your seed phrase and test with small amounts first.
-
-To switch to testnet, add `--chain testnet` to the phoenixd command in `docker-compose.yml`.
+> **Mainnet = Real funds!** Always backup your seed phrase and test with small amounts first.
+>
+> Use testnet for development and testing. Get testnet coins from a [Bitcoin Testnet Faucet](https://coinfaucet.eu/en/btc-testnet/).
 
 ---
 
-## 🔐 Backup & Recovery
+## Backup & Recovery
+
+### Quick Backup
+
+Use the included backup script to create a complete backup:
+
+```bash
+./scripts/backup.sh
+```
+
+This will:
+
+- Detect current network (mainnet/testnet)
+- Backup seed phrase, config, and database
+- Save to `backups/phoenixd-{network}-{timestamp}/`
+
+### Quick Recovery
+
+Use the interactive recovery script to restore from a backup:
+
+```bash
+./scripts/recovery.sh
+```
+
+Features:
+
+- **Interactive menu** - Use ↑↓ arrow keys to select a backup
+- **Shows backup details** - Network, date, and included files
+- **Auto-configures network** - Updates `.env` based on backup
+- **Safe restore** - Asks for confirmation before overwriting
 
 ### Getting Your Seed Phrase
 
 Your seed phrase is the **only way** to recover your funds if something goes wrong. **Back it up immediately!**
 
-#### From Docker Container
-
 ```bash
 # View your seed phrase
 docker exec phoenixd cat /phoenix/.phoenix/seed.dat
 
-# Or save it to a file
-docker exec phoenixd cat /phoenix/.phoenix/seed.dat > my-seed-backup.txt
-```
-
-#### From Local Data Directory
-
-If you're using the default Docker setup, the seed is also available at:
-
-```bash
+# Or from local data directory
 cat ./data/phoenixd/seed.dat
 ```
 
-### Important Files to Backup
+> 💡 **Note:** The same seed is used for both mainnet and testnet. Different keys are derived for each network using different derivation paths.
+
+### Important Files
 
 | File           | Description                         | Location in Container            |
 | -------------- | ----------------------------------- | -------------------------------- |
 | `seed.dat`     | **12-word seed phrase** (CRITICAL!) | `/phoenix/.phoenix/seed.dat`     |
 | `phoenix.conf` | Configuration & API password        | `/phoenix/.phoenix/phoenix.conf` |
-| `channels.db`  | Channel state database              | `/phoenix/.phoenix/channels.db`  |
-
-### Full Backup Script
-
-```bash
-#!/bin/bash
-# Create a backup directory with timestamp
-BACKUP_DIR="phoenixd-backup-$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$BACKUP_DIR"
-
-# Copy all important files
-docker exec phoenixd cat /phoenix/.phoenix/seed.dat > "$BACKUP_DIR/seed.dat"
-docker exec phoenixd cat /phoenix/.phoenix/phoenix.conf > "$BACKUP_DIR/phoenix.conf"
-docker cp phoenixd:/phoenix/.phoenix/channels.db "$BACKUP_DIR/channels.db" 2>/dev/null || echo "No channels.db yet"
-
-echo "Backup saved to: $BACKUP_DIR"
-echo "⚠️  Store this backup in a secure location!"
-```
+| `phoenix.*.db` | Channel & payment database          | `/phoenix/.phoenix/phoenix.*.db` |
 
 ### Importing Your Seed to Another Wallet
 
@@ -274,13 +317,13 @@ Your phoenixd seed is a standard **BIP39 12-word mnemonic**. You can import it i
 
 ---
 
-## 🔓 Forgot Dashboard Password?
+## Forgot Dashboard Password?
 
 If you forget your dashboard password, you can reset it using the provided script:
 
 ```bash
 # Run the password reset script
-./reset-password.sh
+./scripts/reset-password.sh
 ```
 
 This will remove the password protection from your dashboard. You can then set up a new password in the Settings page.
