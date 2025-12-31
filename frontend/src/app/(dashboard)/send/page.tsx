@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Send,
   Zap,
@@ -12,7 +12,7 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react';
-import { payInvoice, payOffer, payLnAddress, sendToAddress } from '@/lib/api';
+import { payInvoice, payOffer, payLnAddress, sendToAddress, getNodeInfo } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
@@ -25,7 +25,18 @@ export default function SendPage() {
   const [result, setResult] = useState<{ success: boolean; data?: unknown; error?: string } | null>(
     null
   );
+  const [chain, setChain] = useState<string>('mainnet');
   const { toast } = useToast();
+
+  // Fetch node info to get current chain
+  useEffect(() => {
+    getNodeInfo()
+      .then((info) => setChain(info.chain || 'mainnet'))
+      .catch(() => setChain('mainnet'));
+  }, []);
+
+  const isTestnet = chain.toLowerCase().includes('testnet');
+  const addressPlaceholder = isTestnet ? 'tb1...' : 'bc1...';
 
   // Invoice form
   const [invoice, setInvoice] = useState('');
@@ -393,7 +404,7 @@ export default function SendPage() {
                   Bitcoin Address *
                 </label>
                 <input
-                  placeholder="bc1..."
+                  placeholder={addressPlaceholder}
                   value={btcAddress}
                   onChange={(e) => setBtcAddress(e.target.value)}
                   className="glass-input w-full px-4 py-3.5 font-mono"
