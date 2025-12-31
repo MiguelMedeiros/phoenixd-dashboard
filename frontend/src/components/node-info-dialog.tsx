@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Zap, Server, Wifi, Copy, Check, ExternalLink, Github, BookOpen, X } from 'lucide-react';
+import { Zap, Server, Wifi, Copy, Check, Github, BookOpen, X } from 'lucide-react';
 import { getNodeInfo } from '@/lib/api';
-import { cn, getMempoolUrl } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 interface NodeInfo {
   nodeId: string;
@@ -47,19 +47,19 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
 
   const links = [
     {
-      title: 'Documentation',
+      title: 'Phoenixd Docs',
       href: 'https://phoenix.acinq.co/server/api',
       icon: BookOpen,
     },
     {
-      title: 'GitHub',
+      title: 'Phoenixd',
       href: 'https://github.com/ACINQ/phoenixd',
       icon: Github,
     },
     {
-      title: 'Mempool Explorer',
-      href: getMempoolUrl(nodeInfo?.chain || 'mainnet'),
-      icon: ExternalLink,
+      title: 'Dashboard',
+      href: 'https://github.com/MiguelMedeiros/phoenixd-dashboard',
+      icon: Github,
     },
   ];
 

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { getNodeInfo } from '@/lib/api';
-import { cn, getMempoolUrl } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -80,16 +80,16 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
       icon: BookOpen,
     },
     {
-      title: 'GitHub Repository',
-      description: 'View source code',
+      title: 'Phoenixd Repository',
+      description: 'ACINQ phoenixd source code',
       href: 'https://github.com/ACINQ/phoenixd',
       icon: Github,
     },
     {
-      title: 'Mempool Explorer',
-      description: 'View blockchain transactions',
-      href: getMempoolUrl(nodeInfo?.chain || 'mainnet'),
-      icon: ExternalLink,
+      title: 'Dashboard Repository',
+      description: 'phoenixd-dashboard source code',
+      href: 'https://github.com/MiguelMedeiros/phoenixd-dashboard',
+      icon: Github,
     },
   ];
 

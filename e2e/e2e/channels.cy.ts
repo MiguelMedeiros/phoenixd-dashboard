@@ -87,6 +87,119 @@ describe('Channels Page', () => {
 
       cy.contains('button', 'Close').should('exist');
     });
+
+    it('opens close channel dialog when clicking Close', () => {
+      cy.visit('/channels');
+      cy.wait('@getChannels');
+
+      // Click the first Close button
+      cy.contains('button', 'Close').first().click();
+
+      // Dialog should be visible
+      cy.contains('Close Channel').should('be.visible');
+      cy.contains('Bitcoin Address').should('be.visible');
+      cy.contains('Fee Rate').should('be.visible');
+    });
+
+    it('shows warning message in close dialog', () => {
+      cy.visit('/channels');
+      cy.wait('@getChannels');
+
+      cy.contains('button', 'Close').first().click();
+
+      cy.contains('Warning').should('be.visible');
+      cy.contains('irreversible').should('be.visible');
+    });
+
+    it('can cancel close channel dialog', () => {
+      cy.visit('/channels');
+      cy.wait('@getChannels');
+
+      cy.contains('button', 'Close').first().click();
+      cy.contains('Close Channel').should('be.visible');
+
+      // Click cancel
+      cy.contains('button', 'Cancel').click();
+
+      // Dialog should be closed
+      cy.contains('Bitcoin Address').should('not.exist');
+    });
+
+    it('validates empty address in close dialog', () => {
+      cy.visit('/channels');
+      cy.wait('@getChannels');
+
+      cy.contains('button', 'Close').first().click();
+
+      // Try to close without entering address
+      cy.get('[role="dialog"]').contains('button', 'Close Channel').should('be.disabled');
+    });
+
+    it('successfully closes channel with valid inputs', () => {
+      cy.intercept('POST', '**/api/node/channels/close', {
+        body: { txId: 'mock-tx-id-123' },
+      }).as('closeChannel');
+
+      cy.visit('/channels');
+      cy.wait('@getChannels');
+
+      cy.contains('button', 'Close').first().click();
+
+      // Enter valid address and fee rate
+      cy.get('input[id="address"]').type('bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4');
+      cy.get('input[id="feeRate"]').clear().type('10');
+
+      // Click close channel button
+      cy.get('[role="dialog"]').contains('button', 'Close Channel').click();
+
+      // Wait for API call
+      cy.wait('@closeChannel').its('request.body').should('deep.include', {
+        address: 'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4',
+        feerateSatByte: 10,
+      });
+
+      // Toast should appear
+      cy.contains('Channel Closing').should('be.visible');
+    });
+
+    it('shows error for invalid address format', () => {
+      cy.visit('/channels');
+      cy.wait('@getChannels');
+
+      cy.contains('button', 'Close').first().click();
+
+      // Enter invalid address
+      cy.get('input[id="address"]').type('invalid-address');
+      cy.get('input[id="feeRate"]').clear().type('10');
+
+      // Click close channel button
+      cy.get('[role="dialog"]').contains('button', 'Close Channel').click();
+
+      // Error message should appear
+      cy.contains('Invalid').should('be.visible');
+    });
+
+    it('handles API error gracefully', () => {
+      cy.intercept('POST', '**/api/node/channels/close', {
+        statusCode: 400,
+        body: { error: 'Channel not found' },
+      }).as('closeChannelError');
+
+      cy.visit('/channels');
+      cy.wait('@getChannels');
+
+      cy.contains('button', 'Close').first().click();
+
+      cy.get('input[id="address"]').type('bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4');
+      cy.get('input[id="feeRate"]').clear().type('10');
+
+      cy.get('[role="dialog"]').contains('button', 'Close Channel').click();
+
+      cy.wait('@closeChannelError');
+
+      // Error should be displayed
+      cy.get('[role="dialog"]').should('be.visible');
+    });
   });
 
   describe('Empty State', () => {
@@ -124,6 +237,17 @@ describe('Channels Page', () => {
       cy.wait('@getChannels');
 
       cy.contains('h1', 'Channels').should('be.visible');
+    });
+
+    it('close dialog works on mobile', () => {
+      cy.viewport('iphone-x');
+      cy.visit('/channels');
+      cy.wait('@getChannels');
+
+      cy.contains('button', 'Close').first().click();
+
+      cy.contains('Close Channel').should('be.visible');
+      cy.get('input[id="address"]').should('be.visible');
     });
   });
 });

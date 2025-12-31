@@ -206,7 +206,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden [&>button]:hidden">
         {/* Search Input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-black/[0.08] dark:border-white/[0.08]">
           <Search className="h-5 w-5 text-muted-foreground" />

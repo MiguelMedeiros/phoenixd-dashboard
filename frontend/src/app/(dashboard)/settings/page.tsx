@@ -202,7 +202,7 @@ export default function SettingsPage() {
     setSelectedAutoLock(minutes);
     try {
       await updateAuthSettings({ autoLockMinutes: minutes });
-      await refreshStatus();
+      // Don't call refreshStatus() here to avoid re-rendering animations
     } catch (err) {
       console.error('Failed to update auto-lock setting:', err);
       setSelectedAutoLock(autoLockMinutes);
@@ -213,7 +213,7 @@ export default function SettingsPage() {
     setSelectedBackground(bg);
     try {
       await updateAuthSettings({ lockScreenBg: bg });
-      await refreshStatus();
+      // Don't call refreshStatus() here to avoid re-rendering animations
     } catch (err) {
       console.error('Failed to update background setting:', err);
       setSelectedBackground(lockScreenBg);

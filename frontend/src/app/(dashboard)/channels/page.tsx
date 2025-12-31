@@ -13,12 +13,15 @@ import {
 import { listChannels, closeChannel, getNodeInfo, type Channel } from '@/lib/api';
 import { formatSats, cn, getMempoolUrl } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { CloseChannelDialog } from '@/components/close-channel-dialog';
 
 export default function ChannelsPage() {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
   const [closingChannel, setClosingChannel] = useState<string | null>(null);
   const [chain, setChain] = useState<string>('mainnet');
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [selectedChannelId, setSelectedChannelId] = useState<string>('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,17 +41,29 @@ export default function ChannelsPage() {
     fetchData();
   }, [toast]);
 
-  const handleCloseChannel = async (channelId: string) => {
-    if (!confirm('Are you sure you want to close this channel?')) return;
+  const openCloseDialog = (channelId: string) => {
+    setSelectedChannelId(channelId);
+    setCloseDialogOpen(true);
+  };
 
-    setClosingChannel(channelId);
+  const handleCloseChannel = async (address: string, feerateSatByte: number) => {
+    setClosingChannel(selectedChannelId);
     try {
-      await closeChannel({ channelId });
-      toast({ title: 'Channel Closing', description: 'Channel close initiated' });
+      await closeChannel({
+        channelId: selectedChannelId,
+        address,
+        feerateSatByte,
+      });
+      toast({ title: 'Channel Closing', description: 'Channel close initiated successfully' });
       const data = await listChannels();
       setChannels(data || []);
-    } catch {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to close channel' });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: (error as Error).message || 'Failed to close channel',
+      });
+      throw error;
     } finally {
       setClosingChannel(null);
     }
@@ -213,7 +228,7 @@ export default function ChannelsPage() {
                     View on Mempool
                   </button>
                   <button
-                    onClick={() => handleCloseChannel(channel.channelId)}
+                    onClick={() => openCloseDialog(channel.channelId)}
                     disabled={
                       closingChannel === channel.channelId ||
                       channel.state.toUpperCase() !== 'NORMAL'
@@ -235,6 +250,15 @@ export default function ChannelsPage() {
           })}
         </div>
       )}
+
+      {/* Close Channel Dialog */}
+      <CloseChannelDialog
+        open={closeDialogOpen}
+        onOpenChange={setCloseDialogOpen}
+        channelId={selectedChannelId}
+        chain={chain}
+        onConfirm={handleCloseChannel}
+      />
     </div>
   );
 }
