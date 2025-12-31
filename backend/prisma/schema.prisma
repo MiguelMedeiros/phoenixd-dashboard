@@ -57,3 +57,21 @@ model NodeInfo {
   rawData   Json
   updatedAt DateTime @updatedAt
 }
+
+model Settings {
+  id              String   @id @default("singleton")
+  passwordHash    String?  // bcrypt hash - null = no password required
+  autoLockMinutes Int      @default(0) // 0 = never auto-lock
+  lockScreenBg    String   @default("storm-clouds") // lightning, thunder-flash, storm-clouds, electric-storm, night-lightning, sky-thunder
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastUsed  DateTime @default(now())
+
+  @@index([expiresAt])
+}

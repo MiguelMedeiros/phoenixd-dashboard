@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import { SettingsDialog } from '@/components/settings-dialog';
 
 const mainNavItems = [
   { title: 'Home', href: '/', icon: Home },
@@ -34,9 +33,9 @@ const moreNavItems = [
 export function BottomNav() {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const isMoreActive = moreNavItems.some((item) => item.href === pathname);
+  const isMoreActive =
+    moreNavItems.some((item) => item.href === pathname) || pathname === '/settings';
 
   return (
     <>
@@ -83,16 +82,19 @@ export function BottomNav() {
             })}
 
             <div className="border-t border-black/10 dark:border-white/10 pt-2 mt-2">
-              <button
-                onClick={() => {
-                  setMoreOpen(false);
-                  setSettingsOpen(true);
-                }}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl w-full hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground transition-all"
+              <Link
+                href="/settings"
+                onClick={() => setMoreOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 rounded-xl w-full transition-all',
+                  pathname === '/settings'
+                    ? 'bg-primary text-white'
+                    : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground'
+                )}
               >
                 <Settings className="h-5 w-5" />
                 <span className="font-medium">Settings</span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -159,8 +161,6 @@ export function BottomNav() {
           </div>
         </div>
       </nav>
-
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   );
 }

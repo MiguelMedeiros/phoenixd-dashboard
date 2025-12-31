@@ -32,6 +32,16 @@ import {
   lnurlPay,
   lnurlWithdraw,
   lnurlAuth,
+  // Auth functions
+  getAuthStatus,
+  setupPassword,
+  login,
+  logout,
+  changePassword,
+  removePassword,
+  getAuthSettings,
+  updateAuthSettings,
+  getSeed,
 } from '@/lib/api';
 
 describe('API Client', () => {
@@ -530,6 +540,250 @@ describe('API Client', () => {
       });
 
       await expect(getNodeInfo()).rejects.toThrow('Unknown error');
+    });
+  });
+
+  describe('Authentication', () => {
+    describe('getAuthStatus', () => {
+      it('should fetch auth status', async () => {
+        const mockStatus = {
+          hasPassword: true,
+          authenticated: true,
+          autoLockMinutes: 5,
+          lockScreenBg: 'storm-clouds',
+        };
+
+        mockFetch.mockResolvedValueOnce(mockSuccessResponse(mockStatus));
+
+        const result = await getAuthStatus();
+
+        expect(result).toEqual(mockStatus);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:4001/api/auth/status',
+          expect.objectContaining({
+            credentials: 'include',
+          })
+        );
+      });
+
+      it('should return unauthenticated status', async () => {
+        mockFetch.mockResolvedValueOnce(
+          mockSuccessResponse({
+            hasPassword: true,
+            authenticated: false,
+            autoLockMinutes: 0,
+            lockScreenBg: 'storm-clouds',
+          })
+        );
+
+        const result = await getAuthStatus();
+
+        expect(result.authenticated).toBe(false);
+        expect(result.hasPassword).toBe(true);
+      });
+    });
+
+    describe('setupPassword', () => {
+      it('should setup password successfully', async () => {
+        mockFetch.mockResolvedValueOnce(
+          mockSuccessResponse({ success: true, message: 'Password set' })
+        );
+
+        const result = await setupPassword('mypassword123');
+
+        expect(result.success).toBe(true);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:4001/api/auth/setup',
+          expect.objectContaining({
+            method: 'POST',
+            body: JSON.stringify({ password: 'mypassword123' }),
+          })
+        );
+      });
+
+      it('should handle setup error when password already exists', async () => {
+        mockFetch.mockResolvedValueOnce(mockErrorResponse(400, 'Password already configured'));
+
+        await expect(setupPassword('password')).rejects.toThrow('Password already configured');
+      });
+    });
+
+    describe('login', () => {
+      it('should login successfully', async () => {
+        mockFetch.mockResolvedValueOnce(mockSuccessResponse({ success: true }));
+
+        const result = await login('correctpassword');
+
+        expect(result.success).toBe(true);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:4001/api/auth/login',
+          expect.objectContaining({
+            method: 'POST',
+            body: JSON.stringify({ password: 'correctpassword' }),
+          })
+        );
+      });
+
+      it('should fail with invalid password', async () => {
+        mockFetch.mockResolvedValueOnce(mockErrorResponse(401, 'Invalid password'));
+
+        await expect(login('wrongpassword')).rejects.toThrow('Invalid password');
+      });
+    });
+
+    describe('logout', () => {
+      it('should logout successfully', async () => {
+        mockFetch.mockResolvedValueOnce(mockSuccessResponse({ success: true }));
+
+        const result = await logout();
+
+        expect(result.success).toBe(true);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:4001/api/auth/logout',
+          expect.objectContaining({
+            method: 'POST',
+          })
+        );
+      });
+    });
+
+    describe('changePassword', () => {
+      it('should change password successfully', async () => {
+        mockFetch.mockResolvedValueOnce(
+          mockSuccessResponse({ success: true, message: 'Password changed' })
+        );
+
+        const result = await changePassword('oldpass', 'newpass');
+
+        expect(result.success).toBe(true);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:4001/api/auth/change-password',
+          expect.objectContaining({
+            method: 'POST',
+            body: JSON.stringify({ currentPassword: 'oldpass', newPassword: 'newpass' }),
+          })
+        );
+      });
+
+      it('should fail with wrong current password', async () => {
+        mockFetch.mockResolvedValueOnce(mockErrorResponse(401, 'Current password is incorrect'));
+
+        await expect(changePassword('wrong', 'newpass')).rejects.toThrow(
+          'Current password is incorrect'
+        );
+      });
+    });
+
+    describe('removePassword', () => {
+      it('should remove password successfully', async () => {
+        mockFetch.mockResolvedValueOnce(
+          mockSuccessResponse({ success: true, message: 'Password removed' })
+        );
+
+        const result = await removePassword('currentpass');
+
+        expect(result.success).toBe(true);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:4001/api/auth/remove-password',
+          expect.objectContaining({
+            method: 'DELETE',
+            body: JSON.stringify({ password: 'currentpass' }),
+          })
+        );
+      });
+
+      it('should fail with wrong password', async () => {
+        mockFetch.mockResolvedValueOnce(mockErrorResponse(401, 'Invalid password'));
+
+        await expect(removePassword('wrong')).rejects.toThrow('Invalid password');
+      });
+    });
+
+    describe('getAuthSettings', () => {
+      it('should fetch auth settings', async () => {
+        const mockSettings = {
+          autoLockMinutes: 10,
+          lockScreenBg: 'lightning',
+        };
+
+        mockFetch.mockResolvedValueOnce(mockSuccessResponse(mockSettings));
+
+        const result = await getAuthSettings();
+
+        expect(result).toEqual(mockSettings);
+      });
+    });
+
+    describe('updateAuthSettings', () => {
+      it('should update auto-lock setting', async () => {
+        mockFetch.mockResolvedValueOnce(
+          mockSuccessResponse({ autoLockMinutes: 15, lockScreenBg: 'storm-clouds' })
+        );
+
+        const result = await updateAuthSettings({ autoLockMinutes: 15 });
+
+        expect(result.autoLockMinutes).toBe(15);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:4001/api/auth/settings',
+          expect.objectContaining({
+            method: 'PUT',
+            body: JSON.stringify({ autoLockMinutes: 15 }),
+          })
+        );
+      });
+
+      it('should update lock screen background', async () => {
+        mockFetch.mockResolvedValueOnce(
+          mockSuccessResponse({ autoLockMinutes: 0, lockScreenBg: 'electric-storm' })
+        );
+
+        const result = await updateAuthSettings({ lockScreenBg: 'electric-storm' });
+
+        expect(result.lockScreenBg).toBe('electric-storm');
+      });
+    });
+
+    describe('getSeed', () => {
+      it('should get seed phrase with valid password', async () => {
+        const mockSeed = {
+          seed: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+        };
+
+        mockFetch.mockResolvedValueOnce(mockSuccessResponse(mockSeed));
+
+        const result = await getSeed('mypassword');
+
+        expect(result.seed).toBe(mockSeed.seed);
+        expect(mockFetch).toHaveBeenCalledWith(
+          'http://localhost:4001/api/auth/seed',
+          expect.objectContaining({
+            method: 'POST',
+            body: JSON.stringify({ password: 'mypassword' }),
+          })
+        );
+      });
+
+      it('should fail with invalid password', async () => {
+        mockFetch.mockResolvedValueOnce(mockErrorResponse(401, 'Invalid password'));
+
+        await expect(getSeed('wrongpassword')).rejects.toThrow('Invalid password');
+      });
+
+      it('should fail when no password is configured', async () => {
+        mockFetch.mockResolvedValueOnce(
+          mockErrorResponse(403, 'Password protection must be enabled to view seed phrase')
+        );
+
+        await expect(getSeed('password')).rejects.toThrow(
+          'Password protection must be enabled to view seed phrase'
+        );
+      });
+
+      it('should fail when not authenticated', async () => {
+        mockFetch.mockResolvedValueOnce(mockErrorResponse(401, 'Unauthorized'));
+
+        await expect(getSeed('password')).rejects.toThrow('Unauthorized');
+      });
     });
   });
 });

@@ -274,6 +274,30 @@ Your phoenixd seed is a standard **BIP39 12-word mnemonic**. You can import it i
 
 ---
 
+## 🔓 Forgot Dashboard Password?
+
+If you forget your dashboard password, you can reset it using the provided script:
+
+```bash
+# Run the password reset script
+./reset-password.sh
+```
+
+This will remove the password protection from your dashboard. You can then set up a new password in the Settings page.
+
+**Manual Reset (Alternative)**
+
+If the script doesn't work, you can manually reset by running:
+
+```bash
+docker exec phoenixd-postgres psql -U phoenixd -d phoenixd_dashboard -c \
+  "UPDATE \"Settings\" SET \"passwordHash\" = NULL WHERE id = 'singleton';"
+```
+
+> **Note:** This only removes the dashboard password. It does NOT affect your node, funds, or seed phrase.
+
+---
+
 ## API Endpoints
 
 <details>

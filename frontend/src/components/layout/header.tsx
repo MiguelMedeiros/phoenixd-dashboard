@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { RefreshCw, Zap, Search, Bell } from 'lucide-react';
+import { RefreshCw, Zap, Search, Bell, Lock } from 'lucide-react';
 import { getBalance } from '@/lib/api';
+import { useAuthContext } from '@/components/auth-provider';
 import { formatSats } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { SearchDialog } from '@/components/search-dialog';
@@ -39,6 +40,7 @@ export function Header({
   const [balanceAnimating, setBalanceAnimating] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const { hasPassword, lock } = useAuthContext();
 
   const fetchBalance = useCallback(async () => {
     setLoading(true);
@@ -121,6 +123,17 @@ export function Header({
           >
             <Search className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
+
+          {/* Lock Button - Only visible if password is configured */}
+          {hasPassword && (
+            <button
+              onClick={lock}
+              className="icon-circle !w-10 !h-10 md:!w-11 md:!h-11 group"
+              title="Lock Dashboard"
+            >
+              <Lock className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            </button>
+          )}
 
           {/* Notifications */}
           <div className="relative">

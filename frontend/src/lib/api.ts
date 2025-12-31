@@ -5,6 +5,7 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
   const response = await fetch(url, {
     ...options,
+    credentials: 'include', // Send cookies for authentication
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
@@ -318,5 +319,87 @@ export async function lnurlAuth(params: { lnurl: string }) {
   return request<{ success: boolean }>('/api/lnurl/auth', {
     method: 'POST',
     body: JSON.stringify(params),
+  });
+}
+
+// Auth
+export type LockScreenBg =
+  | 'lightning'
+  | 'thunder-flash'
+  | 'storm-clouds'
+  | 'electric-storm'
+  | 'night-lightning'
+  | 'sky-thunder';
+
+export interface AuthStatus {
+  hasPassword: boolean;
+  authenticated: boolean;
+  autoLockMinutes: number;
+  lockScreenBg: LockScreenBg;
+}
+
+export interface AuthSettings {
+  hasPassword: boolean;
+  autoLockMinutes: number;
+  lockScreenBg: LockScreenBg;
+}
+
+export async function getAuthStatus(): Promise<AuthStatus> {
+  return request<AuthStatus>('/api/auth/status');
+}
+
+export async function setupPassword(password: string) {
+  return request<{ success: boolean; message: string }>('/api/auth/setup', {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  });
+}
+
+export async function login(password: string) {
+  return request<{ success: boolean }>('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  });
+}
+
+export async function logout() {
+  return request<{ success: boolean }>('/api/auth/logout', {
+    method: 'POST',
+  });
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+  return request<{ success: boolean; message: string }>('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
+export async function removePassword(password: string) {
+  return request<{ success: boolean; message: string }>('/api/auth/remove-password', {
+    method: 'DELETE',
+    body: JSON.stringify({ password }),
+  });
+}
+
+export async function getAuthSettings(): Promise<AuthSettings> {
+  return request<AuthSettings>('/api/auth/settings');
+}
+
+export async function updateAuthSettings(settings: {
+  autoLockMinutes?: number;
+  lockScreenBg?: LockScreenBg;
+}) {
+  return request<AuthSettings>('/api/auth/settings', {
+    method: 'PUT',
+    body: JSON.stringify(settings),
+  });
+}
+
+// Get wallet seed phrase (requires password verification)
+export async function getSeed(password: string) {
+  return request<{ seed: string }>('/api/auth/seed', {
+    method: 'POST',
+    body: JSON.stringify({ password }),
   });
 }

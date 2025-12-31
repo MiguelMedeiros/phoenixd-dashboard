@@ -4,13 +4,14 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { Header } from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/components/auth-provider';
 import { useWebSocket } from '@/hooks/use-websocket';
 import { useToast } from '@/hooks/use-toast';
 import { formatSats } from '@/lib/utils';
 import { useCallback, useRef, useState } from 'react';
 import { type Notification } from '@/components/notifications-popover';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+function DashboardContent({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const balanceRefreshRef = useRef<(() => void) | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -113,5 +114,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <Toaster />
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <DashboardContent>{children}</DashboardContent>
+    </AuthProvider>
   );
 }

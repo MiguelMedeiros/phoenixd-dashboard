@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -15,10 +15,11 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  Server,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SettingsDialog } from '@/components/settings-dialog';
 import { getNodeInfo } from '@/lib/api';
+import { NodeInfoDialog } from '@/components/node-info-dialog';
 
 const sidebarNavItems = [
   {
@@ -60,9 +61,9 @@ const sidebarNavItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [chain, setChain] = useState<string>('mainnet');
+  const [nodeInfoOpen, setNodeInfoOpen] = useState(false);
 
   // Persist state in localStorage
   useEffect(() => {
@@ -101,18 +102,41 @@ export function Sidebar() {
       >
         {/* Logo & Brand */}
         <div className={cn('mb-8', expanded ? 'px-2' : '')}>
-          <div className={cn('flex items-center gap-3', expanded ? '' : 'justify-center')}>
+          <div className={cn('flex items-center gap-3', expanded ? '' : 'flex-col justify-center')}>
             <div className="relative flex-shrink-0">
               <div className="icon-circle !w-12 !h-12 !bg-gradient-to-br !from-primary/20 !to-accent/20">
                 <Zap className="h-6 w-6 text-primary" />
               </div>
               <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl -z-10" />
             </div>
-            {expanded && (
-              <div className="overflow-hidden">
+            {expanded ? (
+              <div className="overflow-hidden flex-1">
                 <h1 className="font-bold text-lg tracking-tight whitespace-nowrap">Phoenixd</h1>
-                <p className="text-xs text-muted-foreground whitespace-nowrap">Dashboard</p>
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className={cn(
+                      'h-2 w-2 rounded-full',
+                      chain === 'mainnet'
+                        ? 'bg-bitcoin shadow-[0_0_6px_hsl(var(--bitcoin))]'
+                        : 'bg-yellow-500 shadow-[0_0_6px_hsl(45,100%,50%)]'
+                    )}
+                  />
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {chain === 'mainnet' ? 'Mainnet' : 'Testnet'}
+                  </span>
+                </div>
               </div>
+            ) : (
+              <span
+                className={cn(
+                  'px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider',
+                  chain === 'mainnet'
+                    ? 'bg-bitcoin/20 text-bitcoin'
+                    : 'bg-yellow-500/20 text-yellow-500'
+                )}
+              >
+                {chain === 'mainnet' ? 'Main' : 'Test'}
+              </span>
             )}
           </div>
         </div>
@@ -166,51 +190,60 @@ export function Sidebar() {
             expanded ? '' : 'items-center'
           )}
         >
-          {/* Settings Button */}
+          {/* Settings Link */}
+          <Link href="/settings" title={expanded ? undefined : 'Settings'}>
+            <div
+              className={cn(
+                'group flex items-center gap-3 transition-all duration-200',
+                expanded
+                  ? cn(
+                      'px-3 py-2.5 rounded-xl',
+                      pathname === '/settings'
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                        : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
+                    )
+                  : cn('icon-circle', pathname === '/settings' && 'active')
+              )}
+            >
+              <Settings
+                className={cn(
+                  'h-5 w-5 flex-shrink-0 transition-colors',
+                  pathname === '/settings'
+                    ? 'text-white'
+                    : 'text-muted-foreground group-hover:text-foreground'
+                )}
+              />
+              {expanded && (
+                <span
+                  className={cn(
+                    'text-sm font-medium whitespace-nowrap transition-colors',
+                    pathname === '/settings' ? 'text-white' : ''
+                  )}
+                >
+                  Settings
+                </span>
+              )}
+            </div>
+          </Link>
+
+          {/* Node Info Button */}
           <button
-            onClick={() => setSettingsOpen(true)}
+            onClick={() => setNodeInfoOpen(true)}
+            title={expanded ? undefined : 'Node Info'}
             className={cn(
-              'group flex items-center gap-3 transition-all duration-200',
+              'group flex items-center gap-3 transition-all duration-200 w-full',
               expanded
                 ? 'px-3 py-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
                 : 'icon-circle'
             )}
-            title={expanded ? undefined : 'Settings'}
           >
-            <Settings className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
-            {expanded && <span className="text-sm font-medium whitespace-nowrap">Settings</span>}
-          </button>
-
-          {/* Network Indicator */}
-          <div
-            className={cn(
-              'mt-3 flex items-center gap-2',
-              expanded ? 'px-3 py-2' : 'flex-col gap-1'
+            <Server className="h-5 w-5 flex-shrink-0 transition-colors text-muted-foreground group-hover:text-foreground" />
+            {expanded && (
+              <span className="text-sm font-medium whitespace-nowrap transition-colors">
+                Node Info
+              </span>
             )}
-          >
-            <div
-              className={cn(
-                'h-3 w-3 rounded-full flex-shrink-0',
-                chain === 'mainnet'
-                  ? 'bg-bitcoin shadow-[0_0_10px_hsl(var(--bitcoin))]'
-                  : 'bg-yellow-500 shadow-[0_0_10px_hsl(45,100%,50%)]'
-              )}
-            />
-            <span
-              className={cn(
-                'font-medium uppercase tracking-wider text-muted-foreground',
-                expanded ? 'text-xs' : 'text-[9px]'
-              )}
-            >
-              {expanded
-                ? chain === 'mainnet'
-                  ? 'Mainnet'
-                  : 'Testnet'
-                : chain === 'mainnet'
-                  ? 'Main'
-                  : 'Test'}
-            </span>
-          </div>
+          </button>
 
           {/* Expand/Collapse Button */}
           <button
@@ -235,8 +268,8 @@ export function Sidebar() {
         </div>
       </aside>
 
-      {/* Settings Dialog */}
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      {/* Node Info Dialog */}
+      <NodeInfoDialog open={nodeInfoOpen} onClose={() => setNodeInfoOpen(false)} />
     </>
   );
 }

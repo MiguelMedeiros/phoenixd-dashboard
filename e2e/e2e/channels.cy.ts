@@ -1,5 +1,15 @@
 describe('Channels Page', () => {
   beforeEach(() => {
+    // Auth mock - allow access
+    cy.intercept('GET', '**/api/auth/status', {
+      body: {
+        hasPassword: false,
+        authenticated: true,
+        autoLockMinutes: 0,
+        lockScreenBg: 'storm-clouds',
+      },
+    }).as('getAuthStatus');
+
     cy.intercept('GET', '**/api/node/channels', { fixture: 'channels.json' }).as('getChannels');
     cy.intercept('GET', '**/api/node/info', { fixture: 'node-info.json' }).as('getNodeInfo');
   });
@@ -81,6 +91,14 @@ describe('Channels Page', () => {
 
   describe('Empty State', () => {
     it('shows empty state message when no channels', () => {
+      cy.intercept('GET', '**/api/auth/status', {
+        body: {
+          hasPassword: false,
+          authenticated: true,
+          autoLockMinutes: 0,
+          lockScreenBg: 'storm-clouds',
+        },
+      }).as('getAuthStatus');
       cy.intercept('GET', '**/api/node/channels', { body: [] }).as('getEmptyChannels');
       cy.intercept('GET', '**/api/node/info', { fixture: 'node-info.json' }).as('getNodeInfo');
 

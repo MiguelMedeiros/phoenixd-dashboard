@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createServer } from 'http';
 import { PrismaClient } from '@prisma/client';
@@ -7,7 +8,9 @@ import { phoenixdRouter } from './routes/phoenixd.js';
 import { paymentsRouter } from './routes/payments.js';
 import { nodeRouter } from './routes/node.js';
 import { lnurlRouter } from './routes/lnurl.js';
+import { authRouter } from './routes/auth.js';
 import { PhoenixdService } from './services/phoenixd.js';
+import { cleanupExpiredSessions } from './middleware/auth.js';
 
 const app = express();
 const server = createServer(app);
@@ -17,7 +20,13 @@ export const prisma = new PrismaClient();
 export const phoenixd = new PhoenixdService();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -27,6 +36,7 @@ app.get('/health', (_, res) => {
 });
 
 // Routes
+app.use('/api/auth', authRouter);
 app.use('/api/phoenixd', phoenixdRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/node', nodeRouter);
@@ -129,6 +139,11 @@ server.listen(PORT, () => {
 
   // Connect to phoenixd WebSocket after a delay
   setTimeout(connectPhoenixdWebSocket, 3000);
+
+  // Cleanup expired sessions every hour
+  setInterval(cleanupExpiredSessions, 60 * 60 * 1000);
+  // Also run cleanup on startup
+  cleanupExpiredSessions();
 });
 
 // Graceful shutdown

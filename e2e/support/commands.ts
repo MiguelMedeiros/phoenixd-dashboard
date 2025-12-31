@@ -51,12 +51,57 @@ declare global {
        * Copy text to clipboard and verify
        */
       copyToClipboard(selector: string): Chainable<void>;
+
+      /**
+       * Mock auth endpoints - no password configured
+       */
+      mockAuthNoPassword(): Chainable<void>;
+
+      /**
+       * Mock auth endpoints - password configured but not authenticated
+       */
+      mockAuthLocked(): Chainable<void>;
+
+      /**
+       * Mock auth endpoints - password configured and authenticated
+       */
+      mockAuthAuthenticated(): Chainable<void>;
+
+      /**
+       * Mock successful login
+       */
+      mockLoginSuccess(): Chainable<void>;
+
+      /**
+       * Mock failed login
+       */
+      mockLoginFailure(): Chainable<void>;
+
+      /**
+       * Mock seed retrieval
+       */
+      mockGetSeed(seed?: string): Chainable<void>;
+
+      /**
+       * Mock seed retrieval failure
+       */
+      mockGetSeedFailure(errorMessage?: string): Chainable<void>;
     }
   }
 }
 
 // Setup all API mocks
 Cypress.Commands.add('setupApiMocks', () => {
+  // Auth endpoints - mock as no password configured (allows access)
+  cy.intercept('GET', '**/api/auth/status', {
+    body: {
+      hasPassword: false,
+      authenticated: true,
+      autoLockMinutes: 0,
+      lockScreenBg: 'storm-clouds',
+    },
+  }).as('getAuthStatus');
+
   // Node endpoints
   cy.intercept('GET', '**/api/node/info', { fixture: 'node-info.json' }).as('getNodeInfo');
   cy.intercept('GET', '**/api/node/balance', { fixture: 'balance.json' }).as('getBalance');
@@ -119,6 +164,16 @@ Cypress.Commands.add('setupApiMocks', () => {
 
 // Mock only node endpoints
 Cypress.Commands.add('mockNodeEndpoints', () => {
+  // Auth endpoint - allow access
+  cy.intercept('GET', '**/api/auth/status', {
+    body: {
+      hasPassword: false,
+      authenticated: true,
+      autoLockMinutes: 0,
+      lockScreenBg: 'storm-clouds',
+    },
+  }).as('getAuthStatus');
+
   cy.intercept('GET', '**/api/node/info', { fixture: 'node-info.json' }).as('getNodeInfo');
   cy.intercept('GET', '**/api/node/balance', { fixture: 'balance.json' }).as('getBalance');
   cy.intercept('GET', '**/api/node/channels', { fixture: 'channels.json' }).as('getChannels');
@@ -179,6 +234,85 @@ Cypress.Commands.add('mockPayLnAddressError', (errorMessage = 'Payment failed') 
     statusCode: 500,
     body: { error: errorMessage },
   }).as('payLnAddressError');
+});
+
+// Mock auth - no password configured
+Cypress.Commands.add('mockAuthNoPassword', () => {
+  cy.intercept('GET', '**/api/auth/status', {
+    body: {
+      hasPassword: false,
+      authenticated: true,
+      autoLockMinutes: 0,
+      lockScreenBg: 'storm-clouds',
+    },
+  }).as('getAuthStatus');
+});
+
+// Mock auth - password configured but locked (not authenticated)
+Cypress.Commands.add('mockAuthLocked', () => {
+  cy.intercept('GET', '**/api/auth/status', {
+    body: {
+      hasPassword: true,
+      authenticated: false,
+      autoLockMinutes: 5,
+      lockScreenBg: 'storm-clouds',
+    },
+  }).as('getAuthStatus');
+});
+
+// Mock auth - password configured and authenticated
+Cypress.Commands.add('mockAuthAuthenticated', () => {
+  cy.intercept('GET', '**/api/auth/status', {
+    body: {
+      hasPassword: true,
+      authenticated: true,
+      autoLockMinutes: 5,
+      lockScreenBg: 'storm-clouds',
+    },
+  }).as('getAuthStatus');
+
+  cy.intercept('GET', '**/api/auth/settings', {
+    body: {
+      hasPassword: true,
+      autoLockMinutes: 5,
+      lockScreenBg: 'storm-clouds',
+    },
+  }).as('getAuthSettings');
+});
+
+// Mock successful login
+Cypress.Commands.add('mockLoginSuccess', () => {
+  cy.intercept('POST', '**/api/auth/login', {
+    body: { success: true },
+  }).as('login');
+});
+
+// Mock failed login
+Cypress.Commands.add('mockLoginFailure', () => {
+  cy.intercept('POST', '**/api/auth/login', {
+    statusCode: 401,
+    body: { error: 'Invalid password' },
+  }).as('loginFailure');
+});
+
+// Mock seed retrieval
+Cypress.Commands.add(
+  'mockGetSeed',
+  (
+    seed = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+  ) => {
+    cy.intercept('POST', '**/api/auth/seed', {
+      body: { seed },
+    }).as('getSeed');
+  }
+);
+
+// Mock seed retrieval failure
+Cypress.Commands.add('mockGetSeedFailure', (errorMessage = 'Invalid password') => {
+  cy.intercept('POST', '**/api/auth/seed', {
+    statusCode: 401,
+    body: { error: errorMessage },
+  }).as('getSeedFailure');
 });
 
 export {};

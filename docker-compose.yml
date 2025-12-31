@@ -68,6 +68,7 @@ services:
         condition: service_started
     volumes:
       - ./backend/src:/app/src:ro
+      - ./data/phoenixd:/phoenix-data:ro
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s
