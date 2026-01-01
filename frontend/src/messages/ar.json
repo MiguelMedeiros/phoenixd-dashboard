@@ -28,6 +28,8 @@
     "testnet": "شبكة الاختبار",
     "mainnetShort": "رئيسي",
     "testnetShort": "اختبار",
+    "torEnabled": "Tor",
+    "torConnecting": "جاري الاتصال بـ Tor...",
     "dashboard": "لوحة التحكم",
     "overview": "نظرة عامة",
     "receive": "استلام",

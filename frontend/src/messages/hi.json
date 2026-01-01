@@ -28,6 +28,8 @@
     "testnet": "टेस्टनेट",
     "mainnetShort": "मेन",
     "testnetShort": "टेस्ट",
+    "torEnabled": "Tor",
+    "torConnecting": "Tor कनेक्ट हो रहा है...",
     "dashboard": "डैशबोर्ड",
     "overview": "अवलोकन",
     "receive": "प्राप्त करें",

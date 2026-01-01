@@ -28,6 +28,8 @@
     "testnet": "テストネット",
     "mainnetShort": "メイン",
     "testnetShort": "テスト",
+    "torEnabled": "Tor",
+    "torConnecting": "Tor 接続中...",
     "dashboard": "ダッシュボード",
     "overview": "概要",
     "receive": "受取",

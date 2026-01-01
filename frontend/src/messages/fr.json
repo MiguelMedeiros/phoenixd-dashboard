@@ -28,6 +28,8 @@
     "testnet": "Testnet",
     "mainnetShort": "Main",
     "testnetShort": "Test",
+    "torEnabled": "Tor",
+    "torConnecting": "Tor connexion...",
     "dashboard": "Tableau de bord",
     "overview": "Aperçu",
     "receive": "Recevoir",

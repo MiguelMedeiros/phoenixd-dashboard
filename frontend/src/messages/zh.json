@@ -28,6 +28,8 @@
     "testnet": "测试网",
     "mainnetShort": "主网",
     "testnetShort": "测试",
+    "torEnabled": "Tor",
+    "torConnecting": "Tor 连接中...",
     "dashboard": "仪表板",
     "overview": "概览",
     "receive": "收款",

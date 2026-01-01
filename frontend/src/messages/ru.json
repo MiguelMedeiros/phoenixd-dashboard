@@ -28,6 +28,8 @@
     "testnet": "Тестовая сеть",
     "mainnetShort": "Осн",
     "testnetShort": "Тест",
+    "torEnabled": "Tor",
+    "torConnecting": "Tor подключается...",
     "dashboard": "Панель управления",
     "overview": "Обзор",
     "receive": "Получить",

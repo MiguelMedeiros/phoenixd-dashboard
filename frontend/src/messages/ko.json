@@ -28,6 +28,8 @@
     "testnet": "테스트넷",
     "mainnetShort": "메인",
     "testnetShort": "테스트",
+    "torEnabled": "Tor",
+    "torConnecting": "Tor 연결 중...",
     "dashboard": "대시보드",
     "overview": "개요",
     "receive": "받기",
