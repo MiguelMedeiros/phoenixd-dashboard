@@ -1,0 +1,23 @@
+{
+  "nodeId": "0369ab1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
+  "chain": "mainnet",
+  "version": "0.4.1",
+  "channels": [
+    {
+      "state": "NORMAL",
+      "channelId": "channel-001",
+      "balanceSat": 250000,
+      "inboundLiquiditySat": 750000,
+      "capacitySat": 1000000,
+      "fundingTxId": "abc123def456789..."
+    },
+    {
+      "state": "NORMAL",
+      "channelId": "channel-002",
+      "balanceSat": 150000,
+      "inboundLiquiditySat": 350000,
+      "capacitySat": 500000,
+      "fundingTxId": "def456abc789012..."
+    }
+  ]
+}

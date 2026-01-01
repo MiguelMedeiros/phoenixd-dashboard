@@ -3,6 +3,7 @@
 import React from 'react';
 import { ArrowDownToLine, ArrowUpFromLine, Bell, Check, Trash2, X, Zap } from 'lucide-react';
 import { cn, formatSats } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 export interface Notification {
   id: string;
@@ -33,6 +34,7 @@ export function NotificationsPopover({
   onClear,
   onRemove,
 }: NotificationsPopoverProps) {
+  const t = useTranslations('notifications');
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const formatTime = (timestamp: number) => {
@@ -43,10 +45,10 @@ export function NotificationsPopover({
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (minutes < 1) return t('justNow');
+    if (minutes < 60) return t('minutesAgo', { minutes });
+    if (hours < 24) return t('hoursAgo', { hours });
+    if (days < 7) return t('daysAgo', { days });
     return date.toLocaleDateString();
   };
 
@@ -76,7 +78,7 @@ export function NotificationsPopover({
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-black/10 dark:border-white/10">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold">Notifications</h3>
+              <h3 className="font-semibold">{t('title')}</h3>
               {unreadCount > 0 && (
                 <span className="flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-primary text-xs font-medium text-white">
                   {unreadCount}
@@ -89,14 +91,14 @@ export function NotificationsPopover({
                   <button
                     onClick={onMarkAllAsRead}
                     className="p-1.5 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-                    title="Mark all as read"
+                    title={t('markAllRead')}
                   >
                     <Check className="h-4 w-4 text-muted-foreground" />
                   </button>
                   <button
                     onClick={onClear}
                     className="p-1.5 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-                    title="Clear all"
+                    title={t('clearAll')}
                   >
                     <Trash2 className="h-4 w-4 text-muted-foreground" />
                   </button>
@@ -118,8 +120,8 @@ export function NotificationsPopover({
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/5 dark:bg-white/5 mb-3">
                   <Bell className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground">No notifications</p>
-                <p className="text-xs text-muted-foreground mt-1">You&apos;re all caught up!</p>
+                <p className="text-sm text-muted-foreground">{t('noNotifications')}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('allCaughtUp')}</p>
               </div>
             ) : (
               <div className="py-1">

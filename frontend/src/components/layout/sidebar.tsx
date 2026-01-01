@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import {
   Home,
   ArrowDownToLine,
@@ -20,46 +19,48 @@ import {
 import { cn } from '@/lib/utils';
 import { getNodeInfo } from '@/lib/api';
 import { NodeInfoDialog } from '@/components/node-info-dialog';
+import { useTranslations } from 'next-intl';
 
 const sidebarNavItems = [
   {
-    title: 'Overview',
+    key: 'overview',
     href: '/',
     icon: Home,
   },
   {
-    title: 'Receive',
+    key: 'receive',
     href: '/receive',
     icon: ArrowDownToLine,
   },
   {
-    title: 'Send',
+    key: 'send',
     href: '/send',
     icon: ArrowUpFromLine,
   },
   {
-    title: 'Payments',
+    key: 'payments',
     href: '/payments',
     icon: History,
   },
   {
-    title: 'Channels',
+    key: 'channels',
     href: '/channels',
     icon: Layers,
   },
   {
-    title: 'Tools',
+    key: 'tools',
     href: '/tools',
     icon: Wrench,
   },
   {
-    title: 'LNURL',
+    key: 'lnurl',
     href: '/lnurl',
     icon: Link2,
   },
 ];
 
 export function Sidebar() {
+  const t = useTranslations('common');
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
   const [chain, setChain] = useState<string>('mainnet');
@@ -122,7 +123,7 @@ export function Sidebar() {
                     )}
                   />
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {chain === 'mainnet' ? 'Mainnet' : 'Testnet'}
+                    {chain === 'mainnet' ? t('mainnet') : t('testnet')}
                   </span>
                 </div>
               </div>
@@ -135,7 +136,7 @@ export function Sidebar() {
                     : 'bg-yellow-500/20 text-yellow-500'
                 )}
               >
-                {chain === 'mainnet' ? 'Main' : 'Test'}
+                {chain === 'mainnet' ? t('mainnetShort') : t('testnetShort')}
               </span>
             )}
           </div>
@@ -145,9 +146,10 @@ export function Sidebar() {
         <nav className={cn('flex flex-1 flex-col gap-1.5', expanded ? '' : 'items-center')}>
           {sidebarNavItems.map((item) => {
             const isActive = pathname === item.href;
+            const title = t(item.key);
 
             return (
-              <Link key={item.href} href={item.href} title={expanded ? undefined : item.title}>
+              <Link key={item.href} href={item.href} title={expanded ? undefined : title}>
                 <div
                   className={cn(
                     'group flex items-center gap-3 transition-all duration-200',
@@ -174,7 +176,7 @@ export function Sidebar() {
                         isActive ? 'text-white' : ''
                       )}
                     >
-                      {item.title}
+                      {title}
                     </span>
                   )}
                 </div>
@@ -191,7 +193,7 @@ export function Sidebar() {
           )}
         >
           {/* Settings Link */}
-          <Link href="/settings" title={expanded ? undefined : 'Settings'}>
+          <Link href="/settings" title={expanded ? undefined : t('settings')}>
             <div
               className={cn(
                 'group flex items-center gap-3 transition-all duration-200',
@@ -220,7 +222,7 @@ export function Sidebar() {
                     pathname === '/settings' ? 'text-white' : ''
                   )}
                 >
-                  Settings
+                  {t('settings')}
                 </span>
               )}
             </div>
@@ -229,7 +231,7 @@ export function Sidebar() {
           {/* Node Info Button */}
           <button
             onClick={() => setNodeInfoOpen(true)}
-            title={expanded ? undefined : 'Node Info'}
+            title={expanded ? undefined : t('nodeInfo')}
             className={cn(
               'group flex items-center gap-3 transition-all duration-200 w-full',
               expanded
@@ -240,7 +242,7 @@ export function Sidebar() {
             <Server className="h-5 w-5 flex-shrink-0 transition-colors text-muted-foreground group-hover:text-foreground" />
             {expanded && (
               <span className="text-sm font-medium whitespace-nowrap transition-colors">
-                Node Info
+                {t('nodeInfo')}
               </span>
             )}
           </button>
@@ -254,12 +256,12 @@ export function Sidebar() {
                 ? 'px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground w-full'
                 : 'icon-circle !w-10 !h-10'
             )}
-            title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            title={expanded ? t('collapseSidebar') : t('expandSidebar')}
           >
             {expanded ? (
               <>
                 <ChevronLeft className="h-4 w-4" />
-                <span className="text-xs font-medium">Collapse</span>
+                <span className="text-xs font-medium">{t('collapse')}</span>
               </>
             ) : (
               <ChevronRight className="h-4 w-4 text-muted-foreground" />

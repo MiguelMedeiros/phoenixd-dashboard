@@ -1,0 +1,5 @@
+{
+  "amountSat": 1000,
+  "paymentHash": "newinvoice1234567890abcdef1234567890abcdef1234567890abcdef12345678",
+  "serialized": "lnbc10u1pjtest123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz"
+}

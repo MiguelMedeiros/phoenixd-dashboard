@@ -1,0 +1,11 @@
+{
+  "prefix": "lnbc",
+  "timestamp": 1703980800,
+  "nodeId": "02abc1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
+  "serialized": "lnbc10u1pjtest...",
+  "description": "Test payment",
+  "paymentHash": "decoded1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+  "expiry": 3600,
+  "minFinalCltvExpiry": 144,
+  "amountMsat": 1000000
+}

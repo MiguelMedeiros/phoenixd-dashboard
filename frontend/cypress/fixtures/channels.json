@@ -1,0 +1,26 @@
+[
+  {
+    "state": "NORMAL",
+    "channelId": "channel-001-abcdef1234567890",
+    "balanceSat": 250000,
+    "inboundLiquiditySat": 750000,
+    "capacitySat": 1000000,
+    "fundingTxId": "abc123def456789abcdef123456789abcdef123456789abcdef123456789ab"
+  },
+  {
+    "state": "NORMAL",
+    "channelId": "channel-002-fedcba0987654321",
+    "balanceSat": 150000,
+    "inboundLiquiditySat": 350000,
+    "capacitySat": 500000,
+    "fundingTxId": "def456abc789012fedcba098765432100112233445566778899aabbccddeeff"
+  },
+  {
+    "state": "CLOSING",
+    "channelId": "channel-003-closing123456789",
+    "balanceSat": 50000,
+    "inboundLiquiditySat": 0,
+    "capacitySat": 50000,
+    "fundingTxId": "closing789abc012def345678901234567890abcdef1234567890abcdef12345"
+  }
+]

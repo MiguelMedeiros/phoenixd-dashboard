@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import {
   Home,
   ArrowDownToLine,
@@ -16,21 +15,23 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 const mainNavItems = [
-  { title: 'Home', href: '/', icon: Home },
-  { title: 'Receive', href: '/receive', icon: ArrowDownToLine },
-  { title: 'Send', href: '/send', icon: ArrowUpFromLine },
-  { title: 'Payments', href: '/payments', icon: History },
+  { key: 'overview', href: '/', icon: Home },
+  { key: 'receive', href: '/receive', icon: ArrowDownToLine },
+  { key: 'send', href: '/send', icon: ArrowUpFromLine },
+  { key: 'payments', href: '/payments', icon: History },
 ];
 
 const moreNavItems = [
-  { title: 'Channels', href: '/channels', icon: Layers },
-  { title: 'Tools', href: '/tools', icon: Wrench },
-  { title: 'LNURL', href: '/lnurl', icon: Link2 },
+  { key: 'channels', href: '/channels', icon: Layers },
+  { key: 'tools', href: '/tools', icon: Wrench },
+  { key: 'lnurl', href: '/lnurl', icon: Link2 },
 ];
 
 export function BottomNav() {
+  const t = useTranslations('common');
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -52,7 +53,7 @@ export function BottomNav() {
         <div className="fixed bottom-20 left-4 right-4 z-50 md:hidden">
           <div className="glass-card rounded-2xl p-4 space-y-2">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-muted-foreground">More</span>
+              <span className="text-sm font-medium text-muted-foreground">{t('more')}</span>
               <button
                 onClick={() => setMoreOpen(false)}
                 className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10"
@@ -76,7 +77,7 @@ export function BottomNav() {
                   )}
                 >
                   <item.icon className="h-5 w-5" />
-                  <span className="font-medium">{item.title}</span>
+                  <span className="font-medium">{t(item.key)}</span>
                 </Link>
               );
             })}
@@ -93,7 +94,7 @@ export function BottomNav() {
                 )}
               >
                 <Settings className="h-5 w-5" />
-                <span className="font-medium">Settings</span>
+                <span className="font-medium">{t('settings')}</span>
               </Link>
             </div>
           </div>
@@ -128,7 +129,7 @@ export function BottomNav() {
                       isActive ? 'text-primary' : 'text-muted-foreground'
                     )}
                   >
-                    {item.title}
+                    {t(item.key)}
                   </span>
                 </Link>
               );
@@ -155,7 +156,7 @@ export function BottomNav() {
                   isMoreActive || moreOpen ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
-                More
+                {t('more')}
               </span>
             </button>
           </div>

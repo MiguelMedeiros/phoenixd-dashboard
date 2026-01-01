@@ -1,29 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Zap, Eye, EyeOff, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { LockScreenBg } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface LockScreenProps {
   onUnlock: (password: string) => Promise<boolean>;
   error?: string | null;
   background?: LockScreenBg;
 }
-
-// Fun messages for the lock screen
-const funMessages = [
-  'Your sats are safe 🔐',
-  'Tick tock, next block ⏱️',
-  'HODL mode: activated 💎',
-  'Lightning never sleeps ⚡',
-  'Stack sats, stay humble 🧘',
-  'Not your keys, not your coins 🔑',
-  'Proof of patience 🧡',
-  'Bitcoin fixes this 🛠️',
-  'Stay humble, stack sats ⚡',
-  'Number go up technology™ 📈',
-];
 
 // Background configuration
 const backgroundConfig: Record<LockScreenBg, { video: string; gradient: string }> = {
@@ -65,12 +52,32 @@ export function LockScreen({
   error: externalError,
   background = 'storm-clouds',
 }: LockScreenProps) {
+  const t = useTranslations('lockScreen');
+  const tf = useTranslations('funMessages');
+
+  const funMessages = useMemo(
+    () => [
+      tf('stackingSats'),
+      tf('lightningFast'),
+      tf('twentyOneMillion'),
+      tf('pureEnergy'),
+      tf('numberGoUp'),
+      tf('hodlMode'),
+      tf('notYourKeys'),
+      tf('tickTock'),
+      tf('stayHumble'),
+      tf('wagmi'),
+    ],
+    [tf]
+  );
+
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
-  const [funMessage] = useState(() => funMessages[Math.floor(Math.random() * funMessages.length)]);
+  const [funMessageIndex] = useState(() => Math.floor(Math.random() * 10));
+  const funMessage = funMessages[funMessageIndex];
   const [videoLoaded, setVideoLoaded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -93,7 +100,7 @@ export function LockScreen({
     e.preventDefault();
 
     if (!password.trim()) {
-      setError('Please enter your password');
+      setError(t('enterPassword'));
       return;
     }
 
@@ -104,14 +111,14 @@ export function LockScreen({
       const success = await onUnlock(password);
 
       if (!success) {
-        setError('Invalid password');
+        setError(t('invalidPassword'));
         setShake(true);
         setTimeout(() => setShake(false), 500);
         setPassword('');
         inputRef.current?.focus();
       }
     } catch {
-      setError('Failed to unlock');
+      setError(t('failedToUnlock'));
       setShake(true);
       setTimeout(() => setShake(false), 500);
     } finally {
@@ -154,8 +161,8 @@ export function LockScreen({
             <Zap className={cn('h-10 w-10', accent.icon)} strokeWidth={1.5} />
           </div>
 
-          <h1 className="text-2xl font-semibold tracking-tight text-white/90 mb-1">Phoenixd</h1>
-          <p className="text-white/40 text-sm">Enter password to continue</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white/90 mb-1">{t('title')}</h1>
+          <p className="text-white/40 text-sm">{t('enterPasswordToContinue')}</p>
         </div>
 
         {/* Clean Form - No container box */}
@@ -167,7 +174,7 @@ export function LockScreen({
               type="text"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
+              placeholder={t('password')}
               disabled={isLoading}
               className={cn(
                 'w-full px-4 py-3.5 pr-12 rounded-xl',
@@ -232,11 +239,11 @@ export function LockScreen({
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Unlocking...</span>
+                <span>{t('unlocking')}</span>
               </>
             ) : (
               <>
-                <span>Unlock</span>
+                <span>{t('unlock')}</span>
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

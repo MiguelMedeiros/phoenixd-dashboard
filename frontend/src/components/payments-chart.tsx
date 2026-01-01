@@ -28,6 +28,7 @@ import {
 } from 'date-fns';
 import { BarChart3, TrendingUp, Calendar } from 'lucide-react';
 import type { IncomingPayment, OutgoingPayment } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 type Period = 'daily' | 'weekly' | 'monthly';
 
@@ -43,25 +44,11 @@ interface ChartData {
   sent: number;
 }
 
-const periodConfig = {
-  daily: {
-    label: 'Daily',
-    shortLabel: 'D',
-    days: 14,
-    description: 'Last 14 days',
-  },
-  weekly: {
-    label: 'Weekly',
-    shortLabel: 'W',
-    weeks: 8,
-    description: 'Last 8 weeks',
-  },
-  monthly: {
-    label: 'Monthly',
-    shortLabel: 'M',
-    months: 6,
-    description: 'Last 6 months',
-  },
+// Period configuration - days/weeks/months values used in chart calculations
+const _periodConfig = {
+  daily: { days: 14 },
+  weekly: { weeks: 8 },
+  monthly: { months: 6 },
 };
 
 // Custom tooltip component with glassmorphism style
@@ -69,20 +56,31 @@ const CustomTooltip = ({
   active,
   payload,
   label,
+  translations,
 }: {
   active?: boolean;
   payload?: Array<{ value: number; dataKey: string; color: string }>;
   label?: string;
+  translations: { received: string; sent: string; sats: string };
 }) => {
   if (active && payload && payload.length) {
+    const keyLabels: Record<string, string> = {
+      received: translations.received,
+      sent: translations.sent,
+    };
+
     return (
       <div className="glass-card rounded-xl p-3 border border-black/10 dark:border-white/10 shadow-lg">
         <p className="text-sm font-medium text-foreground mb-2">{label}</p>
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 text-sm">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-            <span className="text-muted-foreground capitalize">{entry.dataKey}:</span>
-            <span className="font-mono font-medium">{entry.value.toLocaleString()} sats</span>
+            <span className="text-muted-foreground">
+              {keyLabels[entry.dataKey] || entry.dataKey}:
+            </span>
+            <span className="font-mono font-medium">
+              {entry.value.toLocaleString()} {translations.sats}
+            </span>
           </div>
         ))}
       </div>
@@ -92,8 +90,20 @@ const CustomTooltip = ({
 };
 
 export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsChartProps) {
+  const t = useTranslations('overview');
+  const tc = useTranslations('common');
   const [period, setPeriod] = useState<Period>('daily');
-  const config = periodConfig[period];
+
+  const tooltipTranslations = {
+    received: t('received'),
+    sent: t('sent'),
+    sats: tc('sats'),
+  };
+
+  const legendLabels: Record<string, string> = {
+    received: t('received'),
+    sent: t('sent'),
+  };
 
   const chartData = useMemo(() => {
     const now = new Date();
@@ -190,20 +200,16 @@ export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsCh
             <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
               <BarChart3 className="h-4 w-4 text-primary" />
             </div>
-            Payment Activity
+            {t('paymentActivity')}
           </h3>
-          <PeriodSelector period={period} onChange={setPeriod} />
+          <PeriodSelector period={period} onChange={setPeriod} t={t} />
         </div>
         <div className="flex flex-col items-center justify-center h-[200px] text-center">
           <div className="h-14 w-14 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center mb-3">
             <TrendingUp className="h-7 w-7 text-muted-foreground" />
           </div>
-          <p className="text-muted-foreground">
-            No payment activity in the {config.description.toLowerCase()}
-          </p>
-          <p className="text-sm text-muted-foreground/70 mt-1">
-            Start receiving payments to see your activity chart
-          </p>
+          <p className="text-muted-foreground">{t('noPaymentActivity')}</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">{t('startReceivingPayments')}</p>
         </div>
       </div>
     );
@@ -216,12 +222,9 @@ export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsCh
           <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
             <BarChart3 className="h-4 w-4 text-primary" />
           </div>
-          Payment Activity
-          <span className="text-xs text-muted-foreground font-normal ml-2 hidden sm:inline">
-            {config.description}
-          </span>
+          {t('paymentActivity')}
         </h3>
-        <PeriodSelector period={period} onChange={setPeriod} />
+        <PeriodSelector period={period} onChange={setPeriod} t={t} />
       </div>
 
       <div className="h-[240px] w-full">
@@ -252,13 +255,15 @@ export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsCh
               tickFormatter={(value) => (value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value)}
               width={45}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip translations={tooltipTranslations} />} />
             <Legend
               wrapperStyle={{ paddingTop: '10px' }}
               iconType="circle"
               iconSize={8}
               formatter={(value) => (
-                <span className="text-sm text-muted-foreground capitalize">{value}</span>
+                <span className="text-sm text-muted-foreground">
+                  {legendLabels[value as string] || value}
+                </span>
               )}
             />
             <Area
@@ -290,17 +295,30 @@ export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsCh
 function PeriodSelector({
   period,
   onChange,
+  t,
 }: {
   period: Period;
   onChange: (period: Period) => void;
+  t: (key: string) => string;
 }) {
   const periods: Period[] = ['daily', 'weekly', 'monthly'];
+
+  const labels: Record<Period, string> = {
+    daily: t('daily'),
+    weekly: t('weekly'),
+    monthly: t('monthly'),
+  };
+
+  const shortLabels: Record<Period, string> = {
+    daily: 'D',
+    weekly: 'W',
+    monthly: 'M',
+  };
 
   return (
     <div className="flex items-center gap-1 p-1 rounded-lg bg-black/5 dark:bg-white/5 border border-black/[0.05] dark:border-white/[0.05]">
       {periods.map((p) => {
         const isActive = period === p;
-        const config = periodConfig[p];
 
         return (
           <button
@@ -314,11 +332,10 @@ function PeriodSelector({
                   : 'text-muted-foreground hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5'
               }
             `}
-            title={config.description}
           >
             <Calendar className="h-3 w-3 sm:hidden" />
-            <span className="hidden sm:inline">{config.label}</span>
-            <span className="sm:hidden">{config.shortLabel}</span>
+            <span className="hidden sm:inline">{labels[p]}</span>
+            <span className="sm:hidden">{shortLabels[p]}</span>
           </button>
         );
       })}

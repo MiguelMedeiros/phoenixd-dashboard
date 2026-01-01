@@ -8,6 +8,8 @@ import { formatSats } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { SearchDialog } from '@/components/search-dialog';
 import { NotificationsPopover, type Notification } from '@/components/notifications-popover';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useTranslations } from 'next-intl';
 
 interface HeaderProps {
   isConnected: boolean;
@@ -24,7 +26,7 @@ interface HeaderProps {
 export function Header({
   isConnected,
   onRefreshBalance,
-  title = 'Dashboard',
+  title,
   subtitle,
   notifications = [],
   onNotificationRead,
@@ -32,6 +34,7 @@ export function Header({
   onNotificationsClear,
   onNotificationRemove,
 }: HeaderProps) {
+  const t = useTranslations('common');
   const [balance, setBalance] = useState<{
     balanceSat: number;
     feeCreditSat: number;
@@ -41,6 +44,8 @@ export function Header({
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { hasPassword, lock } = useAuthContext();
+
+  const displayTitle = title || t('dashboard');
 
   const fetchBalance = useCallback(async () => {
     setLoading(true);
@@ -108,7 +113,9 @@ export function Header({
 
           {/* Desktop Title */}
           <div className="hidden md:block">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              {displayTitle}
+            </h1>
             {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
           </div>
         </div>
@@ -119,10 +126,13 @@ export function Header({
           <button
             onClick={() => setSearchOpen(true)}
             className="hidden md:flex icon-circle group"
-            title="Search (⌘K)"
+            title={t('search')}
           >
             <Search className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
+
+          {/* Language Switcher */}
+          <LanguageSwitcher />
 
           {/* Lock Button - Only visible if password is configured */}
           {hasPassword && (

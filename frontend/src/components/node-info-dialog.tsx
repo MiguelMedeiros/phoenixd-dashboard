@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Zap, Server, Wifi, Copy, Check, Github, BookOpen, X } from 'lucide-react';
 import { getNodeInfo } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface NodeInfo {
   nodeId: string;
@@ -17,6 +18,8 @@ interface NodeInfoDialogProps {
 }
 
 export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
+  const t = useTranslations('nodeInfo');
+  const tc = useTranslations('common');
   const [nodeInfo, setNodeInfo] = useState<NodeInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -47,17 +50,17 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
 
   const links = [
     {
-      title: 'Phoenixd Docs',
+      title: tc('phoenixdDocs'),
       href: 'https://phoenix.acinq.co/server/api',
       icon: BookOpen,
     },
     {
-      title: 'Phoenixd',
+      title: tc('phoenixd'),
       href: 'https://github.com/ACINQ/phoenixd',
       icon: Github,
     },
     {
-      title: 'Dashboard',
+      title: tc('dashboard'),
       href: 'https://github.com/MiguelMedeiros/phoenixd-dashboard',
       icon: Github,
     },
@@ -83,8 +86,8 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
                 <Zap className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold">Phoenixd Node</h2>
-                <p className="text-xs text-muted-foreground">Lightning Network</p>
+                <h2 className="text-lg font-semibold">{tc('phoenixdNode')}</h2>
+                <p className="text-xs text-muted-foreground">{tc('lightningNetwork')}</p>
               </div>
             </div>
             <button
@@ -106,14 +109,14 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
                 <div className="p-3 rounded-xl bg-black/5 dark:bg-white/5">
                   <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Server className="h-3.5 w-3.5" />
-                    <span className="text-xs">Version</span>
+                    <span className="text-xs">{t('version')}</span>
                   </div>
                   <p className="font-mono text-sm font-medium">{nodeInfo.version}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-black/5 dark:bg-white/5">
                   <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Wifi className="h-3.5 w-3.5" />
-                    <span className="text-xs">Network</span>
+                    <span className="text-xs">{t('network')}</span>
                   </div>
                   <span
                     className={cn(
@@ -131,7 +134,7 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
               {/* Node ID */}
               <div className="p-3 rounded-xl bg-black/5 dark:bg-white/5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-muted-foreground">Node ID</span>
+                  <span className="text-xs text-muted-foreground">{t('nodeId')}</span>
                   <button
                     onClick={copyNodeId}
                     className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -139,12 +142,12 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
                     {copied ? (
                       <>
                         <Check className="h-3.5 w-3.5 text-green-500" />
-                        <span className="text-green-500">Copied!</span>
+                        <span className="text-green-500">{tc('copied')}</span>
                       </>
                     ) : (
                       <>
                         <Copy className="h-3.5 w-3.5" />
-                        <span>Copy</span>
+                        <span>{tc('copy')}</span>
                       </>
                     )}
                   </button>
@@ -176,7 +179,7 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground text-center py-8">
-              Unable to load node info
+              {tc('unableToLoadNodeInfo')}
             </p>
           )}
         </div>

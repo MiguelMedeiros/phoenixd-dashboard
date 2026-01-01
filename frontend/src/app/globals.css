@@ -612,3 +612,129 @@
   -moz-text-security: disc;
   text-security: disc;
 }
+
+/* ============================================
+   RTL (Right-to-Left) Support for Arabic
+   ============================================ */
+
+/* Apply Arabic font for Arabic locale */
+[dir='rtl'] {
+  font-family: var(--font-arabic), var(--font-sans), system-ui, sans-serif;
+}
+
+/* Hindi font support */
+html:lang(hi) {
+  font-family: var(--font-devanagari), var(--font-sans), system-ui, sans-serif;
+}
+
+/* Mirror sidebar for RTL */
+[dir='rtl'] .warm-sidebar {
+  border-right: none;
+  border-left: 1px solid hsl(30 15% 88%);
+}
+
+.dark [dir='rtl'] .warm-sidebar {
+  border-left-color: hsl(30 10% 95% / 0.08);
+}
+
+/* Flip chevron icons in RTL */
+[dir='rtl'] .lucide-chevron-right {
+  transform: rotate(180deg);
+}
+
+[dir='rtl'] .lucide-chevron-left {
+  transform: rotate(180deg);
+}
+
+/* Adjust icon circles margins for RTL */
+[dir='rtl'] .icon-circle {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Fix flex directions for RTL layouts */
+[dir='rtl'] .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* Adjust text alignment for RTL */
+[dir='rtl'] .text-left {
+  text-align: right;
+}
+
+[dir='rtl'] .text-right {
+  text-align: left;
+}
+
+/* Adjust padding and margins for RTL */
+[dir='rtl'] .pl-2 {
+  padding-left: 0;
+  padding-right: 0.5rem;
+}
+[dir='rtl'] .pr-2 {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+[dir='rtl'] .pl-3 {
+  padding-left: 0;
+  padding-right: 0.75rem;
+}
+[dir='rtl'] .pr-3 {
+  padding-right: 0;
+  padding-left: 0.75rem;
+}
+[dir='rtl'] .pl-4 {
+  padding-left: 0;
+  padding-right: 1rem;
+}
+[dir='rtl'] .pr-4 {
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+[dir='rtl'] .ml-2 {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+[dir='rtl'] .mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+[dir='rtl'] .ml-3 {
+  margin-left: 0;
+  margin-right: 0.75rem;
+}
+[dir='rtl'] .mr-3 {
+  margin-right: 0;
+  margin-left: 0.75rem;
+}
+[dir='rtl'] .ml-4 {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+[dir='rtl'] .mr-4 {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+/* Adjust rounded corners for RTL */
+[dir='rtl'] .rounded-l-xl {
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+[dir='rtl'] .rounded-r-xl {
+  border-radius: 0.75rem 0 0 0.75rem;
+}
+
+/* Adjust gap directions */
+[dir='rtl'] .gap-x-2 > * + * {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+[dir='rtl'] .gap-x-3 > * + * {
+  margin-right: 0.75rem;
+  margin-left: 0;
+}
+[dir='rtl'] .gap-x-4 > * + * {
+  margin-right: 1rem;
+  margin-left: 0;
+}

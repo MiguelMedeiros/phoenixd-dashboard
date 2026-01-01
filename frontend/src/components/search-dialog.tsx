@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -13,6 +13,7 @@ import {
   X,
   FileCode,
   Zap,
+  Settings,
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn, formatSats } from '@/lib/utils';
@@ -22,6 +23,7 @@ import {
   type IncomingPayment,
   type OutgoingPayment,
 } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface SearchDialogProps {
   open: boolean;
@@ -37,60 +39,71 @@ type SearchResult = {
   data?: IncomingPayment | OutgoingPayment;
 };
 
-const pages: SearchResult[] = [
-  {
-    type: 'page',
-    title: 'Overview',
-    subtitle: 'Dashboard home',
-    icon: <Home className="h-4 w-4" />,
-    href: '/',
-  },
-  {
-    type: 'page',
-    title: 'Receive',
-    subtitle: 'Create invoices',
-    icon: <ArrowDownToLine className="h-4 w-4" />,
-    href: '/receive',
-  },
-  {
-    type: 'page',
-    title: 'Send',
-    subtitle: 'Pay invoices',
-    icon: <ArrowUpFromLine className="h-4 w-4" />,
-    href: '/send',
-  },
-  {
-    type: 'page',
-    title: 'Payments',
-    subtitle: 'Transaction history',
-    icon: <FileCode className="h-4 w-4" />,
-    href: '/payments',
-  },
-  {
-    type: 'page',
-    title: 'Channels',
-    subtitle: 'Manage channels',
-    icon: <Layers className="h-4 w-4" />,
-    href: '/channels',
-  },
-  {
-    type: 'page',
-    title: 'Tools',
-    subtitle: 'Decode & estimate',
-    icon: <Wrench className="h-4 w-4" />,
-    href: '/tools',
-  },
-  {
-    type: 'page',
-    title: 'LNURL',
-    subtitle: 'LNURL operations',
-    icon: <Link2 className="h-4 w-4" />,
-    href: '/lnurl',
-  },
-];
-
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const router = useRouter();
+  const t = useTranslations('search');
+
+  const pages: SearchResult[] = useMemo(
+    () => [
+      {
+        type: 'page',
+        title: t('overviewTitle'),
+        subtitle: t('overviewSubtitle'),
+        icon: <Home className="h-4 w-4" />,
+        href: '/',
+      },
+      {
+        type: 'page',
+        title: t('receiveTitle'),
+        subtitle: t('receiveSubtitle'),
+        icon: <ArrowDownToLine className="h-4 w-4" />,
+        href: '/receive',
+      },
+      {
+        type: 'page',
+        title: t('sendTitle'),
+        subtitle: t('sendSubtitle'),
+        icon: <ArrowUpFromLine className="h-4 w-4" />,
+        href: '/send',
+      },
+      {
+        type: 'page',
+        title: t('paymentsTitle'),
+        subtitle: t('paymentsSubtitle'),
+        icon: <FileCode className="h-4 w-4" />,
+        href: '/payments',
+      },
+      {
+        type: 'page',
+        title: t('channelsTitle'),
+        subtitle: t('channelsSubtitle'),
+        icon: <Layers className="h-4 w-4" />,
+        href: '/channels',
+      },
+      {
+        type: 'page',
+        title: t('toolsTitle'),
+        subtitle: t('toolsSubtitle'),
+        icon: <Wrench className="h-4 w-4" />,
+        href: '/tools',
+      },
+      {
+        type: 'page',
+        title: t('lnurlTitle'),
+        subtitle: t('lnurlSubtitle'),
+        icon: <Link2 className="h-4 w-4" />,
+        href: '/lnurl',
+      },
+      {
+        type: 'page',
+        title: t('settingsTitle'),
+        subtitle: t('settingsSubtitle'),
+        icon: <Settings className="h-4 w-4" />,
+        href: '/settings',
+      },
+    ],
+    [t]
+  );
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>(pages);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -161,7 +174,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
 
     setResults([...filteredPages, ...filteredPayments]);
     setSelectedIndex(0);
-  }, [query, payments]);
+  }, [query, payments, pages]);
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
@@ -212,7 +225,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           <Search className="h-5 w-5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search pages, payments..."
+            placeholder={t('placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -241,7 +254,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Search className="h-8 w-8 text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground">No results found</p>
+              <p className="text-sm text-muted-foreground">{t('noResults')}</p>
             </div>
           ) : (
             <>
@@ -249,7 +262,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               {results.some((r) => r.type === 'page') && (
                 <div className="px-2 mb-2">
                   <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Pages
+                    {t('pages')}
                   </p>
                   {results
                     .filter((r) => r.type === 'page')
@@ -292,7 +305,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               {results.some((r) => r.type === 'payment') && (
                 <div className="px-2">
                   <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Payments
+                    {t('payments')}
                   </p>
                   {results
                     .filter((r) => r.type === 'payment')
@@ -346,13 +359,13 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               <kbd className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/[0.08] dark:border-white/[0.08]">
                 ↓
               </kbd>
-              navigate
+              {t('navigate')}
             </span>
             <span className="flex items-center gap-1">
               <kbd className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/[0.08] dark:border-white/[0.08]">
                 ↵
               </kbd>
-              select
+              {t('select')}
             </span>
           </div>
           <span className="flex items-center gap-1">
@@ -362,7 +375,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             <kbd className="px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/[0.08] dark:border-white/[0.08]">
               K
             </kbd>
-            to open
+            {t('toOpen')}
           </span>
         </div>
       </DialogContent>

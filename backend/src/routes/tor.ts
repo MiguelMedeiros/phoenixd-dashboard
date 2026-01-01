@@ -226,7 +226,7 @@ torRouter.delete('/image', requireAuth, async (_req: AuthenticatedRequest, res: 
       for (const img of images) {
         await docker.getImage(img.Id).remove({ force: true });
       }
-    } catch (imgError) {
+    } catch {
       console.log('No Tor image to remove or already removed');
     }
 

@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from 'next-intl';
 
 interface CloseChannelDialogProps {
   open: boolean;
@@ -29,6 +30,8 @@ export function CloseChannelDialog({
   chain,
   onConfirm,
 }: CloseChannelDialogProps) {
+  const t = useTranslations('channels');
+  const tc = useTranslations('common');
   const [address, setAddress] = useState('');
   const [feeRate, setFeeRate] = useState('10');
   const [loading, setLoading] = useState(false);
@@ -100,17 +103,14 @@ export function CloseChannelDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Close Channel
+            {t('closeChannelTitle')}
           </DialogTitle>
-          <DialogDescription>
-            This will close your Lightning channel and send the funds to the Bitcoin address you
-            specify.
-          </DialogDescription>
+          <DialogDescription>{t('closeChannelDescription')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="channelId">Channel ID</Label>
+            <Label htmlFor="channelId">{tc('channelId')}</Label>
             <Input
               id="channelId"
               value={channelId.slice(0, 24) + '...'}
@@ -121,7 +121,7 @@ export function CloseChannelDialog({
 
           <div className="space-y-2">
             <Label htmlFor="address">
-              Bitcoin Address <span className="text-destructive">*</span>
+              {t('bitcoinAddress')} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="address"
@@ -131,14 +131,12 @@ export function CloseChannelDialog({
               className="font-mono"
               disabled={loading}
             />
-            <p className="text-xs text-muted-foreground">
-              Funds will be sent to this address after channel closes
-            </p>
+            <p className="text-xs text-muted-foreground">{tc('fundsWillBeSent')}</p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="feeRate">
-              Fee Rate (sat/vB) <span className="text-destructive">*</span>
+              {t('feeRate')} ({t('satVbyte')}) <span className="text-destructive">*</span>
             </Label>
             <Input
               id="feeRate"
@@ -149,9 +147,7 @@ export function CloseChannelDialog({
               onChange={(e) => setFeeRate(e.target.value)}
               disabled={loading}
             />
-            <p className="text-xs text-muted-foreground">
-              Higher fee = faster confirmation. Recommended: 5-20 sat/vB
-            </p>
+            <p className="text-xs text-muted-foreground">{tc('higherFeeFaster')}</p>
           </div>
 
           {error && (
@@ -159,23 +155,22 @@ export function CloseChannelDialog({
           )}
 
           <div className="rounded-lg bg-yellow-500/10 p-3 text-sm text-yellow-500">
-            <strong>Warning:</strong> Closing a channel is irreversible. Make sure the address is
-            correct!
+            <strong>{tc('warning')}:</strong> {t('closingWarning')}
           </div>
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={handleClose} disabled={loading}>
-            Cancel
+            {tc('cancel')}
           </Button>
           <Button variant="destructive" onClick={handleConfirm} disabled={loading || !address}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Closing...
+                {t('closing')}
               </>
             ) : (
-              'Close Channel'
+              t('closeChannel')
             )}
           </Button>
         </DialogFooter>
