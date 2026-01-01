@@ -44,8 +44,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Create user and add to docker group for Docker socket access
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 expressjs
+# Add docker group (GID may vary, we'll handle via volume mount permissions)
+RUN addgroup --system docker 2>/dev/null || true
+RUN addgroup expressjs docker 2>/dev/null || true
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules

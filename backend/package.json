@@ -24,6 +24,7 @@
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dockerode": "^4.0.9",
     "express": "^4.21.2",
     "ws": "^8.18.0"
   },
@@ -32,6 +33,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.17",
+    "@types/dockerode": "^3.3.47",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
     "@types/supertest": "^6.0.2",

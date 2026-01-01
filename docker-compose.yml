@@ -52,12 +52,15 @@ services:
     restart: unless-stopped
     networks:
       - phoenixd-network
+    # Run as root to access Docker socket (required for Tor container management)
+    user: root
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 4000
       DATABASE_URL: postgresql://${POSTGRES_USER:-phoenixd}:${POSTGRES_PASSWORD:-phoenixd_secret}@postgres:5432/${POSTGRES_DB:-phoenixd_dashboard}?schema=public
       PHOENIXD_URL: http://phoenixd:9740
       PHOENIXD_PASSWORD: ${PHOENIXD_PASSWORD:-}
+      DOCKER_HOST: unix:///var/run/docker.sock
     ports:
       - '4001:4000'
     depends_on:
@@ -68,6 +71,8 @@ services:
     volumes:
       - ./backend/src:/app/src:ro
       - ./data/phoenixd:/phoenix-data:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./tor:/tor-config:ro
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s
@@ -93,9 +98,34 @@ services:
     volumes:
       - ./frontend/src:/app/src:ro
 
+  # Tor SOCKS5 Proxy - managed dynamically by backend
+  tor:
+    build:
+      context: ./tor
+      dockerfile: Dockerfile
+    container_name: phoenixd-tor
+    restart: unless-stopped
+    networks:
+      - phoenixd-network
+    volumes:
+      - tor_data:/var/lib/tor
+    profiles:
+      - tor
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl --socks5 localhost:9050 --connect-timeout 10 https://check.torproject.org/api/ip 2>/dev/null | grep -q IsTor || exit 1',
+        ]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
+
 networks:
   phoenixd-network:
     driver: bridge
 
 volumes:
   postgres_data:
+  tor_data:

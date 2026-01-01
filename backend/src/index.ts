@@ -9,6 +9,7 @@ import { paymentsRouter } from './routes/payments.js';
 import { nodeRouter } from './routes/node.js';
 import { lnurlRouter } from './routes/lnurl.js';
 import { authRouter } from './routes/auth.js';
+import { torRouter } from './routes/tor.js';
 import { PhoenixdService } from './services/phoenixd.js';
 import { cleanupExpiredSessions } from './middleware/auth.js';
 
@@ -41,6 +42,7 @@ app.use('/api/phoenixd', phoenixdRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/node', nodeRouter);
 app.use('/api/lnurl', lnurlRouter);
+app.use('/api/tor', torRouter);
 
 // WebSocket clients
 const clients = new Set<WebSocket>();

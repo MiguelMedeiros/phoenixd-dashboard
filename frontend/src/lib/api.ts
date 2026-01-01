@@ -403,3 +403,33 @@ export async function getSeed(password: string) {
     body: JSON.stringify({ password }),
   });
 }
+
+// Tor
+export interface TorStatus {
+  enabled: boolean;
+  running: boolean;
+  healthy: boolean;
+  containerExists: boolean;
+}
+
+export async function getTorStatus(): Promise<TorStatus> {
+  return request<TorStatus>('/api/tor/status');
+}
+
+export async function enableTor() {
+  return request<{ success: boolean; message: string }>('/api/tor/enable', {
+    method: 'POST',
+  });
+}
+
+export async function disableTor() {
+  return request<{ success: boolean; message: string }>('/api/tor/disable', {
+    method: 'POST',
+  });
+}
+
+export async function removeTorImage() {
+  return request<{ success: boolean; message: string }>('/api/tor/image', {
+    method: 'DELETE',
+  });
+}

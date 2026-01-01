@@ -24,6 +24,9 @@ import {
   Key,
   Copy,
   AlertTriangle,
+  Globe,
+  Power,
+  PowerOff,
 } from 'lucide-react';
 import {
   setupPassword,
@@ -31,7 +34,11 @@ import {
   removePassword,
   updateAuthSettings,
   getSeed,
+  getTorStatus,
+  enableTor,
+  disableTor,
   type LockScreenBg,
+  type TorStatus,
 } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useAuthContext } from '@/components/auth-provider';
@@ -80,6 +87,24 @@ export default function SettingsPage() {
   const [seedLoading, setSeedLoading] = useState(false);
   const [seedError, setSeedError] = useState<string | null>(null);
   const [seedCopied, setSeedCopied] = useState(false);
+
+  // Tor state
+  const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
+  const [torLoading, setTorLoading] = useState(false);
+  const [torError, setTorError] = useState<string | null>(null);
+
+  // Fetch Tor status on mount
+  useEffect(() => {
+    const fetchTorStatus = async () => {
+      try {
+        const status = await getTorStatus();
+        setTorStatus(status);
+      } catch (err) {
+        console.error('Failed to fetch Tor status:', err);
+      }
+    };
+    fetchTorStatus();
+  }, []);
 
   useEffect(() => {
     setSelectedAutoLock(autoLockMinutes);
@@ -262,6 +287,42 @@ export default function SettingsPage() {
   const handleCloseSeed = () => {
     setShowSeedSection(false);
     resetSeedForm();
+  };
+
+  const handleTorToggle = async () => {
+    setTorLoading(true);
+    setTorError(null);
+
+    try {
+      if (torStatus?.enabled) {
+        await disableTor();
+        setTorStatus({ enabled: false, running: false, healthy: false, containerExists: false });
+      } else {
+        await enableTor();
+        setTorStatus({ enabled: true, running: true, healthy: false, containerExists: true });
+        // Poll for healthy status
+        const pollHealth = async () => {
+          for (let i = 0; i < 10; i++) {
+            await new Promise((r) => setTimeout(r, 5000));
+            const status = await getTorStatus();
+            setTorStatus(status);
+            if (status.healthy) break;
+          }
+        };
+        pollHealth();
+      }
+    } catch (err) {
+      setTorError(err instanceof Error ? err.message : 'Failed to toggle Tor');
+      // Refresh status
+      try {
+        const status = await getTorStatus();
+        setTorStatus(status);
+      } catch {
+        // Ignore
+      }
+    } finally {
+      setTorLoading(false);
+    }
   };
 
   return (
@@ -771,6 +832,96 @@ export default function SettingsPage() {
           </div>
         </section>
       )}
+
+      {/* Network Section - Tor */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <Globe className="h-4 w-4" />
+          Network
+        </h2>
+
+        <div className="glass-card rounded-xl p-5 space-y-4">
+          {/* Tor Status */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  'h-10 w-10 rounded-lg flex items-center justify-center',
+                  torStatus?.enabled && torStatus?.healthy
+                    ? 'bg-success/10'
+                    : torStatus?.enabled && torStatus?.running
+                      ? 'bg-warning/10'
+                      : 'bg-muted'
+                )}
+              >
+                {torStatus?.enabled ? (
+                  <Power
+                    className={cn(
+                      'h-5 w-5',
+                      torStatus?.healthy
+                        ? 'text-success'
+                        : torStatus?.running
+                          ? 'text-warning animate-pulse'
+                          : 'text-muted-foreground'
+                    )}
+                  />
+                ) : (
+                  <PowerOff className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">Tor Proxy</p>
+                <p className="text-sm text-muted-foreground">
+                  {torStatus?.enabled
+                    ? torStatus?.healthy
+                      ? 'Connected - Traffic routed through Tor'
+                      : torStatus?.running
+                        ? 'Connecting to Tor network...'
+                        : 'Starting Tor container...'
+                    : 'Disabled - Direct connection'}
+                </p>
+                {torStatus?.enabled && torStatus?.healthy && (
+                  <p className="text-xs text-success/80 mt-1 flex items-center gap-1">
+                    <Shield className="h-3 w-3" />
+                    Your IP is hidden from Lightning peers
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={handleTorToggle}
+              disabled={torLoading}
+              className={cn(
+                'px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 flex-shrink-0',
+                torStatus?.enabled
+                  ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+                  : 'bg-primary/10 text-primary hover:bg-primary/20',
+                torLoading && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {torLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {torStatus?.enabled ? 'Disable' : 'Enable'}
+            </button>
+          </div>
+
+          {/* Tor Error */}
+          {torError && (
+            <div className="flex items-center gap-2 text-sm text-destructive p-3 rounded-lg bg-destructive/10">
+              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              {torError}
+            </div>
+          )}
+
+          {/* Tor Info */}
+          <div className="pt-4 border-t border-black/5 dark:border-white/5">
+            <p className="text-xs text-muted-foreground">
+              When enabled, Tor creates a SOCKS5 proxy that can route Lightning Network connections
+              through the Tor network, hiding your real IP address from peers. This improves privacy
+              but may slightly increase connection latency.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Theme Section */}
       <section className="space-y-4">

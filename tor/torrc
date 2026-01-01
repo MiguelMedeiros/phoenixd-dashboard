@@ -1,0 +1,20 @@
+# Tor SOCKS5 Proxy Configuration for Phoenixd Dashboard
+# Provides anonymous outbound connections for Lightning Network
+
+# SOCKS5 proxy - listen on all interfaces for container access
+SocksPort 0.0.0.0:9050
+
+# Accept connections from the Docker network
+SocksPolicy accept *
+
+# Logging to stdout for Docker
+Log notice stdout
+
+# Data directory
+DataDirectory /var/lib/tor
+
+# Optimize for container environment
+AvoidDiskWrites 1
+
+# Run in foreground (required for Docker)
+RunAsDaemon 0

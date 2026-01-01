@@ -63,6 +63,7 @@ model Settings {
   passwordHash    String?  // bcrypt hash - null = no password required
   autoLockMinutes Int      @default(0) // 0 = never auto-lock
   lockScreenBg    String   @default("storm-clouds") // lightning, thunder-flash, storm-clouds, electric-storm, night-lightning, sky-thunder
+  torEnabled      Boolean  @default(false) // Tor SOCKS5 proxy enabled
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
