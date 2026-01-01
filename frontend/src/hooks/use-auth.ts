@@ -19,7 +19,7 @@ interface UseAuthReturn {
   login: (password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshStatus: () => Promise<void>;
-  lock: () => void;
+  lock: () => Promise<void>;
 }
 
 export function useAuth(): UseAuthReturn {
@@ -77,8 +77,15 @@ export function useAuth(): UseAuthReturn {
     }
   }, [refreshStatus]);
 
-  const lock = useCallback(() => {
+  const lock = useCallback(async () => {
     if (status?.hasPassword) {
+      // Refresh status to get the latest settings (like lockScreenBg) before locking
+      try {
+        const authStatus = await getAuthStatus();
+        setStatus(authStatus);
+      } catch (err) {
+        console.error('Error refreshing status before lock:', err);
+      }
       setIsLocked(true);
     }
   }, [status?.hasPassword]);

@@ -12,7 +12,7 @@ interface AuthContextType {
   autoLockMinutes: number;
   lockScreenBg: LockScreenBg;
   logout: () => Promise<void>;
-  lock: () => void;
+  lock: () => Promise<void>;
   refreshStatus: () => Promise<void>;
 }
 
