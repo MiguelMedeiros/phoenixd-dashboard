@@ -33,8 +33,18 @@ mkdir -p ./data/phoenixd
 
 # Fix permissions for the phoenixd data directory
 # The phoenixd container runs as UID 1000, so we need to ensure the directory is writable
-# Using chmod 777 as a safe fallback that works across different host configurations
-chmod 777 ./data/phoenixd
+# We try the most secure option first, then fall back if needed
+
+# Try to set ownership to UID 1000 (phoenixd container user)
+if chown 1000:1000 ./data/phoenixd 2>/dev/null; then
+    chmod 700 ./data/phoenixd
+    echo -e "${GREEN}Data directory secured with owner-only permissions (700)${NC}"
+else
+    # If chown fails (non-root user), use group-writable permissions
+    chmod 770 ./data/phoenixd 2>/dev/null || chmod 755 ./data/phoenixd
+    echo -e "${YELLOW}Data directory created with restricted permissions${NC}"
+    echo -e "${YELLOW}Note: For maximum security, run 'sudo chown 1000:1000 ./data/phoenixd && chmod 700 ./data/phoenixd'${NC}"
+fi
 
 echo -e "${GREEN}Data directory ready!${NC}"
 

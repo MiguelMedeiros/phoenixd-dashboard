@@ -119,15 +119,21 @@ Run the following commands to fix the data directory permissions:
 # Stop the containers
 docker compose down
 
-# Fix permissions
-chmod 777 ./data/phoenixd
+# Fix permissions (recommended - secure)
+sudo chown 1000:1000 ./data/phoenixd
+chmod 700 ./data/phoenixd
+
+# Alternative: If you can't use sudo, use group-writable permissions
+# chmod 770 ./data/phoenixd
 
 # Or remove the data directory and start fresh
-rm -rf ./data/phoenixd
+# rm -rf ./data/phoenixd
 
 # Run setup again
 ./scripts/setup.sh
 ```
+
+> ⚠️ **Security Note**: Avoid using `chmod 777` as it allows any user on the system to read/write sensitive wallet data including your seed phrase.
 
 **Manual start** (if you've already run setup):
 
