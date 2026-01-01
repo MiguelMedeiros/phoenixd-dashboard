@@ -27,7 +27,12 @@ export const metadata: Metadata = {
   title: 'Phoenixd Dashboard',
   description: 'Lightning Node Management Dashboard for Phoenixd',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/apple-touch-icon.svg',
   },
 };
 

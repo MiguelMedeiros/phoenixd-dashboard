@@ -54,7 +54,7 @@
     "higherFeeFaster": "Higher fee = faster confirmation. Recommended: 5-20 sat/vB",
     "phoenixdNode": "Phoenixd Node",
     "lightningNetwork": "Lightning Network",
-    "phoenixdDocs": "Phoenixd Docs",
+    "phoenixdDocs": "Docs",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "Unable to load node info",
     "fees": "Fees"
