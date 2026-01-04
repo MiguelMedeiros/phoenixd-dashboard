@@ -42,6 +42,7 @@ import {
 } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useAuthContext } from '@/components/auth-provider';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useTranslations } from 'next-intl';
 
 export default function SettingsPage() {
@@ -93,7 +94,7 @@ export default function SettingsPage() {
   const [seedPhrase, setSeedPhrase] = useState<string | null>(null);
   const [seedLoading, setSeedLoading] = useState(false);
   const [seedError, setSeedError] = useState<string | null>(null);
-  const [seedCopied, setSeedCopied] = useState(false);
+  const { copied: seedCopied, copy: copySeed } = useCopyToClipboard();
 
   // Tor state
   const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
@@ -265,7 +266,6 @@ export default function SettingsPage() {
     setSeedPhrase(null);
     setSeedError(null);
     setShowSeedPassword(false);
-    setSeedCopied(false);
   };
 
   const handleRevealSeed = async (e: React.FormEvent) => {
@@ -283,11 +283,9 @@ export default function SettingsPage() {
     }
   };
 
-  const handleCopySeed = () => {
+  const handleCopySeed = async () => {
     if (seedPhrase) {
-      navigator.clipboard.writeText(seedPhrase);
-      setSeedCopied(true);
-      setTimeout(() => setSeedCopied(false), 2000);
+      await copySeed(seedPhrase);
     }
   };
 

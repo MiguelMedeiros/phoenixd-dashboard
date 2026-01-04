@@ -24,6 +24,7 @@ import {
 } from '@/lib/api';
 import { formatSats, cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { Link } from '@/i18n/navigation';
 import { PaymentsChart } from '@/components/payments-chart';
 import { useTranslations } from 'next-intl';
@@ -48,6 +49,7 @@ export default function OverviewPage() {
   const [allOutgoing, setAllOutgoing] = useState<OutgoingPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { copy: copyToClipboard } = useCopyToClipboard();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,19 +86,6 @@ export default function OverviewPage() {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // Fallback for environments where clipboard API is not available
-      console.log('Clipboard API not available');
-    }
-    toast({
-      title: tc('copied'),
-      description: tc('copiedToClipboard'),
-    });
-  };
 
   const totalCapacity = channels.reduce((acc, ch) => acc + (ch.capacitySat || 0), 0);
   const totalInbound = channels.reduce((acc, ch) => acc + (ch.inboundLiquiditySat || 0), 0);

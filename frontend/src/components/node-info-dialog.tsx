@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Zap, Server, Wifi, Copy, Check, Github, BookOpen, X } from 'lucide-react';
 import { getNodeInfo } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useTranslations } from 'next-intl';
 
 interface NodeInfo {
@@ -22,7 +23,7 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
   const tc = useTranslations('common');
   const [nodeInfo, setNodeInfo] = useState<NodeInfo | null>(null);
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   useEffect(() => {
     if (open && !nodeInfo) {
@@ -42,9 +43,7 @@ export function NodeInfoDialog({ open, onClose }: NodeInfoDialogProps) {
 
   const copyNodeId = async () => {
     if (nodeInfo?.nodeId) {
-      await navigator.clipboard.writeText(nodeInfo.nodeId);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await copy(nodeInfo.nodeId);
     }
   };
 

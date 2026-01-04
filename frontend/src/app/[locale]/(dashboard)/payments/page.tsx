@@ -30,6 +30,7 @@ import {
 } from '@/lib/api';
 import { formatSats, cn, getMempoolUrl } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslations } from 'next-intl';
@@ -47,9 +48,9 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [chain, setChain] = useState<string>('mainnet');
   const { toast } = useToast();
+  const { copiedField, copy: copyToClipboard } = useCopyToClipboard();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,18 +98,6 @@ export default function PaymentsPage() {
     } finally {
       setExporting(false);
     }
-  };
-
-  const copyToClipboard = async (text: string, field: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // Fallback for environments where clipboard API is not available
-      console.log('Clipboard API not available');
-    }
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-    toast({ title: tt('copied'), description: tt('copiedToClipboard') });
   };
 
   const formatDate = (timestamp: number) => {

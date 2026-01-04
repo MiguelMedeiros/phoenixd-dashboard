@@ -16,6 +16,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
 import { createInvoice, createOffer } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { formatSats } from '@/lib/utils';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 import { useTranslations } from 'next-intl';
@@ -121,10 +122,10 @@ export default function ReceivePage() {
     paymentHash: string;
   } | null>(null);
   const [offerResult, setOfferResult] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [paidAmount, setPaidAmount] = useState(0);
   const { toast } = useToast();
+  const { copied, copy: copyToClipboard } = useCopyToClipboard();
   const wsRef = useRef<WebSocket | null>(null);
 
   // Invoice form state
@@ -203,19 +204,6 @@ export default function ReceivePage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // Fallback for environments where clipboard API is not available
-      console.log('Clipboard API not available, using fallback');
-    }
-    // Always show copied state even if clipboard fails (for UI feedback)
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({ title: 'Copied!', description: 'Copied to clipboard' });
   };
 
   const resetInvoice = () => {
