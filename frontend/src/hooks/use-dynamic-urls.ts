@@ -91,9 +91,7 @@ export function useDynamicUrls(): UseDynamicUrlsResult {
         } catch {
           // If detection fails, check the current hostname
           if (typeof window !== 'undefined') {
-            tailscaleAccess = window.location.hostname.includes(
-              dynamicUrls.tailscaleDnsName || ''
-            );
+            tailscaleAccess = window.location.hostname.includes(dynamicUrls.tailscaleDnsName || '');
           }
         }
       }
@@ -130,8 +128,10 @@ export function useDynamicUrls(): UseDynamicUrlsResult {
   }, [fetchUrls]);
 
   // Determine which URLs to use based on access context
-  const effectiveApiUrl = isTailscaleAccess && urls.tailscaleApiUrl ? urls.tailscaleApiUrl : urls.apiUrl;
-  const effectiveWsUrl = isTailscaleAccess && urls.tailscaleWsUrl ? urls.tailscaleWsUrl : urls.wsUrl;
+  const effectiveApiUrl =
+    isTailscaleAccess && urls.tailscaleApiUrl ? urls.tailscaleApiUrl : urls.apiUrl;
+  const effectiveWsUrl =
+    isTailscaleAccess && urls.tailscaleWsUrl ? urls.tailscaleWsUrl : urls.wsUrl;
 
   return {
     apiUrl: effectiveApiUrl,

@@ -271,10 +271,7 @@ tailscaleRouter.post('/enable', requireAuth, async (_req: AuthenticatedRequest, 
           CapAdd: ['NET_ADMIN', 'NET_RAW'],
         },
         Healthcheck: {
-          Test: [
-            'CMD-SHELL',
-            'tailscale status --json | jq -e ".Self.Online == true" || exit 1',
-          ],
+          Test: ['CMD-SHELL', 'tailscale status --json | jq -e ".Self.Online == true" || exit 1'],
           Interval: 30000000000, // 30s in nanoseconds
           Timeout: 10000000000, // 10s
           Retries: 3,

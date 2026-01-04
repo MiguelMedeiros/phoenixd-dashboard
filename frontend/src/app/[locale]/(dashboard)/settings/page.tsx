@@ -492,9 +492,7 @@ export default function SettingsPage() {
     try {
       const result = await refreshTailscaleDns();
       if (result.dnsName) {
-        setTailscaleStatus((prev) =>
-          prev ? { ...prev, dnsName: result.dnsName || null } : null
-        );
+        setTailscaleStatus((prev) => (prev ? { ...prev, dnsName: result.dnsName || null } : null));
         clearUrlCache();
       }
     } catch (err) {
@@ -1313,9 +1311,7 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">{t('magicDnsUrl')}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t('scanQrToAccess')}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('scanQrToAccess')}</p>
                     </div>
                     <button
                       onClick={handleRefreshTailscaleDns}
@@ -1323,9 +1319,7 @@ export default function SettingsPage() {
                       className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                       title={t('refreshDns')}
                     >
-                      <RefreshCw
-                        className={cn('h-4 w-4', tailscaleLoading && 'animate-spin')}
-                      />
+                      <RefreshCw className={cn('h-4 w-4', tailscaleLoading && 'animate-spin')} />
                     </button>
                   </div>
 
@@ -1358,12 +1352,7 @@ export default function SettingsPage() {
                   {/* QR Code */}
                   {showTailscaleQR && (
                     <div className="flex justify-center p-4 bg-white rounded-lg">
-                      <QRCodeSVG
-                        value={tailscaleFrontendUrl}
-                        size={200}
-                        level="M"
-                        includeMargin
-                      />
+                      <QRCodeSVG value={tailscaleFrontendUrl} size={200} level="M" includeMargin />
                     </div>
                   )}
                 </div>
