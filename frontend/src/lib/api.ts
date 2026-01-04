@@ -1,6 +1,27 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+// Detect if we're being accessed via Tailscale Magic DNS
+function getApiUrl(): string {
+  // On server-side, use the environment variable
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+  }
+
+  // On client-side, check if we're accessing via Tailscale
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol;
+
+  // If hostname ends with .ts.net, we're accessing via Tailscale
+  // Use the same hostname but with the backend port (4001)
+  // The backend is exposed on port 4001 via Docker port mapping
+  if (hostname.endsWith('.ts.net')) {
+    return `${protocol}//${hostname}:4001`;
+  }
+
+  // Otherwise, use the configured API URL
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+}
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const API_URL = getApiUrl();
   const url = `${API_URL}${endpoint}`;
 
   const response = await fetch(url, {
@@ -249,9 +270,11 @@ export async function exportPayments(from?: number, to?: number): Promise<string
   if (to !== undefined) queryParams.append('to', String(to));
   const query = queryParams.toString();
 
-  const response = await fetch(`${API_URL}/api/phoenixd/export${query ? `?${query}` : ''}`, {
+  const apiUrl = getApiUrl();
+  const response = await fetch(`${apiUrl}/api/phoenixd/export${query ? `?${query}` : ''}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -447,4 +470,85 @@ export async function removeTorImage() {
   return request<{ success: boolean; message: string }>('/api/tor/image', {
     method: 'DELETE',
   });
+}
+
+// Tailscale
+export interface TailscaleStatus {
+  enabled: boolean;
+  running: boolean;
+  healthy: boolean;
+  containerExists: boolean;
+  imageExists: boolean;
+  dnsName: string | null;
+  hostname: string | null;
+  hasAuthKey: boolean;
+}
+
+export async function getTailscaleStatus(): Promise<TailscaleStatus> {
+  return request<TailscaleStatus>('/api/tailscale/status');
+}
+
+export async function saveTailscaleAuthKey(authKey: string, hostname?: string) {
+  return request<{ success: boolean; message: string }>('/api/tailscale/authkey', {
+    method: 'PUT',
+    body: JSON.stringify({ authKey, hostname }),
+  });
+}
+
+export async function removeTailscaleAuthKey() {
+  return request<{ success: boolean; message: string }>('/api/tailscale/authkey', {
+    method: 'DELETE',
+  });
+}
+
+export async function enableTailscale() {
+  return request<{ success: boolean; message: string; dnsName?: string }>('/api/tailscale/enable', {
+    method: 'POST',
+  });
+}
+
+export async function disableTailscale() {
+  return request<{ success: boolean; message: string }>('/api/tailscale/disable', {
+    method: 'POST',
+  });
+}
+
+export async function refreshTailscaleDns() {
+  return request<{ success: boolean; dnsName?: string }>('/api/tailscale/refresh-dns', {
+    method: 'POST',
+  });
+}
+
+export async function removeTailscaleImage() {
+  return request<{ success: boolean; message: string }>('/api/tailscale/image', {
+    method: 'DELETE',
+  });
+}
+
+// Config / Dynamic URLs
+export interface DynamicUrls {
+  apiUrl: string;
+  wsUrl: string;
+  tailscaleApiUrl: string | null;
+  tailscaleWsUrl: string | null;
+  tailscaleFrontendUrl: string | null;
+  tailscaleEnabled: boolean;
+  tailscaleHealthy: boolean;
+  tailscaleDnsName: string | null;
+}
+
+export async function getDynamicUrls(): Promise<DynamicUrls> {
+  return request<DynamicUrls>('/api/config/urls');
+}
+
+export async function detectAccessType(): Promise<{
+  isTailscaleAccess: boolean;
+  host: string;
+  tailscaleDnsName: string | null;
+}> {
+  return request<{
+    isTailscaleAccess: boolean;
+    host: string;
+    tailscaleDnsName: string | null;
+  }>('/api/config/detect-access');
 }

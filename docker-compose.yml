@@ -52,7 +52,7 @@ services:
     restart: unless-stopped
     networks:
       - phoenixd-network
-    # Run as root to access Docker socket (required for Tor container management)
+    # Run as root to access Docker socket (required for Tor/Tailscale container management)
     user: root
     environment:
       NODE_ENV: ${NODE_ENV:-development}
@@ -74,6 +74,7 @@ services:
       - ./data/phoenixd:/phoenix-data:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - ./services/tor:/tor-config:ro
+      - ./services/tailscale:/tailscale-config:ro
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s
@@ -126,6 +127,36 @@ services:
       retries: 3
       start_period: 60s
 
+  # Tailscale VPN - managed dynamically by backend for remote access
+  tailscale:
+    build:
+      context: ./services/tailscale
+      dockerfile: Dockerfile
+    container_name: phoenixd-tailscale
+    restart: unless-stopped
+    networks:
+      - phoenixd-network
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
+      TS_HOSTNAME: ${TS_HOSTNAME:-phoenixd-dashboard}
+    volumes:
+      - tailscale_data:/var/lib/tailscale
+    profiles:
+      - tailscale
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'tailscale status --json | jq -e ".Self.Online == true" || exit 1',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 networks:
   phoenixd-network:
     driver: bridge
@@ -133,3 +164,4 @@ networks:
 volumes:
   postgres_data:
   tor_data:
+  tailscale_data:

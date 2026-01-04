@@ -59,13 +59,17 @@ model NodeInfo {
 }
 
 model Settings {
-  id              String   @id @default("singleton")
-  passwordHash    String?  // bcrypt hash - null = no password required
-  autoLockMinutes Int      @default(0) // 0 = never auto-lock
-  lockScreenBg    String   @default("storm-clouds") // lightning, thunder-flash, storm-clouds, electric-storm, night-lightning, sky-thunder
-  torEnabled      Boolean  @default(false) // Tor SOCKS5 proxy enabled
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                 String   @id @default("singleton")
+  passwordHash       String?  // bcrypt hash - null = no password required
+  autoLockMinutes    Int      @default(0) // 0 = never auto-lock
+  lockScreenBg       String   @default("storm-clouds") // lightning, thunder-flash, storm-clouds, electric-storm, night-lightning, sky-thunder
+  torEnabled         Boolean  @default(false) // Tor SOCKS5 proxy enabled
+  tailscaleEnabled   Boolean  @default(false) // Tailscale VPN enabled
+  tailscaleAuthKey   String?  // Tailscale auth key (encrypted)
+  tailscaleHostname  String?  // Machine name for Magic DNS
+  tailscaleDnsName   String?  // Full Magic DNS name (e.g., phoenixd-dashboard.tailnet.ts.net)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Session {

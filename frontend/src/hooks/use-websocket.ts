@@ -17,6 +17,23 @@ interface UseWebSocketOptions {
   onDisconnect?: () => void;
 }
 
+// Get WebSocket URL dynamically based on access method
+function getWebSocketUrl(): string {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4001';
+  }
+
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+  // If accessing via Tailscale Magic DNS, use relative WebSocket URL
+  if (hostname.endsWith('.ts.net')) {
+    return `${protocol}//${hostname}`;
+  }
+
+  return process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4001';
+}
+
 export function useWebSocket(options: UseWebSocketOptions = {}) {
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
@@ -34,7 +51,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       }
 
       connectingRef.current = true;
-      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4001';
+      const wsUrl = getWebSocketUrl();
 
       try {
         const ws = new WebSocket(`${wsUrl}/ws`);

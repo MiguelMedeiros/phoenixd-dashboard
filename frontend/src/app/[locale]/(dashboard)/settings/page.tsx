@@ -30,7 +30,13 @@ import {
   Bell,
   BellOff,
   BellRing,
+  Wifi,
+  WifiOff,
+  QrCode,
+  ExternalLink,
+  RefreshCw,
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useNotifications } from '@/hooks/use-notifications';
 import {
   setupPassword,
@@ -41,9 +47,16 @@ import {
   getTorStatus,
   enableTor,
   disableTor,
+  getTailscaleStatus,
+  saveTailscaleAuthKey,
+  enableTailscale,
+  disableTailscale,
+  refreshTailscaleDns,
   type LockScreenBg,
   type TorStatus,
+  type TailscaleStatus,
 } from '@/lib/api';
+import { clearUrlCache } from '@/hooks/use-dynamic-urls';
 import { cn } from '@/lib/utils';
 import { useAuthContext } from '@/components/auth-provider';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
@@ -105,6 +118,17 @@ export default function SettingsPage() {
   const [torLoading, setTorLoading] = useState(false);
   const [torError, setTorError] = useState<string | null>(null);
 
+  // Tailscale state
+  const [tailscaleStatus, setTailscaleStatus] = useState<TailscaleStatus | null>(null);
+  const [tailscaleLoading, setTailscaleLoading] = useState(false);
+  const [tailscaleError, setTailscaleError] = useState<string | null>(null);
+  const [tailscaleAuthKey, setTailscaleAuthKey] = useState('');
+  const [tailscaleHostname, setTailscaleHostname] = useState('phoenixd-dashboard');
+  const [showTailscaleAuthKey, setShowTailscaleAuthKey] = useState(false);
+  const [tailscaleAuthKeySaved, setTailscaleAuthKeySaved] = useState(false);
+  const [showTailscaleQR, setShowTailscaleQR] = useState(false);
+  const { copied: tailscaleUrlCopied, copy: copyTailscaleUrl } = useCopyToClipboard();
+
   // Push notifications
   const {
     permission: notificationPermission,
@@ -127,6 +151,25 @@ export default function SettingsPage() {
       }
     };
     fetchTorStatus();
+  }, []);
+
+  // Fetch Tailscale status on mount
+  useEffect(() => {
+    const fetchTailscaleStatus = async () => {
+      try {
+        const status = await getTailscaleStatus();
+        setTailscaleStatus(status);
+        if (status.hasAuthKey) {
+          setTailscaleAuthKeySaved(true);
+        }
+        if (status.hostname) {
+          setTailscaleHostname(status.hostname);
+        }
+      } catch (err) {
+        console.error('Failed to fetch Tailscale status:', err);
+      }
+    };
+    fetchTailscaleStatus();
   }, []);
 
   useEffect(() => {
@@ -364,6 +407,107 @@ export default function SettingsPage() {
       setNotificationLoading(false);
     }
   };
+
+  const handleSaveTailscaleAuthKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tailscaleAuthKey.trim()) return;
+
+    setTailscaleLoading(true);
+    setTailscaleError(null);
+
+    try {
+      await saveTailscaleAuthKey(tailscaleAuthKey.trim(), tailscaleHostname);
+      setTailscaleAuthKeySaved(true);
+      setTailscaleAuthKey(''); // Clear the input for security
+      // Refresh status
+      const status = await getTailscaleStatus();
+      setTailscaleStatus(status);
+    } catch (err) {
+      setTailscaleError(err instanceof Error ? err.message : 'Failed to save auth key');
+    } finally {
+      setTailscaleLoading(false);
+    }
+  };
+
+  const handleTailscaleToggle = async () => {
+    setTailscaleLoading(true);
+    setTailscaleError(null);
+
+    try {
+      if (tailscaleStatus?.enabled) {
+        await disableTailscale();
+        setTailscaleStatus({
+          ...tailscaleStatus,
+          enabled: false,
+          running: false,
+          healthy: false,
+          containerExists: false,
+          dnsName: null,
+        });
+        clearUrlCache(); // Clear URL cache when Tailscale is disabled
+      } else {
+        await enableTailscale();
+        setTailscaleStatus({
+          ...(tailscaleStatus || {
+            imageExists: true,
+            hasAuthKey: true,
+            hostname: tailscaleHostname,
+          }),
+          enabled: true,
+          running: true,
+          healthy: false,
+          containerExists: true,
+          dnsName: null,
+        });
+        // Poll for healthy status and DNS name
+        const pollHealth = async () => {
+          for (let i = 0; i < 12; i++) {
+            await new Promise((r) => setTimeout(r, 5000));
+            const status = await getTailscaleStatus();
+            setTailscaleStatus(status);
+            if (status.healthy && status.dnsName) {
+              clearUrlCache(); // Clear URL cache when Tailscale is ready
+              break;
+            }
+          }
+        };
+        pollHealth();
+      }
+    } catch (err) {
+      setTailscaleError(err instanceof Error ? err.message : 'Failed to toggle Tailscale');
+      // Refresh status
+      try {
+        const status = await getTailscaleStatus();
+        setTailscaleStatus(status);
+      } catch {
+        // Ignore
+      }
+    } finally {
+      setTailscaleLoading(false);
+    }
+  };
+
+  const handleRefreshTailscaleDns = async () => {
+    setTailscaleLoading(true);
+    try {
+      const result = await refreshTailscaleDns();
+      if (result.dnsName) {
+        setTailscaleStatus((prev) =>
+          prev ? { ...prev, dnsName: result.dnsName || null } : null
+        );
+        clearUrlCache();
+      }
+    } catch (err) {
+      setTailscaleError(err instanceof Error ? err.message : 'Failed to refresh DNS');
+    } finally {
+      setTailscaleLoading(false);
+    }
+  };
+
+  // Tailscale Serve exposes frontend on HTTPS port 443 (no port needed in URL)
+  const tailscaleFrontendUrl = tailscaleStatus?.dnsName
+    ? `https://${tailscaleStatus.dnsName}`
+    : null;
 
   return (
     <div className="py-6 max-w-2xl mx-auto space-y-8">
@@ -1020,6 +1164,234 @@ export default function SettingsPage() {
           {/* Tor Info */}
           <div className="pt-4 border-t border-black/5 dark:border-white/5">
             <p className="text-xs text-muted-foreground">{t('torDescription')}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Remote Access Section - Tailscale */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <Wifi className="h-4 w-4" />
+          {t('remoteAccess')}
+        </h2>
+
+        <div className="glass-card rounded-xl p-5 space-y-4">
+          {/* Auth Key Configuration */}
+          {!tailscaleAuthKeySaved ? (
+            <form onSubmit={handleSaveTailscaleAuthKey} className="space-y-4">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-primary">{t('tailscaleSetup')}</p>
+                  <p className="text-muted-foreground mt-1">{t('tailscaleSetupDescription')}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type={showTailscaleAuthKey ? 'text' : 'password'}
+                    value={tailscaleAuthKey}
+                    onChange={(e) => setTailscaleAuthKey(e.target.value)}
+                    placeholder={t('tailscaleAuthKeyPlaceholder')}
+                    className="w-full px-4 py-2.5 pr-10 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
+                    autoComplete="off"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowTailscaleAuthKey(!showTailscaleAuthKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    {showTailscaleAuthKey ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+
+                <input
+                  type="text"
+                  value={tailscaleHostname}
+                  onChange={(e) => setTailscaleHostname(e.target.value)}
+                  placeholder={t('tailscaleHostnamePlaceholder')}
+                  className="w-full px-4 py-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={tailscaleLoading || !tailscaleAuthKey.trim()}
+                className={cn(
+                  'w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2',
+                  'bg-primary text-white hover:bg-primary/90',
+                  (tailscaleLoading || !tailscaleAuthKey.trim()) && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                {tailscaleLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {t('saveAuthKey')}
+              </button>
+
+              <a
+                href="https://login.tailscale.com/admin/settings/keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 text-sm text-primary hover:underline"
+              >
+                <ExternalLink className="h-4 w-4" />
+                {t('getTailscaleAuthKey')}
+              </a>
+            </form>
+          ) : (
+            <>
+              {/* Tailscale Status */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      'h-10 w-10 rounded-lg flex items-center justify-center',
+                      tailscaleStatus?.enabled && tailscaleStatus?.healthy
+                        ? 'bg-success/10'
+                        : tailscaleStatus?.enabled && tailscaleStatus?.running
+                          ? 'bg-warning/10'
+                          : 'bg-muted'
+                    )}
+                  >
+                    {tailscaleStatus?.enabled ? (
+                      <Wifi
+                        className={cn(
+                          'h-5 w-5',
+                          tailscaleStatus?.healthy
+                            ? 'text-success'
+                            : tailscaleStatus?.running
+                              ? 'text-warning animate-pulse'
+                              : 'text-muted-foreground'
+                        )}
+                      />
+                    ) : (
+                      <WifiOff className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{t('tailscaleVpn')}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {tailscaleStatus?.enabled
+                        ? tailscaleStatus?.healthy
+                          ? t('connectedTailscale')
+                          : tailscaleStatus?.running
+                            ? t('connectingTailscale')
+                            : t('startingTailscale')
+                        : t('disabledTailscale')}
+                    </p>
+                    {tailscaleStatus?.enabled && tailscaleStatus?.healthy && (
+                      <p className="text-xs text-success/80 mt-1 flex items-center gap-1">
+                        <Shield className="h-3 w-3" />
+                        {t('remoteAccessEnabled')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={handleTailscaleToggle}
+                  disabled={tailscaleLoading}
+                  className={cn(
+                    'px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 flex-shrink-0',
+                    tailscaleStatus?.enabled
+                      ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+                      : 'bg-primary/10 text-primary hover:bg-primary/20',
+                    tailscaleLoading && 'opacity-50 cursor-not-allowed'
+                  )}
+                >
+                  {tailscaleLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {tailscaleStatus?.enabled ? t('disable') : t('enable')}
+                </button>
+              </div>
+
+              {/* Magic DNS URL and QR Code */}
+              {tailscaleStatus?.enabled && tailscaleStatus?.healthy && tailscaleFrontendUrl && (
+                <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{t('magicDnsUrl')}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t('scanQrToAccess')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleRefreshTailscaleDns}
+                      disabled={tailscaleLoading}
+                      className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                      title={t('refreshDns')}
+                    >
+                      <RefreshCw
+                        className={cn('h-4 w-4', tailscaleLoading && 'animate-spin')}
+                      />
+                    </button>
+                  </div>
+
+                  {/* URL Display */}
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-black/5 dark:bg-white/5">
+                    <code className="flex-1 text-sm font-mono truncate">
+                      {tailscaleFrontendUrl}
+                    </code>
+                    <button
+                      onClick={() => copyTailscaleUrl(tailscaleFrontendUrl)}
+                      className="p-2 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                    >
+                      {tailscaleUrlCopied ? (
+                        <Check className="h-4 w-4 text-success" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+
+                  {/* QR Code Toggle */}
+                  <button
+                    onClick={() => setShowTailscaleQR(!showTailscaleQR)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                  >
+                    <QrCode className="h-4 w-4" />
+                    {showTailscaleQR ? t('hideQrCode') : t('showQrCode')}
+                  </button>
+
+                  {/* QR Code */}
+                  {showTailscaleQR && (
+                    <div className="flex justify-center p-4 bg-white rounded-lg">
+                      <QRCodeSVG
+                        value={tailscaleFrontendUrl}
+                        size={200}
+                        level="M"
+                        includeMargin
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Tailscale Error */}
+              {tailscaleError && (
+                <div className="flex items-center gap-2 text-sm text-destructive p-3 rounded-lg bg-destructive/10">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  {tailscaleError}
+                </div>
+              )}
+
+              {/* Change Auth Key */}
+              <div className="pt-4 border-t border-black/5 dark:border-white/5">
+                <button
+                  onClick={() => setTailscaleAuthKeySaved(false)}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {t('changeAuthKey')}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Tailscale Info */}
+          <div className="pt-4 border-t border-black/5 dark:border-white/5">
+            <p className="text-xs text-muted-foreground">{t('tailscaleDescription')}</p>
           </div>
         </div>
       </section>

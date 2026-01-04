@@ -10,6 +10,8 @@ import { nodeRouter } from './routes/node.js';
 import { lnurlRouter } from './routes/lnurl.js';
 import { authRouter } from './routes/auth.js';
 import { torRouter } from './routes/tor.js';
+import { tailscaleRouter } from './routes/tailscale.js';
+import { configRouter } from './routes/config.js';
 import { PhoenixdService } from './services/phoenixd.js';
 import { cleanupExpiredSessions } from './middleware/auth.js';
 
@@ -20,10 +22,38 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 export const prisma = new PrismaClient();
 export const phoenixd = new PhoenixdService();
 
-// Middleware
+// CORS configuration - allow localhost and Tailscale domains
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+  'http://localhost:3000',
+  'http://localhost:4001',
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, etc)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Allow any Tailscale Magic DNS domain (.ts.net)
+      if (origin.includes('.ts.net')) {
+        return callback(null, true);
+      }
+
+      // Allow configured origins
+      if (allowedOrigins.some((allowed) => origin.startsWith(allowed.replace(/:\d+$/, '')))) {
+        return callback(null, true);
+      }
+
+      // Allow localhost with any port
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );
@@ -43,6 +73,8 @@ app.use('/api/payments', paymentsRouter);
 app.use('/api/node', nodeRouter);
 app.use('/api/lnurl', lnurlRouter);
 app.use('/api/tor', torRouter);
+app.use('/api/tailscale', tailscaleRouter);
+app.use('/api/config', configRouter);
 
 // WebSocket clients
 const clients = new Set<WebSocket>();

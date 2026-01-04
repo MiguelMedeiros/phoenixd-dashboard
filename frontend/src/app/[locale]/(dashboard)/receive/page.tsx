@@ -148,7 +148,21 @@ export default function ReceivePage() {
   useEffect(() => {
     if (!invoiceResult?.paymentHash) return;
 
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4001';
+    // Get WebSocket URL dynamically based on access method
+    const getWsUrl = () => {
+      if (typeof window === 'undefined') {
+        return process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4001';
+      }
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      // If accessing via Tailscale Magic DNS, use dynamic URL
+      if (hostname.endsWith('.ts.net')) {
+        return `${protocol}//${hostname}`;
+      }
+      return process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4001';
+    };
+
+    const wsUrl = getWsUrl();
     const ws = new WebSocket(`${wsUrl}/ws`);
     wsRef.current = ws;
 
