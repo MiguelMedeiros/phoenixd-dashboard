@@ -397,7 +397,12 @@
     "showQrCode": "显示二维码",
     "hideQrCode": "隐藏二维码",
     "changeAuthKey": "更改认证密钥",
-    "tailscaleDescription": "Tailscale创建安全的VPN连接，让您可以从任何地方访问此仪表板。在手机上安装Tailscale，扫描二维码，旅行时将您的仪表板用作移动钱包。"
+    "tailscaleDescription": "Tailscale创建安全的VPN连接，让您可以从任何地方访问此仪表板。在手机上安装Tailscale，扫描二维码，旅行时将您的仪表板用作移动钱包。",
+    "currency": "货币",
+    "displayCurrency": "显示货币",
+    "showingInSats": "以比特币（聪）显示数值",
+    "showingInFiat": "以{currency}显示数值",
+    "currencyDescription": "选择在整个仪表板中如何显示货币数值。BTC显示聪，而法定货币显示来自CoinGecko的实时转换数值。"
   },
   "nodeInfo": {
     "title": "节点信息",

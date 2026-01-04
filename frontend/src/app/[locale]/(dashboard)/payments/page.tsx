@@ -28,7 +28,8 @@ import {
   type IncomingPayment,
   type OutgoingPayment,
 } from '@/lib/api';
-import { formatSats, cn, getMempoolUrl } from '@/lib/utils';
+import { cn, getMempoolUrl } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
@@ -42,6 +43,7 @@ export default function PaymentsPage() {
   const tc = useTranslations('common');
   const tt = useTranslations('toast');
   const te = useTranslations('errors');
+  const { formatValue } = useCurrencyContext();
   const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing'>('incoming');
   const [incomingPayments, setIncomingPayments] = useState<IncomingPayment[]>([]);
   const [outgoingPayments, setOutgoingPayments] = useState<OutgoingPayment[]>([]);
@@ -188,7 +190,7 @@ export default function PaymentsPage() {
               <div className="min-w-0">
                 <p className="text-[10px] md:text-sm text-muted-foreground">{t('received')}</p>
                 <p className="text-sm md:text-2xl font-bold text-success mt-0.5 md:mt-1 truncate">
-                  {formatSats(totalReceived)}
+                  {formatValue(totalReceived)}
                 </p>
               </div>
               <div className="hidden md:flex h-12 w-12 rounded-xl bg-success/10 items-center justify-center group-hover:scale-110 transition-transform">
@@ -202,7 +204,7 @@ export default function PaymentsPage() {
               <div className="min-w-0">
                 <p className="text-[10px] md:text-sm text-muted-foreground">{t('sent')}</p>
                 <p className="text-sm md:text-2xl font-bold text-primary mt-0.5 md:mt-1 truncate">
-                  {formatSats(totalSent)}
+                  {formatValue(totalSent)}
                 </p>
               </div>
               <div className="hidden md:flex h-12 w-12 rounded-xl bg-primary/10 items-center justify-center group-hover:scale-110 transition-transform">
@@ -216,7 +218,7 @@ export default function PaymentsPage() {
               <div className="min-w-0">
                 <p className="text-[10px] md:text-sm text-muted-foreground">{t('fees')}</p>
                 <p className="text-sm md:text-2xl font-bold text-muted-foreground mt-0.5 md:mt-1 truncate">
-                  {formatSats(totalFees)}
+                  {formatValue(totalFees)}
                 </p>
               </div>
               <div className="hidden md:flex h-12 w-12 rounded-xl bg-white/5 items-center justify-center group-hover:scale-110 transition-transform">
@@ -300,7 +302,7 @@ export default function PaymentsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1">
                           <span className="font-bold text-sm md:text-lg text-success">
-                            +{formatSats(payment.receivedSat)}
+                            +{formatValue(payment.receivedSat)}
                           </span>
                           <span
                             className={cn(
@@ -354,7 +356,7 @@ export default function PaymentsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
                           <span className="font-bold text-sm md:text-lg">
-                            -{formatSats(payment.sent)}
+                            -{formatValue(payment.sent)}
                           </span>
                           <span
                             className={cn(
@@ -368,7 +370,7 @@ export default function PaymentsPage() {
                           </span>
                           {payment.fees > 0 && (
                             <span className="text-[10px] md:text-xs text-muted-foreground hidden sm:inline">
-                              {t('fee')}: {formatSats(Math.floor(payment.fees / 1000))}
+                              {t('fee')}: {formatValue(Math.floor(payment.fees / 1000))}
                             </span>
                           )}
                         </div>
@@ -423,14 +425,14 @@ export default function PaymentsPage() {
               <div className="text-center py-6 glass-card rounded-2xl bg-gradient-to-br from-white/[0.02] to-transparent">
                 {'receivedSat' in selectedPayment ? (
                   <p className="text-4xl font-bold text-success">
-                    +{formatSats(selectedPayment.receivedSat)}
+                    +{formatValue(selectedPayment.receivedSat)}
                   </p>
                 ) : (
-                  <p className="text-4xl font-bold">-{formatSats(selectedPayment.sent)}</p>
+                  <p className="text-4xl font-bold">-{formatValue(selectedPayment.sent)}</p>
                 )}
                 {'fees' in selectedPayment && selectedPayment.fees > 0 && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    {t('fee')}: {formatSats(Math.floor(selectedPayment.fees / 1000))}
+                    {t('fee')}: {formatValue(Math.floor(selectedPayment.fees / 1000))}
                   </p>
                 )}
               </div>

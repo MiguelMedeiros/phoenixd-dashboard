@@ -26,7 +26,8 @@ import {
   decodeInvoice,
 } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { cn, formatSats } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 import { useTranslations } from 'next-intl';
 import { QRScanner } from '@/components/qr-scanner';
@@ -35,6 +36,7 @@ import { useRouter } from '@/i18n/navigation';
 export default function SendPage() {
   const t = useTranslations('send');
   const ts = useTranslations('scanner');
+  const { formatValue } = useCurrencyContext();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer' | 'address' | 'onchain'>(
@@ -394,7 +396,7 @@ export default function SendPage() {
                         <span className="text-sm">{t('amount')}</span>
                       </div>
                       <span className="text-lg font-bold text-foreground">
-                        {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))} sats
+                        {formatValue(Math.floor(decodedInvoice.amountMsat / 1000))} sats
                       </span>
                     </div>
                   )}
@@ -457,7 +459,7 @@ export default function SendPage() {
                 ) : decodedInvoice && decodedInvoice.amountMsat ? (
                   <>
                     <Send className="h-5 w-5" /> {t('pay')}{' '}
-                    {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))} sats
+                    {formatValue(Math.floor(decodedInvoice.amountMsat / 1000))} sats
                   </>
                 ) : (
                   <>

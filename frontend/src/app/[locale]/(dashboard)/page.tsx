@@ -22,7 +22,8 @@ import {
   type IncomingPayment,
   type OutgoingPayment,
 } from '@/lib/api';
-import { formatSats, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { Link } from '@/i18n/navigation';
@@ -41,6 +42,7 @@ type RecentPayment = IncomingPayment | OutgoingPayment;
 export default function OverviewPage() {
   const t = useTranslations('overview');
   const tc = useTranslations('common');
+  const { formatValue } = useCurrencyContext();
   const [nodeInfo, setNodeInfo] = useState<NodeInfo | null>(null);
   const [balance, setBalance] = useState<{ balanceSat: number; feeCreditSat: number } | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -126,7 +128,7 @@ export default function OverviewPage() {
             </span>
             <div className="flex items-baseline justify-center gap-1.5 mt-1">
               <span className="text-4xl font-bold text-white tabular-nums">
-                {formatSats(balance?.balanceSat || 0)}
+                {formatValue(balance?.balanceSat || 0)}
               </span>
               <span className="text-base text-white/40">{tc('sats')}</span>
             </div>
@@ -192,7 +194,7 @@ export default function OverviewPage() {
                       )}
                     >
                       {isIncoming ? '+' : '-'}
-                      {formatSats(amount)}
+                      {formatValue(amount)}
                     </p>
                   </div>
                 );
@@ -223,7 +225,7 @@ export default function OverviewPage() {
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-bold text-white">
-                  {formatSats(balance?.balanceSat || 0)}
+                  {formatValue(balance?.balanceSat || 0)}
                 </span>
                 <span className="text-lg text-white/50">{tc('sats')}</span>
               </div>
@@ -265,7 +267,7 @@ export default function OverviewPage() {
           <div className="glass-card rounded-2xl p-4">
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-2xl font-bold truncate">{formatSats(totalCapacity)}</p>
+                <p className="text-2xl font-bold truncate">{formatValue(totalCapacity)}</p>
                 <p className="text-xs text-muted-foreground">{t('capacity')}</p>
               </div>
               <div className="h-9 w-9 rounded-xl bg-bitcoin/10 flex items-center justify-center flex-shrink-0">
@@ -278,7 +280,7 @@ export default function OverviewPage() {
             <div className="flex items-center justify-between">
               <div className="min-w-0">
                 <p className="text-2xl font-bold text-success truncate">
-                  {formatSats(totalInbound)}
+                  {formatValue(totalInbound)}
                 </p>
                 <p className="text-xs text-muted-foreground">{t('inbound')}</p>
               </div>
@@ -292,7 +294,7 @@ export default function OverviewPage() {
             <div className="flex items-center justify-between">
               <div className="min-w-0">
                 <p className="text-2xl font-bold value-highlight truncate">
-                  {formatSats(balance?.feeCreditSat || 0)}
+                  {formatValue(balance?.feeCreditSat || 0)}
                 </p>
                 <p className="text-xs text-muted-foreground">{t('feeCredit')}</p>
               </div>
@@ -471,7 +473,7 @@ export default function OverviewPage() {
                         )}
                       >
                         {isIncoming ? '+' : '-'}
-                        {formatSats(amount)}
+                        {formatValue(amount)}
                       </p>
                     </div>
                   );

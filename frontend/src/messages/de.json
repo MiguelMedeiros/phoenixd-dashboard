@@ -397,7 +397,12 @@
     "showQrCode": "QR-Code anzeigen",
     "hideQrCode": "QR-Code ausblenden",
     "changeAuthKey": "Auth-Key ändern",
-    "tailscaleDescription": "Tailscale erstellt eine sichere VPN-Verbindung, mit der Sie von überall auf dieses Dashboard zugreifen können. Installieren Sie Tailscale auf Ihrem Telefon, scannen Sie den QR-Code und nutzen Sie Ihr Dashboard als mobile Wallet auf Reisen."
+    "tailscaleDescription": "Tailscale erstellt eine sichere VPN-Verbindung, mit der Sie von überall auf dieses Dashboard zugreifen können. Installieren Sie Tailscale auf Ihrem Telefon, scannen Sie den QR-Code und nutzen Sie Ihr Dashboard als mobile Wallet auf Reisen.",
+    "currency": "Währung",
+    "displayCurrency": "Anzeigewährung",
+    "showingInSats": "Werte werden in Bitcoin (sats) angezeigt",
+    "showingInFiat": "Werte werden in {currency} angezeigt",
+    "currencyDescription": "Wählen Sie, wie Geldwerte im gesamten Dashboard angezeigt werden. BTC zeigt Satoshis, während Fiat-Währungen in Echtzeit umgerechnete Werte von CoinGecko anzeigen."
   },
   "nodeInfo": {
     "title": "Node-Informationen",

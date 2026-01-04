@@ -18,6 +18,51 @@ export function formatSats(sats: number): string {
   return `${sats} sats`;
 }
 
+/**
+ * Formats satoshis to fiat currency value
+ * @param sats - Amount in satoshis
+ * @param btcPrice - BTC price in the target fiat currency
+ * @param currency - Currency code (USD, EUR, BRL, etc.)
+ * @param locale - Locale for number formatting (default: en-US)
+ * @returns Formatted fiat string (e.g., "$10.50")
+ */
+export function formatFiat(
+  sats: number,
+  btcPrice: number,
+  currency: string,
+  locale: string = 'en-US'
+): string {
+  const btcAmount = sats / 100_000_000;
+  const fiatValue = btcAmount * btcPrice;
+
+  // Handle very small values
+  if (fiatValue < 0.01 && fiatValue > 0) {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4,
+    }).format(fiatValue);
+  }
+
+  // Handle JPY which doesn't use decimals
+  if (currency === 'JPY') {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(fiatValue);
+  }
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(fiatValue);
+}
+
 export function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString();
 }

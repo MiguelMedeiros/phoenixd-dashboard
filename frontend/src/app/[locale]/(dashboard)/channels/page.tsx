@@ -11,7 +11,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import { listChannels, closeChannel, getNodeInfo, type Channel } from '@/lib/api';
-import { formatSats, cn, getMempoolUrl } from '@/lib/utils';
+import { cn, getMempoolUrl } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { useToast } from '@/hooks/use-toast';
 import { CloseChannelDialog } from '@/components/close-channel-dialog';
 import { useTranslations } from 'next-intl';
@@ -20,6 +21,7 @@ export default function ChannelsPage() {
   const t = useTranslations('channels');
   const tc = useTranslations('common');
   const te = useTranslations('errors');
+  const { formatValue } = useCurrencyContext();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
   const [closingChannel, setClosingChannel] = useState<string | null>(null);
@@ -123,7 +125,7 @@ export default function ChannelsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <div className="metric-card">
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold">{formatSats(totalCapacity)}</span>
+            <span className="text-3xl font-bold">{formatValue(totalCapacity)}</span>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
               <Layers className="h-5 w-5 text-primary" />
             </div>
@@ -133,7 +135,7 @@ export default function ChannelsPage() {
 
         <div className="metric-card">
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold value-highlight">{formatSats(totalBalance)}</span>
+            <span className="text-3xl font-bold value-highlight">{formatValue(totalBalance)}</span>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-lightning/10">
               <ArrowUpFromLine className="h-5 w-5 text-lightning" />
             </div>
@@ -143,7 +145,7 @@ export default function ChannelsPage() {
 
         <div className="metric-card">
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold text-success">{formatSats(totalInbound)}</span>
+            <span className="text-3xl font-bold text-success">{formatValue(totalInbound)}</span>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
               <ArrowDownToLine className="h-5 w-5 text-success" />
             </div>
@@ -205,12 +207,12 @@ export default function ChannelsPage() {
                       <div className="h-2 w-2 rounded-full bg-lightning" />
                       <span className="text-muted-foreground">{t('outbound')}</span>
                       <span className="font-mono font-semibold">
-                        {formatSats(channel.balanceSat)}
+                        {formatValue(channel.balanceSat)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-semibold">
-                        {formatSats(channel.inboundLiquiditySat)}
+                        {formatValue(channel.inboundLiquiditySat)}
                       </span>
                       <span className="text-muted-foreground">{t('inbound')}</span>
                       <div className="h-2 w-2 rounded-full bg-success" />
@@ -223,7 +225,7 @@ export default function ChannelsPage() {
                     />
                   </div>
                   <p className="text-center text-sm text-muted-foreground">
-                    {t('total')}: {formatSats(channel.capacitySat)}
+                    {t('total')}: {formatValue(channel.capacitySat)}
                   </p>
                 </div>
 

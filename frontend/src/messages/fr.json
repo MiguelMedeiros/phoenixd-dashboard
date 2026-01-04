@@ -397,7 +397,12 @@
     "showQrCode": "Afficher le Code QR",
     "hideQrCode": "Masquer le Code QR",
     "changeAuthKey": "Modifier la clé d'auth",
-    "tailscaleDescription": "Tailscale crée une connexion VPN sécurisée qui vous permet d'accéder à ce tableau de bord de n'importe où. Installez Tailscale sur votre téléphone, scannez le code QR et utilisez votre tableau de bord comme portefeuille mobile en voyage."
+    "tailscaleDescription": "Tailscale crée une connexion VPN sécurisée qui vous permet d'accéder à ce tableau de bord de n'importe où. Installez Tailscale sur votre téléphone, scannez le code QR et utilisez votre tableau de bord comme portefeuille mobile en voyage.",
+    "currency": "Devise",
+    "displayCurrency": "Devise d'affichage",
+    "showingInSats": "Affichage des valeurs en Bitcoin (sats)",
+    "showingInFiat": "Affichage des valeurs en {currency}",
+    "currencyDescription": "Choisissez comment afficher les valeurs monétaires dans tout le tableau de bord. BTC affiche les satoshis, tandis que les devises fiat affichent les valeurs converties en temps réel depuis CoinGecko."
   },
   "nodeInfo": {
     "title": "Informations du Nœud",

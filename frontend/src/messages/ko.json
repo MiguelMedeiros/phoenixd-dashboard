@@ -397,7 +397,12 @@
     "showQrCode": "QR 코드 표시",
     "hideQrCode": "QR 코드 숨기기",
     "changeAuthKey": "인증 키 변경",
-    "tailscaleDescription": "Tailscale은 어디서나 이 대시보드에 접속할 수 있는 안전한 VPN 연결을 생성합니다. 휴대폰에 Tailscale을 설치하고, QR 코드를 스캔하여 여행 중에 대시보드를 모바일 지갑으로 사용하세요."
+    "tailscaleDescription": "Tailscale은 어디서나 이 대시보드에 접속할 수 있는 안전한 VPN 연결을 생성합니다. 휴대폰에 Tailscale을 설치하고, QR 코드를 스캔하여 여행 중에 대시보드를 모바일 지갑으로 사용하세요.",
+    "currency": "통화",
+    "displayCurrency": "표시 통화",
+    "showingInSats": "비트코인(sats)으로 값 표시",
+    "showingInFiat": "{currency}로 값 표시",
+    "currencyDescription": "대시보드 전체에서 금액을 어떻게 표시할지 선택하세요. BTC는 사토시를 표시하고, 법정 통화는 CoinGecko에서 실시간 변환된 값을 표시합니다."
   },
   "nodeInfo": {
     "title": "노드 정보",

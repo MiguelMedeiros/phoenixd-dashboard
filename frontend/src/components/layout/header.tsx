@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { getBalance } from '@/lib/api';
 import { useAuthContext } from '@/components/auth-provider';
-import { formatSats } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { cn } from '@/lib/utils';
 import { SearchDialog } from '@/components/search-dialog';
 import { NotificationsPopover, type Notification } from '@/components/notifications-popover';
@@ -72,6 +72,7 @@ export function Header({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { hasPassword, lock } = useAuthContext();
+  const { formatValue } = useCurrencyContext();
 
   const displayTitle = title || t('dashboard');
 
@@ -279,7 +280,7 @@ export function Header({
                   balanceAnimating && 'scale-110'
                 )}
               >
-                {formatSats(balance.balanceSat)}
+                {formatValue(balance.balanceSat)}
               </span>
 
               {/* Refresh - Hidden on mobile */}

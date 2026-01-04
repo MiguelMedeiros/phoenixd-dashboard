@@ -35,6 +35,7 @@ import {
   QrCode,
   ExternalLink,
   RefreshCw,
+  DollarSign,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNotifications } from '@/hooks/use-notifications';
@@ -59,6 +60,7 @@ import {
 import { clearUrlCache } from '@/hooks/use-dynamic-urls';
 import { cn } from '@/lib/utils';
 import { useAuthContext } from '@/components/auth-provider';
+import { useCurrencyContext, FIAT_CURRENCIES } from '@/components/currency-provider';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useTranslations } from 'next-intl';
 
@@ -89,6 +91,9 @@ export default function SettingsPage() {
   // Auth context
   const { hasPassword, autoLockMinutes, lockScreenBg, logout, lock, refreshStatus } =
     useAuthContext();
+
+  // Currency context
+  const { currency, setCurrency, loading: currencyLoading } = useCurrencyContext();
 
   // Password form state
   const [showPasswordSection, setShowPasswordSection] = useState(false);
@@ -1381,6 +1386,60 @@ export default function SettingsPage() {
           {/* Tailscale Info */}
           <div className="pt-4 border-t border-black/5 dark:border-white/5">
             <p className="text-xs text-muted-foreground">{t('tailscaleDescription')}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Currency Section */}
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <DollarSign className="h-4 w-4" />
+          {t('currency')}
+        </h2>
+
+        <div className="glass-card rounded-xl p-5 space-y-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className={cn(
+                'h-10 w-10 rounded-lg flex items-center justify-center',
+                currency !== 'BTC' ? 'bg-primary/10' : 'bg-bitcoin/10'
+              )}
+            >
+              {currency === 'BTC' ? (
+                <Zap className="h-5 w-5 text-bitcoin" />
+              ) : (
+                <DollarSign className="h-5 w-5 text-primary" />
+              )}
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">{t('displayCurrency')}</p>
+              <p className="text-sm text-muted-foreground">
+                {currency === 'BTC' ? t('showingInSats') : t('showingInFiat', { currency })}
+              </p>
+            </div>
+            {currencyLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            {FIAT_CURRENCIES.map((curr) => (
+              <button
+                key={curr.code}
+                onClick={() => setCurrency(curr.code)}
+                className={cn(
+                  'flex flex-col items-center gap-1 p-3 rounded-xl border transition-all',
+                  currency === curr.code
+                    ? 'bg-primary/10 border-primary/50 text-primary'
+                    : 'bg-black/[0.02] dark:bg-white/[0.02] border-black/[0.08] dark:border-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-muted-foreground'
+                )}
+              >
+                <span className="text-lg font-bold">{curr.symbol}</span>
+                <span className="text-xs font-medium">{curr.code}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-4 border-t border-black/5 dark:border-white/5">
+            <p className="text-xs text-muted-foreground">{t('currencyDescription')}</p>
           </div>
         </div>
       </section>

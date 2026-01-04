@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 import { Header } from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/components/auth-provider';
+import { CurrencyProvider, useCurrencyContext } from '@/components/currency-provider';
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { useWebSocket } from '@/hooks/use-websocket';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +14,6 @@ import {
   formatSatsForNotification,
   playNotificationSound,
 } from '@/hooks/use-notifications';
-import { formatSats } from '@/lib/utils';
 import { useCallback, useRef, useState } from 'react';
 import { type Notification } from '@/components/notifications-popover';
 import { useTranslations } from 'next-intl';
@@ -65,6 +65,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const t = useTranslations('notifications');
   const tt = useTranslations('toast');
+  const { formatValue } = useCurrencyContext();
   const balanceRefreshRef = useRef<(() => void) | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -109,7 +110,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       // Show toast
       toast({
         title: `⚡ ${tt('paymentReceived')}`,
-        description: `${formatSats(amount)} ${tt('received')}${
+        description: `${formatValue(amount)} ${tt('received')}${
           event.payerNote ? ` - "${event.payerNote}"` : ''
         }`,
         variant: 'default',
@@ -199,7 +200,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <DashboardContent>{children}</DashboardContent>
+      <CurrencyProvider>
+        <DashboardContent>{children}</DashboardContent>
+      </CurrencyProvider>
     </AuthProvider>
   );
 }
