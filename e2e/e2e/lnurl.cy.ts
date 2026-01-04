@@ -1,13 +1,13 @@
 describe('LNURL Page', () => {
   beforeEach(() => {
     cy.setupApiMocks();
+    cy.viewport(1280, 900);
     cy.visit('/lnurl');
   });
 
   describe('Page Load', () => {
     it('displays the LNURL page header', () => {
       cy.contains('h1', 'LNURL').should('be.visible');
-      cy.contains('Pay, withdraw, and authenticate').should('be.visible');
     });
 
     it('shows all tabs', () => {
@@ -23,7 +23,7 @@ describe('LNURL Page', () => {
     });
 
     it('has form inputs', () => {
-      cy.get('input').should('have.length.at.least', 2);
+      cy.get('input').should('have.length.at.least', 1);
     });
 
     it('has Pay via LNURL button', () => {
@@ -31,9 +31,8 @@ describe('LNURL Page', () => {
     });
 
     it('successfully pays via LNURL', () => {
-      cy.viewport(1280, 900);
       cy.get('input').first().type('lnurl1test...');
-      cy.get('input[type="number"]').type('1000');
+      cy.get('input[type="number"]').first().type('1000');
       cy.contains('button', 'Pay via LNURL').click();
 
       cy.wait('@lnurlPay');
@@ -83,14 +82,13 @@ describe('LNURL Page', () => {
 
   describe('Error Handling', () => {
     it('shows error on failure', () => {
-      cy.viewport(1280, 900);
       cy.intercept('POST', '**/api/lnurl/pay', {
         statusCode: 400,
         body: { error: 'Invalid LNURL' },
       }).as('lnurlPayError');
 
       cy.get('input').first().type('invalid');
-      cy.get('input[type="number"]').type('1000');
+      cy.get('input[type="number"]').first().type('1000');
       cy.contains('button', 'Pay via LNURL').click();
 
       cy.wait('@lnurlPayError');

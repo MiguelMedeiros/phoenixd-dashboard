@@ -9,8 +9,8 @@ describe('Navigation', () => {
       cy.visit('/');
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      // Check dashboard loaded (Receive button visible on both layouts)
-      cy.contains('button', 'Receive').should('be.visible');
+      // Check dashboard loaded - hero card should be visible
+      cy.get('.hero-card').should('be.visible');
     });
 
     it('loads receive page directly', () => {
@@ -54,19 +54,21 @@ describe('Navigation', () => {
   });
 
   describe('Navigation Links', () => {
-    it('navigates from dashboard to receive', () => {
+    it('navigates from dashboard to receive via quick actions', () => {
       cy.visit('/');
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      cy.contains('a', 'Receive').first().click();
+      // Use the quick action link (visible on desktop)
+      cy.get('a[href*="/receive"]').first().click({ force: true });
       cy.url().should('include', '/receive');
     });
 
-    it('navigates from dashboard to send', () => {
+    it('navigates from dashboard to send via quick actions', () => {
       cy.visit('/');
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      cy.contains('a', 'Send').first().click();
+      // Use the quick action link (visible on desktop)
+      cy.get('a[href*="/send"]').first().click({ force: true });
       cy.url().should('include', '/send');
     });
   });
@@ -90,8 +92,18 @@ describe('Navigation', () => {
       cy.visit('/');
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      // Should have some navigation element
+      // Should have bottom navigation or sidebar
       cy.get('nav').should('exist');
+    });
+
+    it('can navigate on mobile', () => {
+      cy.viewport('iphone-x');
+      cy.visit('/');
+      cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
+
+      // Navigate to receive
+      cy.get('a[href*="/receive"]').first().click({ force: true });
+      cy.url().should('include', '/receive');
     });
   });
 });

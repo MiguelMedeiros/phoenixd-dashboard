@@ -144,3 +144,49 @@ cd frontend && npm run build
 ```
 
 Build will fail if any translation key is missing in a locale.
+
+---
+
+## E2E Tests (Cypress) Structure
+
+**CRITICAL**: The Cypress E2E tests are located ONLY in the `/e2e` folder at the project root.
+
+### Correct Structure
+
+```
+phoenixd-dashboard/
+├── e2e/                    ← All Cypress tests go here
+│   ├── e2e/               ← Test spec files
+│   │   ├── auth.cy.ts
+│   │   ├── channels.cy.ts
+│   │   ├── dashboard.cy.ts
+│   │   ├── lnurl.cy.ts
+│   │   ├── navigation.cy.ts
+│   │   ├── payments.cy.ts
+│   │   ├── receive.cy.ts
+│   │   ├── send.cy.ts
+│   │   └── tools.cy.ts
+│   ├── fixtures/          ← Mock data
+│   ├── support/           ← Commands and setup
+│   ├── cypress.config.ts
+│   └── package.json
+├── frontend/               ← NO cypress folder here!
+└── backend/
+```
+
+### Rules
+
+1. **NEVER create a `frontend/cypress` folder** - all E2E tests live in `/e2e`
+2. **NEVER duplicate test files** between `/e2e` and any other location
+3. To run E2E tests: `npm run test:e2e` from project root or `npm test` from `/e2e`
+4. The frontend dev server must be running on `localhost:3000` for E2E tests
+
+### Running E2E Tests
+
+```bash
+# From project root
+npm run test:e2e
+
+# Or from e2e folder
+cd e2e && npm test
+```

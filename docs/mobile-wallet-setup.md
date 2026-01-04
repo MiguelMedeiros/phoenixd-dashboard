@@ -25,34 +25,38 @@ Transform your Phoenixd Dashboard into a **fully self-hosted mobile Lightning wa
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Your Home/Server                          │
-│  ┌─────────────┐   ┌─────────────┐   ┌─────────────────────────┐│
-│  │  Phoenixd   │───│   Backend   │───│       Frontend          ││
-│  │  Lightning  │   │   Express   │   │   Next.js (PWA)         ││
-│  │    Node     │   │   :4001     │   │       :3000             ││
-│  └─────────────┘   └─────────────┘   └─────────────────────────┘│
-│                            │                    │                │
-│                    ┌───────┴────────────────────┴───────┐       │
-│                    │          Tailscale Container        │       │
-│                    │    Magic DNS: your-node.ts.net      │       │
-│                    └────────────────┬────────────────────┘       │
-└─────────────────────────────────────┼───────────────────────────┘
-                                      │
-                         Encrypted Tailscale Tunnel
-                                      │
-                    ┌─────────────────┴─────────────────┐
-                    │       Your Phone (Anywhere)        │
-                    │  ┌─────────────────────────────┐  │
-                    │  │   Tailscale App (VPN)       │  │
-                    │  └──────────────┬──────────────┘  │
-                    │                 │                  │
-                    │  ┌──────────────┴──────────────┐  │
-                    │  │   Phoenixd Dashboard PWA    │  │
-                    │  │   (Installed as Native App) │  │
-                    │  └─────────────────────────────┘  │
-                    └───────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph server["🏠 Your Home/Server"]
+        direction LR
+        phoenixd["⚡ Phoenixd<br/>Lightning Node"]
+        backend["🔧 Backend<br/>Express :4001"]
+        frontend["🌐 Frontend<br/>Next.js :3000"]
+        phoenixd --> backend --> frontend
+    end
+
+    subgraph tailscale_server["🔗 Tailscale Container"]
+        dns["Magic DNS<br/>your-node.ts.net"]
+    end
+
+    subgraph phone["📱 Your Phone (Anywhere)"]
+        tailscale_app["📡 Tailscale App<br/>(VPN)"]
+        pwa["⚡ Phoenixd Dashboard PWA<br/>(Installed as Native App)"]
+        tailscale_app --> pwa
+    end
+
+    frontend --> tailscale_server
+    tailscale_server <-->|"🔒 Encrypted Tunnel"| phone
+
+    style server fill:#1a1a2e,stroke:#16213e,color:#fff
+    style tailscale_server fill:#0f3460,stroke:#16213e,color:#fff
+    style phone fill:#1a1a2e,stroke:#16213e,color:#fff
+    style phoenixd fill:#f59e0b,stroke:#d97706,color:#000
+    style backend fill:#3b82f6,stroke:#2563eb,color:#fff
+    style frontend fill:#10b981,stroke:#059669,color:#fff
+    style dns fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style tailscale_app fill:#06b6d4,stroke:#0891b2,color:#000
+    style pwa fill:#f59e0b,stroke:#d97706,color:#000
 ```
 
 ---
