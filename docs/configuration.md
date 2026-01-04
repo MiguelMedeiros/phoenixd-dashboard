@@ -8,15 +8,15 @@ Copy `.env.example` to `.env` and adjust as needed:
 cp .env.example .env
 ```
 
-| Variable            | Description                                        | Default               |
-| ------------------- | -------------------------------------------------- | --------------------- |
-| `PHOENIXD_CHAIN`    | Network: empty for mainnet, `testnet` for testnet  | _(empty = mainnet)_   |
-| `PHOENIXD_PASSWORD` | API password from phoenix.conf                     | _(auto-read)_         |
-| `POSTGRES_USER`     | PostgreSQL username                                | `phoenixd`            |
-| `POSTGRES_PASSWORD` | PostgreSQL password                                | `phoenixd_secret`     |
-| `POSTGRES_DB`       | PostgreSQL database name                           | `phoenixd_dashboard`  |
-| `TS_AUTHKEY`        | Tailscale auth key (managed via Settings UI)       | _(set in dashboard)_  |
-| `TS_HOSTNAME`       | Tailscale machine hostname for Magic DNS           | `phoenixd-dashboard`  |
+| Variable            | Description                                       | Default              |
+| ------------------- | ------------------------------------------------- | -------------------- |
+| `PHOENIXD_CHAIN`    | Network: empty for mainnet, `testnet` for testnet | _(empty = mainnet)_  |
+| `PHOENIXD_PASSWORD` | API password from phoenix.conf                    | _(auto-read)_        |
+| `POSTGRES_USER`     | PostgreSQL username                               | `phoenixd`           |
+| `POSTGRES_PASSWORD` | PostgreSQL password                               | `phoenixd_secret`    |
+| `POSTGRES_DB`       | PostgreSQL database name                          | `phoenixd_dashboard` |
+| `TS_AUTHKEY`        | Tailscale auth key (managed via Settings UI)      | _(set in dashboard)_ |
+| `TS_HOSTNAME`       | Tailscale machine hostname for Magic DNS          | `phoenixd-dashboard` |
 
 ---
 
