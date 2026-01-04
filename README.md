@@ -27,12 +27,19 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 ## Features
 
 ✓ **Receive** · Bolt11 invoices, Bolt12 offers, Lightning Address, QR codes
+
 ✓ **Send** · Pay invoices, offers, LN addresses, on-chain transactions
+
 ✓ **Dashboard** · Real-time balance, channels, payment activity chart
+
 ✓ **History** · Full payment history with filters & CSV export
+
 ✓ **Tools** · Decode invoices, estimate liquidity fees, LNURL support
+
 ✓ **PWA** · Install as native app — no app store required!
+
 ✓ **Remote** · Access from anywhere via Tailscale VPN
+
 ✓ **Tor** · Optional hidden service for maximum privacy
 
 ---
