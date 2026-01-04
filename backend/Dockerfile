@@ -1,7 +1,7 @@
 FROM node:20-alpine AS base
 
-# Install netcat for health checks
-RUN apk add --no-cache netcat-openbsd
+# Install netcat and curl for health checks
+RUN apk add --no-cache netcat-openbsd curl
 
 # Install dependencies only when needed
 FROM base AS deps
