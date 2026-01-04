@@ -18,6 +18,7 @@ interface UseWebSocketOptions {
 }
 
 // Get WebSocket URL dynamically based on access method
+// This enables WebSocket to work from any hostname without configuration
 function getWebSocketUrl(): string {
   if (typeof window === 'undefined') {
     return process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4001';
@@ -25,13 +26,34 @@ function getWebSocketUrl(): string {
 
   const hostname = window.location.hostname;
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const configuredUrl = process.env.NEXT_PUBLIC_WS_URL;
 
-  // If accessing via Tailscale Magic DNS, use relative WebSocket URL
-  if (hostname.endsWith('.ts.net')) {
-    return `${protocol}//${hostname}`;
+  // If a custom WebSocket URL is explicitly configured (not the default localhost),
+  // respect that configuration
+  if (configuredUrl && !configuredUrl.includes('localhost:4001')) {
+    return configuredUrl;
   }
 
-  return process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4001';
+  // Auto-detect WebSocket URL based on current hostname
+  // This allows WebSocket to work when accessed via:
+  // - localhost (development)
+  // - Local IP (e.g., 192.168.1.100)
+  // - Tailscale Magic DNS (*.ts.net)
+  // - Custom domain
+
+  // For Tailscale, use the hostname with port 4001
+  if (hostname.endsWith('.ts.net')) {
+    return `${protocol}//${hostname}:4001`;
+  }
+
+  // For localhost, use the default port mapping
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'ws://localhost:4001';
+  }
+
+  // For any other hostname (IP address, domain, etc.),
+  // auto-detect using the same hostname with backend port
+  return `${protocol}//${hostname}:4001`;
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
