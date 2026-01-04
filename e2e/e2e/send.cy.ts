@@ -55,27 +55,31 @@ describe('Send Page', () => {
 
   describe('LN Address Tab', () => {
     it('switches to LN Address tab', () => {
-      // Find tab by looking for third button in tabs (Address tab)
-      cy.get('.glass-card button').eq(2).click();
+      // Click the LN Address tab by text content
+      cy.contains('button', 'LN Address').click();
       // Should show form with input fields
       cy.get('form input').should('have.length.at.least', 2);
     });
 
     it('has address input and amount input', () => {
-      cy.get('.glass-card button').eq(2).click();
+      cy.contains('button', 'LN Address').click();
       // Has input fields for address and amount
       cy.get('form input').should('have.length.at.least', 2);
     });
 
     it('successfully pays to LN Address', () => {
-      cy.get('.glass-card button').eq(2).click();
+      cy.contains('button', 'LN Address').click();
       
-      // Fill in address
-      cy.get('form input').first().type('test@example.com');
-      // Fill in amount (inputmode numeric)
-      cy.get('form input[inputmode="numeric"]').first().type('1000');
+      // Wait for the form to appear
+      cy.get('form').should('be.visible');
       
-      cy.contains('button', /pay/i).click();
+      // Fill in address (first non-numeric input)
+      cy.get('form input').first().clear().type('test@example.com');
+      // Fill in amount (first inputmode numeric)
+      cy.get('form input[inputmode="numeric"]').first().clear().type('1000');
+      
+      // Submit the form by clicking the submit button
+      cy.get('form button[type="submit"]').click();
       cy.wait('@payLnAddress');
       cy.contains(/success|paid/i).should('exist');
     });

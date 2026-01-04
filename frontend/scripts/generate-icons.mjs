@@ -17,7 +17,7 @@ const __dirname = path.dirname(__filename);
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 
-// SVG content for the icon (scaled to 512x512 base)
+// SVG content for the icon (scaled to 512x512 base) with rounded rectangle
 const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -30,11 +30,11 @@ const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512
     </linearGradient>
   </defs>
   
-  <!-- Background circle -->
-  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)"/>
+  <!-- Background rounded rectangle -->
+  <rect x="16" y="16" width="480" height="480" rx="112" ry="112" fill="url(#bgGradient)"/>
   
   <!-- Inner glow -->
-  <circle cx="256" cy="256" r="208" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/>
+  <rect x="48" y="48" width="416" height="416" rx="80" ry="80" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/>
   
   <!-- Lightning bolt -->
   <path d="M290.08 119.52L179.2 264.48H241.12L206.88 392.48L332.8 230.4H264.48L290.08 119.52Z" fill="url(#boltGradient)"/>

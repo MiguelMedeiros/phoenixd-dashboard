@@ -157,7 +157,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <div className="premium-bg flex h-screen overflow-hidden pt-safe">
+    <div className="premium-bg flex h-screen min-w-[320px] overflow-hidden pt-safe">
       {/* PWA: Status bar fill for Dynamic Island/Notch - matches background */}
       <div className="status-bar-fill" />
 

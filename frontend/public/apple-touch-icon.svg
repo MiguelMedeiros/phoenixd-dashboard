@@ -10,11 +10,11 @@
     </linearGradient>
   </defs>
   
-  <!-- Background circle -->
-  <circle cx="90" cy="90" r="84" fill="url(#bgGradient)"/>
+  <!-- Background rounded rectangle -->
+  <rect x="6" y="6" width="168" height="168" rx="38" ry="38" fill="url(#bgGradient)"/>
   
   <!-- Inner glow -->
-  <circle cx="90" cy="90" r="72" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+  <rect x="18" y="18" width="144" height="144" rx="30" ry="30" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
   
   <!-- Lightning bolt -->
   <path d="M102 42L63 93H84L72 138L117 81H93L102 42Z" fill="url(#boltGradient)"/>

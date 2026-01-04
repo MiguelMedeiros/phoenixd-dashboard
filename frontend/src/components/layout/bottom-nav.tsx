@@ -47,7 +47,7 @@ export function BottomNav() {
     <>
       {/* Bottom Navigation Bar - Wallet Style */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden">
-        <div className="glass-card border-t border-white/10 px-4 pb-safe">
+        <div className="glass-card border-t border-black/5 dark:border-white/10 px-4 pb-safe">
           <div className="flex items-center justify-center gap-4 py-3">
             {/* Receive Button */}
             <Link
@@ -56,7 +56,7 @@ export function BottomNav() {
                 'flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-medium transition-all',
                 isReceiveActive
                   ? 'bg-primary text-white'
-                  : 'bg-white/10 text-white/80 hover:bg-white/15'
+                  : 'bg-black/5 text-foreground/80 hover:bg-black/10 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15'
               )}
             >
               <ArrowDownToLine className="h-5 w-5" />
@@ -64,7 +64,7 @@ export function BottomNav() {
             </Link>
 
             {/* Divider */}
-            <div className="h-8 w-px bg-white/20" />
+            <div className="h-8 w-px bg-black/10 dark:bg-white/20" />
 
             {/* Send/Scan Button */}
             <button
@@ -73,7 +73,7 @@ export function BottomNav() {
                 'flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-medium transition-all',
                 isSendActive
                   ? 'bg-primary text-white'
-                  : 'bg-white/10 text-white/80 hover:bg-white/15'
+                  : 'bg-black/5 text-foreground/80 hover:bg-black/10 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15'
               )}
             >
               <ScanLine className="h-5 w-5" />

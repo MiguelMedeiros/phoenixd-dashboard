@@ -7,7 +7,11 @@ import { Globe, ChevronDown, Check } from 'lucide-react';
 import { locales, localeNames, localeFlags, type Locale } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  openUp?: boolean;
+}
+
+export function LanguageSwitcher({ openUp = false }: LanguageSwitcherProps) {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
@@ -54,7 +58,14 @@ export function LanguageSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 py-2 w-56 rounded-xl bg-background/95 backdrop-blur-xl border border-white/10 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2">
+        <div
+          className={cn(
+            'absolute py-2 w-56 rounded-xl bg-background/95 backdrop-blur-xl border border-white/10 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95',
+            openUp
+              ? 'bottom-full mb-2 left-0 slide-in-from-bottom-2'
+              : 'right-0 mt-2 slide-in-from-top-2'
+          )}
+        >
           <div className="px-3 pb-2 mb-1 border-b border-white/5">
             <p className="text-xs text-muted-foreground font-medium">Select Language</p>
           </div>

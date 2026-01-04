@@ -105,7 +105,7 @@ export default async function RootLayout({ children, params }: Props) {
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body
-        className={`${inter.variable} ${notoArabic.variable} ${notoDevanagari.variable} font-sans antialiased`}
+        className={`${inter.variable} ${notoArabic.variable} ${notoDevanagari.variable} font-sans antialiased min-w-[320px]`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           {children}

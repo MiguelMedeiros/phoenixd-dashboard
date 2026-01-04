@@ -181,7 +181,7 @@ export function Header({
             <div className="border-t border-white/10 pt-4 mt-4">
               <div className="flex items-center gap-3 px-4 py-2">
                 <Globe className="h-5 w-5 text-muted-foreground" />
-                <LanguageSwitcher />
+                <LanguageSwitcher openUp />
               </div>
             </div>
           </div>
@@ -263,7 +263,10 @@ export function Header({
 
           {/* Balance Pill */}
           {balance && (
-            <div className="flex items-center gap-1.5 md:gap-3 px-2.5 md:px-5 py-1.5 md:py-2.5 rounded-full glass-card">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 md:gap-3 px-2.5 md:px-5 py-1.5 md:py-2.5 rounded-full glass-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer"
+            >
               <div className="relative flex items-center justify-center">
                 <Zap className="h-3.5 w-3.5 md:h-5 md:w-5 text-primary" />
                 <div className="absolute inset-0 blur-md hidden md:block">
@@ -281,7 +284,11 @@ export function Header({
 
               {/* Refresh - Hidden on mobile */}
               <button
-                onClick={handleRefresh}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleRefresh();
+                }}
                 disabled={loading}
                 className="hidden md:block ml-1 p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
               >
@@ -289,7 +296,7 @@ export function Header({
                   className={cn('h-4 w-4 text-muted-foreground', loading && 'animate-spin')}
                 />
               </button>
-            </div>
+            </Link>
           )}
         </div>
       </header>
