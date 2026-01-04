@@ -27,7 +27,11 @@ import {
   Globe,
   Power,
   PowerOff,
+  Bell,
+  BellOff,
+  BellRing,
 } from 'lucide-react';
+import { useNotifications } from '@/hooks/use-notifications';
 import {
   setupPassword,
   changePassword,
@@ -100,6 +104,17 @@ export default function SettingsPage() {
   const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
   const [torLoading, setTorLoading] = useState(false);
   const [torError, setTorError] = useState<string | null>(null);
+
+  // Push notifications
+  const {
+    permission: notificationPermission,
+    isSupported: notificationsSupported,
+    isEnabled: notificationsEnabled,
+    enableNotifications,
+    disableNotifications,
+    sendNotification,
+  } = useNotifications();
+  const [notificationLoading, setNotificationLoading] = useState(false);
 
   // Fetch Tor status on mount
   useEffect(() => {
@@ -327,6 +342,26 @@ export default function SettingsPage() {
       }
     } finally {
       setTorLoading(false);
+    }
+  };
+
+  const handleNotificationToggle = async () => {
+    setNotificationLoading(true);
+    try {
+      if (notificationsEnabled) {
+        disableNotifications();
+      } else {
+        const success = await enableNotifications();
+        if (success) {
+          // Send a test notification
+          sendNotification({
+            title: '⚡ Notifications Enabled!',
+            body: 'You will now receive notifications when you receive sats.',
+          });
+        }
+      }
+    } finally {
+      setNotificationLoading(false);
     }
   };
 
@@ -698,6 +733,77 @@ export default function SettingsPage() {
           )}
         </div>
       </section>
+
+      {/* Notifications Section */}
+      {notificationsSupported && (
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            {t('notifications')}
+          </h2>
+
+          <div className="glass-card rounded-xl p-5 space-y-4">
+            {/* Push Notifications Toggle */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    'h-10 w-10 rounded-lg flex items-center justify-center',
+                    notificationsEnabled ? 'bg-success/10' : 'bg-muted'
+                  )}
+                >
+                  {notificationsEnabled ? (
+                    <BellRing className="h-5 w-5 text-success" />
+                  ) : (
+                    <BellOff className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">{t('pushNotifications')}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {notificationsEnabled
+                      ? t('notificationsEnabled')
+                      : notificationPermission === 'denied'
+                        ? t('notificationsDenied')
+                        : t('notificationsDisabled')}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleNotificationToggle}
+                disabled={notificationLoading || notificationPermission === 'denied'}
+                className={cn(
+                  'px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 flex-shrink-0',
+                  notificationsEnabled
+                    ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
+                    : 'bg-primary/10 text-primary hover:bg-primary/20',
+                  (notificationLoading || notificationPermission === 'denied') &&
+                    'opacity-50 cursor-not-allowed'
+                )}
+              >
+                {notificationLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {notificationsEnabled ? t('disable') : t('enable')}
+              </button>
+            </div>
+
+            {/* Permission Denied Warning */}
+            {notificationPermission === 'denied' && (
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
+                <AlertCircle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-warning">{t('notificationsBlocked')}</p>
+                  <p className="text-muted-foreground mt-1">{t('enableInBrowser')}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Info */}
+            <div className="pt-4 border-t border-black/5 dark:border-white/5">
+              <p className="text-xs text-muted-foreground">{t('notificationsDescription')}</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Wallet Seed Phrase Section - Only visible if password is set */}
       {hasPassword && (

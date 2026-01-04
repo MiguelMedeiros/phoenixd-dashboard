@@ -108,6 +108,7 @@
     "createOffer": "Créer une Offre",
     "oneTimeBolt11": "Bolt11 unique",
     "reusableBolt12": "Bolt12 réutilisable",
+    "offerExplanation": "Les Offres BOLT12 sont comme des liens de paiement permanents. Contrairement aux factures qui expirent, une offre peut être partagée une fois et utilisée par n'importe qui pour vous payer plusieurs fois. Parfait pour les dons, pourboires ou paiements récurrents.",
     "amountSats": "Montant (sats)",
     "whatIsThisFor": "À quoi sert ce paiement ?",
     "describeThisOffer": "Décrivez cette offre...",
@@ -121,6 +122,7 @@
     "copyInvoice": "Copier la Facture",
     "copyOffer": "Copier l'Offre",
     "copied": "Copié !",
+    "share": "Partager",
     "noInvoiceYet": "Pas encore de Facture",
     "noOfferYet": "Pas encore d'Offre",
     "fillAmountToGenerate": "Remplissez le montant et créez une facture pour générer un QR code",
@@ -168,7 +170,17 @@
     "paymentSuccessful": "Paiement Réussi !",
     "sendPayment": "Envoyer le Paiement",
     "sendBitcoin": "Envoyer Bitcoin",
-    "payViaLnurl": "Payer via LNURL"
+    "payViaLnurl": "Payer via LNURL",
+    "amountSats": "Montant (sats)",
+    "message": "Message",
+    "bitcoinAddress": "Adresse Bitcoin",
+    "decoding": "Décodage de la facture...",
+    "invoiceDecoded": "Facture décodée",
+    "amount": "Montant",
+    "description": "Description",
+    "expiry": "Expire",
+    "expired": "Expirée",
+    "pay": "Payer"
   },
   "payments": {
     "title": "Paiements",
@@ -357,7 +369,15 @@
     "thunderFlash": "Flash de Tonnerre",
     "electricStorm": "Tempête Électrique",
     "nightLightning": "Éclair Nocturne",
-    "skyThunder": "Tonnerre dans le Ciel"
+    "skyThunder": "Tonnerre dans le Ciel",
+    "notifications": "Notifications",
+    "pushNotifications": "Notifications Push",
+    "notificationsEnabled": "Vous serez notifié lorsque vous recevrez des sats",
+    "notificationsDisabled": "Activez pour être alerté des paiements entrants",
+    "notificationsDenied": "Les notifications sont bloquées par votre navigateur",
+    "notificationsBlocked": "Notifications Bloquées",
+    "enableInBrowser": "Pour activer les notifications, autorisez-les dans les paramètres de votre navigateur pour ce site.",
+    "notificationsDescription": "Lorsqu'activé, vous recevrez des notifications push du navigateur chaque fois que vous recevrez un paiement Lightning, même lorsque l'onglet est en arrière-plan."
   },
   "nodeInfo": {
     "title": "Informations du Nœud",
@@ -383,6 +403,21 @@
     "hoursAgo": "il y a {hours}h",
     "daysAgo": "il y a {days}j",
     "youReceivedPayment": "Vous avez reçu un paiement Lightning"
+  },
+  "scanner": {
+    "scanQrCode": "Scanner QR Code",
+    "scanToPayDescription": "Pointez la caméra vers un QR code",
+    "scanInvoiceOrAddress": "Scannez facture, offre ou adresse LN",
+    "startingCamera": "Démarrage de la caméra...",
+    "cameraPermissionDenied": "Permission caméra refusée.",
+    "noCameraFound": "Aucune caméra trouvée.",
+    "cameraError": "Impossible d'accéder à la caméra.",
+    "tryAgain": "Réessayer",
+    "scan": "Scanner",
+    "scanToPay": "Scanner pour Payer",
+    "pay": "Payer",
+    "invalidQrCode": "Code QR invalide. Scannez une facture Lightning, une offre ou une adresse.",
+    "payManually": "Saisir manuellement"
   },
   "lockScreen": {
     "title": "Phoenixd",

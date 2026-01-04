@@ -87,3 +87,60 @@ Services configuration files are organized under `/services/`:
 
 - `/services/tor/` - Tor SOCKS5 proxy configuration
 - Future: `/services/tailscale/`, `/services/cloudflared/`
+
+---
+
+## Internationalization (i18n) Rules
+
+**CRITICAL**: When adding, modifying, or removing any translation string, you MUST update ALL supported language files.
+
+### Supported Languages (11 total)
+
+| File                            | Language     | Code |
+| ------------------------------- | ------------ | ---- |
+| `frontend/src/messages/en.json` | English      | en   |
+| `frontend/src/messages/pt.json` | Portuguese   | pt   |
+| `frontend/src/messages/es.json` | Spanish      | es   |
+| `frontend/src/messages/fr.json` | French       | fr   |
+| `frontend/src/messages/de.json` | German       | de   |
+| `frontend/src/messages/ar.json` | Arabic (RTL) | ar   |
+| `frontend/src/messages/zh.json` | Chinese      | zh   |
+| `frontend/src/messages/ja.json` | Japanese     | ja   |
+| `frontend/src/messages/ko.json` | Korean       | ko   |
+| `frontend/src/messages/ru.json` | Russian      | ru   |
+| `frontend/src/messages/hi.json` | Hindi        | hi   |
+
+### Workflow
+
+1. **Adding new strings**:
+
+   - Add to `en.json` first (source of truth)
+   - Then add translations to ALL other 10 language files
+   - Use Context7 or web search to get accurate translations
+
+2. **Modifying existing strings**:
+
+   - Update in `en.json` first
+   - Update the corresponding key in ALL other language files
+
+3. **Removing strings**:
+   - Remove from ALL 11 language files
+
+### Translation Guidelines
+
+- Maintain the same JSON structure and key names across all files
+- Keep placeholders like `{count}`, `{amount}`, `{minutes}` unchanged
+- For RTL languages (Arabic), the text direction is handled by the app
+- Prefer native translations over transliterations
+- Keep translations concise for UI elements
+
+### Verification
+
+After any i18n changes, verify all files have the same keys:
+
+```bash
+# Check all translation files have consistent keys
+cd frontend && npm run build
+```
+
+Build will fail if any translation key is missing in a locale.

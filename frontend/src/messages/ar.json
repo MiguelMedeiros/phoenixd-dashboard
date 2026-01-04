@@ -108,6 +108,7 @@
     "createOffer": "إنشاء عرض",
     "oneTimeBolt11": "Bolt11 لمرة واحدة",
     "reusableBolt12": "Bolt12 قابل لإعادة الاستخدام",
+    "offerExplanation": "عروض BOLT12 هي مثل روابط الدفع الدائمة. على عكس الفواتير التي تنتهي صلاحيتها، يمكن مشاركة العرض مرة واحدة واستخدامه من قبل أي شخص لدفع لك عدة مرات. مثالي للتبرعات والإكراميات أو المدفوعات المتكررة.",
     "amountSats": "المبلغ (ساتوشي)",
     "whatIsThisFor": "ما هو الغرض من هذه الدفعة؟",
     "describeThisOffer": "وصف هذا العرض...",
@@ -121,6 +122,7 @@
     "copyInvoice": "نسخ الفاتورة",
     "copyOffer": "نسخ العرض",
     "copied": "تم النسخ!",
+    "share": "مشاركة",
     "noInvoiceYet": "لا توجد فاتورة بعد",
     "noOfferYet": "لا يوجد عرض بعد",
     "fillAmountToGenerate": "أدخل المبلغ وأنشئ فاتورة لإنشاء رمز QR",
@@ -168,7 +170,17 @@
     "paymentSuccessful": "تم الدفع بنجاح!",
     "sendPayment": "إرسال الدفعة",
     "sendBitcoin": "إرسال بيتكوين",
-    "payViaLnurl": "الدفع عبر LNURL"
+    "payViaLnurl": "الدفع عبر LNURL",
+    "amountSats": "المبلغ (sats)",
+    "message": "رسالة",
+    "bitcoinAddress": "عنوان البيتكوين",
+    "decoding": "جاري فك تشفير الفاتورة...",
+    "invoiceDecoded": "تم فك تشفير الفاتورة",
+    "amount": "المبلغ",
+    "description": "الوصف",
+    "expiry": "ينتهي",
+    "expired": "منتهية الصلاحية",
+    "pay": "ادفع"
   },
   "payments": {
     "title": "المدفوعات",
@@ -357,7 +369,15 @@
     "thunderFlash": "وميض الرعد",
     "electricStorm": "العاصفة الكهربائية",
     "nightLightning": "برق الليل",
-    "skyThunder": "رعد السماء"
+    "skyThunder": "رعد السماء",
+    "notifications": "الإشعارات",
+    "pushNotifications": "إشعارات الدفع",
+    "notificationsEnabled": "سيتم إعلامك عند استلام ساتوشي",
+    "notificationsDisabled": "فعّل للحصول على تنبيهات المدفوعات الواردة",
+    "notificationsDenied": "الإشعارات محظورة من متصفحك",
+    "notificationsBlocked": "الإشعارات محظورة",
+    "enableInBrowser": "لتفعيل الإشعارات، يرجى السماح بها في إعدادات متصفحك لهذا الموقع.",
+    "notificationsDescription": "عند التفعيل، ستتلقى إشعارات دفع من المتصفح عندما تستلم دفعة Lightning، حتى عندما تكون علامة التبويب في الخلفية."
   },
   "nodeInfo": {
     "title": "معلومات العقدة",
@@ -383,6 +403,21 @@
     "hoursAgo": "منذ {hours}س",
     "daysAgo": "منذ {days}ي",
     "youReceivedPayment": "لقد استلمت دفعة Lightning"
+  },
+  "scanner": {
+    "scanQrCode": "مسح رمز QR",
+    "scanToPayDescription": "وجه الكاميرا نحو رمز QR",
+    "scanInvoiceOrAddress": "امسح الفاتورة أو العرض أو عنوان LN",
+    "startingCamera": "جاري تشغيل الكاميرا...",
+    "cameraPermissionDenied": "تم رفض إذن الكاميرا.",
+    "noCameraFound": "لم يتم العثور على كاميرا.",
+    "cameraError": "تعذر الوصول إلى الكاميرا.",
+    "tryAgain": "حاول مرة أخرى",
+    "scan": "مسح",
+    "scanToPay": "مسح للدفع",
+    "pay": "دفع",
+    "invalidQrCode": "رمز QR غير صالح. امسح فاتورة Lightning أو عرضًا أو عنوانًا.",
+    "payManually": "إدخال يدوي"
   },
   "lockScreen": {
     "title": "Phoenixd",

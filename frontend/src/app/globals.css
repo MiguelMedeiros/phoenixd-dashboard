@@ -75,6 +75,13 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* PWA: Background color for safe-area (notch/Dynamic Island) */
+    background-color: hsl(20 15% 7%);
+  }
+
+  html.light,
+  :root:not(.dark) html {
+    background-color: hsl(30 20% 96%);
   }
 
   body {
@@ -83,6 +90,9 @@
       'rlig' 1,
       'calt' 1,
       'ss01' 1;
+    /* PWA: Ensure body extends to edges */
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 }
 
@@ -105,7 +115,7 @@
 
   .premium-bg::before {
     content: '';
-    position: fixed;
+    position: absolute;
     top: -30%;
     right: -20%;
     width: 80%;
@@ -121,7 +131,7 @@
 
   .premium-bg::after {
     content: '';
-    position: fixed;
+    position: absolute;
     bottom: -20%;
     left: -20%;
     width: 60%;
@@ -133,6 +143,22 @@
     );
     pointer-events: none;
     z-index: 0;
+  }
+
+  /* Hide decorative pseudo-elements on mobile to prevent visual glitches */
+  @media (max-width: 768px) {
+    .premium-bg::before,
+    .premium-bg::after {
+      display: none;
+    }
+  }
+
+  /* Hide decorative pseudo-elements on mobile to prevent visual glitches */
+  @media (max-width: 768px) {
+    .premium-bg::before,
+    .premium-bg::after {
+      display: none;
+    }
   }
 
   /* Premium Glass Card - Light */
@@ -154,6 +180,7 @@
     left: 0;
     right: 0;
     height: 1px;
+    pointer-events: none;
     background: linear-gradient(
       90deg,
       transparent 0%,
@@ -304,6 +331,7 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg, transparent 0%, hsl(0 0% 100% / 0.1) 50%, transparent 100%);
+    pointer-events: none;
   }
 
   /* Status Pill - Light */
@@ -547,6 +575,47 @@
     display: none;
   }
 
+  /* Hide scrollbar on mobile, show custom on desktop */
+  .mobile-scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .mobile-scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-scrollbar-hide {
+      scrollbar-width: thin;
+      scrollbar-color: hsl(30 10% 30% / 0.3) transparent;
+    }
+    .mobile-scrollbar-hide::-webkit-scrollbar {
+      display: block;
+      width: 6px;
+    }
+    .mobile-scrollbar-hide::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .mobile-scrollbar-hide::-webkit-scrollbar-thumb {
+      background: hsl(30 10% 30% / 0.3);
+      border-radius: 3px;
+    }
+    .mobile-scrollbar-hide::-webkit-scrollbar-thumb:hover {
+      background: hsl(30 10% 30% / 0.5);
+    }
+
+    /* Dark mode scrollbar */
+    .dark .mobile-scrollbar-hide {
+      scrollbar-color: hsl(30 10% 70% / 0.2) transparent;
+    }
+    .dark .mobile-scrollbar-hide::-webkit-scrollbar-thumb {
+      background: hsl(30 10% 70% / 0.2);
+    }
+    .dark .mobile-scrollbar-hide::-webkit-scrollbar-thumb:hover {
+      background: hsl(30 10% 70% / 0.4);
+    }
+  }
+
   /* Safe area for iPhone notch/home indicator */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 8px);
@@ -554,6 +623,35 @@
 
   .pt-safe {
     padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .mt-safe {
+    margin-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* PWA: Full safe-area padding */
+  .safe-area-inset {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  /* PWA: Status bar area that fills the notch/Dynamic Island */
+  .status-bar-fill {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 9999;
+    pointer-events: none;
+    /* Light theme as default */
+    background: linear-gradient(165deg, hsl(30 25% 97%) 0%, hsl(35 20% 94%) 100%);
+  }
+
+  .dark .status-bar-fill {
+    background: linear-gradient(165deg, hsl(20 18% 8%) 0%, hsl(25 15% 5%) 100%);
   }
 }
 

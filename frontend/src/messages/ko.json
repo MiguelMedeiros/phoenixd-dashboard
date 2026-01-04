@@ -108,6 +108,7 @@
     "createOffer": "오퍼 생성",
     "oneTimeBolt11": "일회용 Bolt11",
     "reusableBolt12": "재사용 가능 Bolt12",
+    "offerExplanation": "BOLT12 오퍼는 영구 결제 링크와 같습니다. 만료되는 인보이스와 달리, 오퍼는 한 번 공유하면 누구든 여러 번 결제에 사용할 수 있습니다. 기부, 팁, 정기 결제에 완벽합니다.",
     "amountSats": "금액 (사토시)",
     "whatIsThisFor": "이 결제의 용도는 무엇인가요?",
     "describeThisOffer": "이 오퍼를 설명하세요...",
@@ -121,6 +122,7 @@
     "copyInvoice": "인보이스 복사",
     "copyOffer": "오퍼 복사",
     "copied": "복사됨!",
+    "share": "공유",
     "noInvoiceYet": "인보이스 없음",
     "noOfferYet": "오퍼 없음",
     "fillAmountToGenerate": "금액을 입력하고 인보이스를 생성하여 QR 코드를 만드세요",
@@ -168,7 +170,17 @@
     "paymentSuccessful": "결제 성공!",
     "sendPayment": "결제 보내기",
     "sendBitcoin": "비트코인 보내기",
-    "payViaLnurl": "LNURL로 결제"
+    "payViaLnurl": "LNURL로 결제",
+    "amountSats": "금액 (sats)",
+    "message": "메시지",
+    "bitcoinAddress": "비트코인 주소",
+    "decoding": "인보이스 디코딩 중...",
+    "invoiceDecoded": "인보이스 디코딩 완료",
+    "amount": "금액",
+    "description": "설명",
+    "expiry": "만료",
+    "expired": "만료됨",
+    "pay": "결제"
   },
   "payments": {
     "title": "결제 내역",
@@ -357,7 +369,15 @@
     "thunderFlash": "천둥 번개",
     "electricStorm": "전기 폭풍",
     "nightLightning": "야간 번개",
-    "skyThunder": "하늘 천둥"
+    "skyThunder": "하늘 천둥",
+    "notifications": "알림",
+    "pushNotifications": "푸시 알림",
+    "notificationsEnabled": "사토시를 받으면 알림을 받습니다",
+    "notificationsDisabled": "수신 결제 알림을 받으려면 활성화하세요",
+    "notificationsDenied": "알림이 브라우저에서 차단되었습니다",
+    "notificationsBlocked": "알림 차단됨",
+    "enableInBrowser": "알림을 활성화하려면 이 사이트의 브라우저 설정에서 허용하세요.",
+    "notificationsDescription": "활성화하면 탭이 백그라운드에 있어도 라이트닝 결제를 받을 때마다 브라우저 푸시 알림을 받습니다."
   },
   "nodeInfo": {
     "title": "노드 정보",
@@ -383,6 +403,21 @@
     "hoursAgo": "{hours}시간 전",
     "daysAgo": "{days}일 전",
     "youReceivedPayment": "라이트닝 결제를 받았습니다"
+  },
+  "scanner": {
+    "scanQrCode": "QR 코드 스캔",
+    "scanToPayDescription": "카메라를 QR 코드에 맞추세요",
+    "scanInvoiceOrAddress": "인보이스, 오퍼 또는 LN 주소 스캔",
+    "startingCamera": "카메라 시작 중...",
+    "cameraPermissionDenied": "카메라 권한이 거부되었습니다.",
+    "noCameraFound": "카메라를 찾을 수 없습니다.",
+    "cameraError": "카메라에 접근할 수 없습니다.",
+    "tryAgain": "다시 시도",
+    "scan": "스캔",
+    "scanToPay": "스캔하여 결제",
+    "pay": "결제",
+    "invalidQrCode": "잘못된 QR 코드입니다. Lightning 인보이스, 오퍼 또는 주소를 스캔하세요.",
+    "payManually": "수동으로 입력"
   },
   "lockScreen": {
     "title": "Phoenixd",

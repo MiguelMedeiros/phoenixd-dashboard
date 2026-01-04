@@ -9,6 +9,11 @@ out/
 dist/
 build/
 
+# PWA - Service Worker (generated during build)
+frontend/public/sw.js
+frontend/public/sw.js.map
+frontend/public/swe-worker-*.js
+
 # Environment files
 .env
 .env.local

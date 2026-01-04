@@ -108,6 +108,7 @@
     "createOffer": "创建报价",
     "oneTimeBolt11": "一次性 Bolt11",
     "reusableBolt12": "可重复使用的 Bolt12",
+    "offerExplanation": "BOLT12报价就像永久支付链接。与会过期的发票不同，报价可以分享一次，任何人都可以多次使用它向您付款。非常适合捐赠、小费或定期付款。",
     "amountSats": "金额（聪）",
     "whatIsThisFor": "这笔付款用于什么？",
     "describeThisOffer": "描述此报价...",
@@ -121,6 +122,7 @@
     "copyInvoice": "复制账单",
     "copyOffer": "复制报价",
     "copied": "已复制！",
+    "share": "分享",
     "noInvoiceYet": "暂无账单",
     "noOfferYet": "暂无报价",
     "fillAmountToGenerate": "填写金额并创建账单以生成二维码",
@@ -168,7 +170,17 @@
     "paymentSuccessful": "付款成功！",
     "sendPayment": "发送付款",
     "sendBitcoin": "发送比特币",
-    "payViaLnurl": "通过 LNURL 支付"
+    "payViaLnurl": "通过 LNURL 支付",
+    "amountSats": "金额 (sats)",
+    "message": "消息",
+    "bitcoinAddress": "比特币地址",
+    "decoding": "正在解码发票...",
+    "invoiceDecoded": "发票已解码",
+    "amount": "金额",
+    "description": "描述",
+    "expiry": "过期时间",
+    "expired": "已过期",
+    "pay": "支付"
   },
   "payments": {
     "title": "交易记录",
@@ -357,7 +369,15 @@
     "thunderFlash": "雷电闪光",
     "electricStorm": "电暴",
     "nightLightning": "夜间闪电",
-    "skyThunder": "天空雷鸣"
+    "skyThunder": "天空雷鸣",
+    "notifications": "通知",
+    "pushNotifications": "推送通知",
+    "notificationsEnabled": "收到聪时您将收到通知",
+    "notificationsDisabled": "启用以获取收款提醒",
+    "notificationsDenied": "通知已被浏览器阻止",
+    "notificationsBlocked": "通知已阻止",
+    "enableInBrowser": "要启用通知，请在浏览器设置中允许此网站的通知。",
+    "notificationsDescription": "启用后，每当您收到闪电网络付款时，您将收到浏览器推送通知，即使标签页在后台运行。"
   },
   "nodeInfo": {
     "title": "节点信息",
@@ -383,6 +403,21 @@
     "hoursAgo": "{hours}小时前",
     "daysAgo": "{days}天前",
     "youReceivedPayment": "您收到了一笔闪电网络付款"
+  },
+  "scanner": {
+    "scanQrCode": "扫描二维码",
+    "scanToPayDescription": "将相机对准二维码",
+    "scanInvoiceOrAddress": "扫描发票、报价或闪电地址",
+    "startingCamera": "正在启动相机...",
+    "cameraPermissionDenied": "相机权限被拒绝。",
+    "noCameraFound": "未找到相机。",
+    "cameraError": "无法访问相机。",
+    "tryAgain": "重试",
+    "scan": "扫描",
+    "scanToPay": "扫描支付",
+    "pay": "支付",
+    "invalidQrCode": "无效的二维码。请扫描闪电发票、报价或地址。",
+    "payManually": "手动输入"
   },
   "lockScreen": {
     "title": "Phoenixd",

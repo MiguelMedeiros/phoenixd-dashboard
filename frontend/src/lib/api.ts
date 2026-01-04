@@ -262,21 +262,36 @@ export async function exportPayments(from?: number, to?: number): Promise<string
 }
 
 // Decode
-export async function decodeInvoice(params: { invoice: string }) {
-  return request<{
-    prefix: string;
-    timestamp: number;
-    nodeId: string;
-    serialized: string;
-    description: string;
+export async function decodeInvoice(params: { invoice: string }): Promise<{
+  description: string;
+  amountMsat?: number;
+  expiry: number;
+  timestamp: number;
+  paymentHash: string;
+}> {
+  const response = await request<{
+    chain: string;
+    amount?: number;
     paymentHash: string;
-    expiry: number;
-    minFinalCltvExpiry: number;
-    amountMsat?: number;
+    description: string;
+    minFinalCltvExpiryDelta: number;
+    paymentSecret: string;
+    timestampSeconds: number;
   }>('/api/phoenixd/decodeinvoice', {
     method: 'POST',
     body: JSON.stringify(params),
   });
+  
+  // Map phoenixd response to our expected format
+  // Default expiry is 3600 seconds (1 hour) if not specified
+  // amount from phoenixd is already in millisats
+  return {
+    description: response.description || '',
+    amountMsat: response.amount,
+    expiry: 3600, // Default 1 hour expiry for BOLT11
+    timestamp: response.timestampSeconds,
+    paymentHash: response.paymentHash,
+  };
 }
 
 export async function decodeOffer(params: { offer: string }) {

@@ -108,6 +108,7 @@
     "createOffer": "Создать предложение",
     "oneTimeBolt11": "Одноразовый Bolt11",
     "reusableBolt12": "Многоразовый Bolt12",
+    "offerExplanation": "Предложения BOLT12 — это как постоянные платёжные ссылки. В отличие от счетов, которые истекают, предложение можно поделиться один раз и использовать многократно для оплаты. Идеально для пожертвований, чаевых или регулярных платежей.",
     "amountSats": "Сумма (сатоши)",
     "whatIsThisFor": "Для чего этот платёж?",
     "describeThisOffer": "Опишите это предложение...",
@@ -121,6 +122,7 @@
     "copyInvoice": "Копировать счёт",
     "copyOffer": "Копировать предложение",
     "copied": "Скопировано!",
+    "share": "Поделиться",
     "noInvoiceYet": "Счёта пока нет",
     "noOfferYet": "Предложения пока нет",
     "fillAmountToGenerate": "Введите сумму и создайте счёт для генерации QR-кода",
@@ -168,7 +170,17 @@
     "paymentSuccessful": "Платёж успешен!",
     "sendPayment": "Отправить платёж",
     "sendBitcoin": "Отправить биткоин",
-    "payViaLnurl": "Оплатить через LNURL"
+    "payViaLnurl": "Оплатить через LNURL",
+    "amountSats": "Сумма (sats)",
+    "message": "Сообщение",
+    "bitcoinAddress": "Биткоин-адрес",
+    "decoding": "Декодирование инвойса...",
+    "invoiceDecoded": "Инвойс декодирован",
+    "amount": "Сумма",
+    "description": "Описание",
+    "expiry": "Истекает",
+    "expired": "Истёк",
+    "pay": "Оплатить"
   },
   "payments": {
     "title": "Платежи",
@@ -357,7 +369,15 @@
     "thunderFlash": "Вспышка грома",
     "electricStorm": "Электрический шторм",
     "nightLightning": "Ночная молния",
-    "skyThunder": "Небесный гром"
+    "skyThunder": "Небесный гром",
+    "notifications": "Уведомления",
+    "pushNotifications": "Push-уведомления",
+    "notificationsEnabled": "Вы будете уведомлены при получении сатоши",
+    "notificationsDisabled": "Включите для получения уведомлений о входящих платежах",
+    "notificationsDenied": "Уведомления заблокированы вашим браузером",
+    "notificationsBlocked": "Уведомления заблокированы",
+    "enableInBrowser": "Чтобы включить уведомления, разрешите их в настройках браузера для этого сайта.",
+    "notificationsDescription": "При включении вы будете получать push-уведомления браузера каждый раз, когда получаете Lightning-платёж, даже когда вкладка в фоне."
   },
   "nodeInfo": {
     "title": "Информация о ноде",
@@ -383,6 +403,21 @@
     "hoursAgo": "{hours}ч назад",
     "daysAgo": "{days}д назад",
     "youReceivedPayment": "Вы получили Lightning-платёж"
+  },
+  "scanner": {
+    "scanQrCode": "Сканировать QR-код",
+    "scanToPayDescription": "Наведите камеру на QR-код",
+    "scanInvoiceOrAddress": "Сканируйте счёт, оффер или LN-адрес",
+    "startingCamera": "Запуск камеры...",
+    "cameraPermissionDenied": "Доступ к камере запрещён.",
+    "noCameraFound": "Камера не найдена.",
+    "cameraError": "Не удалось получить доступ к камере.",
+    "tryAgain": "Повторить",
+    "scan": "Сканировать",
+    "scanToPay": "Сканировать для оплаты",
+    "pay": "Оплатить",
+    "invalidQrCode": "Недействительный QR-код. Сканируйте Lightning-счёт, оффер или адрес.",
+    "payManually": "Ввести вручную"
   },
   "lockScreen": {
     "title": "Phoenixd",

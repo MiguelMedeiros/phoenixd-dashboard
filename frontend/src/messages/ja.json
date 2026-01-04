@@ -108,6 +108,7 @@
     "createOffer": "オファー作成",
     "oneTimeBolt11": "一回限りのBolt11",
     "reusableBolt12": "再利用可能なBolt12",
+    "offerExplanation": "BOLT12オファーは永続的な支払いリンクのようなものです。期限切れになる請求書とは異なり、オファーは一度共有するだけで、誰でも何度でも支払いに使用できます。寄付、チップ、定期支払いに最適です。",
     "amountSats": "金額（サトシ）",
     "whatIsThisFor": "この支払いは何のためですか？",
     "describeThisOffer": "このオファーを説明してください...",
@@ -121,6 +122,7 @@
     "copyInvoice": "請求書をコピー",
     "copyOffer": "オファーをコピー",
     "copied": "コピーしました！",
+    "share": "共有",
     "noInvoiceYet": "請求書がありません",
     "noOfferYet": "オファーがありません",
     "fillAmountToGenerate": "金額を入力し、請求書を作成してQRコードを生成",
@@ -168,7 +170,17 @@
     "paymentSuccessful": "支払いが完了しました！",
     "sendPayment": "支払いを送る",
     "sendBitcoin": "ビットコインを送る",
-    "payViaLnurl": "LNURLで支払う"
+    "payViaLnurl": "LNURLで支払う",
+    "amountSats": "金額 (sats)",
+    "message": "メッセージ",
+    "bitcoinAddress": "ビットコインアドレス",
+    "decoding": "インボイスをデコード中...",
+    "invoiceDecoded": "インボイスがデコードされました",
+    "amount": "金額",
+    "description": "説明",
+    "expiry": "有効期限",
+    "expired": "期限切れ",
+    "pay": "支払う"
   },
   "payments": {
     "title": "取引履歴",
@@ -357,7 +369,15 @@
     "thunderFlash": "雷光",
     "electricStorm": "電気嵐",
     "nightLightning": "夜の稲妻",
-    "skyThunder": "空の雷鳴"
+    "skyThunder": "空の雷鳴",
+    "notifications": "通知",
+    "pushNotifications": "プッシュ通知",
+    "notificationsEnabled": "サトシを受け取ると通知されます",
+    "notificationsDisabled": "入金通知を受け取るには有効にしてください",
+    "notificationsDenied": "通知はブラウザによってブロックされています",
+    "notificationsBlocked": "通知がブロックされています",
+    "enableInBrowser": "通知を有効にするには、このサイトのブラウザ設定で許可してください。",
+    "notificationsDescription": "有効にすると、タブがバックグラウンドにある場合でも、Lightning支払いを受け取るたびにブラウザプッシュ通知を受け取ります。"
   },
   "nodeInfo": {
     "title": "ノード情報",
@@ -383,6 +403,21 @@
     "hoursAgo": "{hours}時間前",
     "daysAgo": "{days}日前",
     "youReceivedPayment": "Lightning決済を受け取りました"
+  },
+  "scanner": {
+    "scanQrCode": "QRコードをスキャン",
+    "scanToPayDescription": "カメラをQRコードに向けてください",
+    "scanInvoiceOrAddress": "請求書、オファー、またはLNアドレスをスキャン",
+    "startingCamera": "カメラを起動中...",
+    "cameraPermissionDenied": "カメラの許可が拒否されました。",
+    "noCameraFound": "カメラが見つかりません。",
+    "cameraError": "カメラにアクセスできません。",
+    "tryAgain": "再試行",
+    "scan": "スキャン",
+    "scanToPay": "スキャンして支払う",
+    "pay": "支払う",
+    "invalidQrCode": "無効なQRコード。Lightning請求書、オファー、またはアドレスをスキャンしてください。",
+    "payManually": "手動で入力"
   },
   "lockScreen": {
     "title": "Phoenixd",

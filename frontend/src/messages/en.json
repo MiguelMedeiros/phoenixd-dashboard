@@ -108,6 +108,7 @@
     "createOffer": "Create Offer",
     "oneTimeBolt11": "One-time Bolt11",
     "reusableBolt12": "Reusable Bolt12",
+    "offerExplanation": "BOLT12 Offers are like permanent payment links. Unlike invoices that expire, an offer can be shared once and used by anyone to pay you multiple times. Perfect for donations, tips, or recurring payments.",
     "amountSats": "Amount (sats)",
     "whatIsThisFor": "What is this payment for?",
     "describeThisOffer": "Describe this offer...",
@@ -121,6 +122,7 @@
     "copyInvoice": "Copy Invoice",
     "copyOffer": "Copy Offer",
     "copied": "Copied!",
+    "share": "Share",
     "noInvoiceYet": "No Invoice Yet",
     "noOfferYet": "No Offer Yet",
     "fillAmountToGenerate": "Fill in the amount and create an invoice to generate a QR code",
@@ -171,7 +173,14 @@
     "payViaLnurl": "Pay via LNURL",
     "amountSats": "Amount (sats)",
     "message": "Message",
-    "bitcoinAddress": "Bitcoin Address"
+    "bitcoinAddress": "Bitcoin Address",
+    "decoding": "Decoding invoice...",
+    "invoiceDecoded": "Invoice decoded",
+    "amount": "Amount",
+    "description": "Description",
+    "expiry": "Expires",
+    "expired": "Expired",
+    "pay": "Pay"
   },
   "payments": {
     "title": "Payments",
@@ -360,7 +369,15 @@
     "thunderFlash": "Thunder Flash",
     "electricStorm": "Electric Storm",
     "nightLightning": "Night Lightning",
-    "skyThunder": "Sky Thunder"
+    "skyThunder": "Sky Thunder",
+    "notifications": "Notifications",
+    "pushNotifications": "Push Notifications",
+    "notificationsEnabled": "You will be notified when you receive sats",
+    "notificationsDisabled": "Enable to get notified about incoming payments",
+    "notificationsDenied": "Notifications are blocked by your browser",
+    "notificationsBlocked": "Notifications Blocked",
+    "enableInBrowser": "To enable notifications, please allow them in your browser settings for this site.",
+    "notificationsDescription": "When enabled, you'll receive browser push notifications whenever you receive a Lightning payment, even when the tab is in the background."
   },
   "nodeInfo": {
     "title": "Node Information",
@@ -386,6 +403,21 @@
     "hoursAgo": "{hours}h ago",
     "daysAgo": "{days}d ago",
     "youReceivedPayment": "You received a Lightning payment"
+  },
+  "scanner": {
+    "scanQrCode": "Scan QR Code",
+    "scanToPayDescription": "Point camera at a QR code",
+    "scanInvoiceOrAddress": "Scan invoice, offer or LN address",
+    "startingCamera": "Starting camera...",
+    "cameraPermissionDenied": "Camera permission denied. Please allow camera access.",
+    "noCameraFound": "No camera found on this device.",
+    "cameraError": "Unable to access camera.",
+    "tryAgain": "Try Again",
+    "scan": "Scan",
+    "scanToPay": "Scan to Pay",
+    "pay": "Pay",
+    "invalidQrCode": "Invalid QR code. Please scan a Lightning invoice, offer, or address.",
+    "payManually": "Enter manually"
   },
   "lockScreen": {
     "title": "Phoenixd",

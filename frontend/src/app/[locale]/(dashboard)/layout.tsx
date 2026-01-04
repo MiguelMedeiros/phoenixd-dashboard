@@ -5,12 +5,61 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 import { Header } from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/components/auth-provider';
+import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { useWebSocket } from '@/hooks/use-websocket';
 import { useToast } from '@/hooks/use-toast';
+import {
+  useNotifications,
+  formatSatsForNotification,
+  playNotificationSound,
+} from '@/hooks/use-notifications';
 import { formatSats } from '@/lib/utils';
 import { useCallback, useRef, useState } from 'react';
 import { type Notification } from '@/components/notifications-popover';
 import { useTranslations } from 'next-intl';
+import confetti from 'canvas-confetti';
+
+// Mini confetti burst from top-right corner for payment notifications
+const firePaymentConfetti = () => {
+  const count = 100;
+  const defaults = {
+    origin: { x: 0.9, y: 0.1 }, // Top-right corner
+    zIndex: 9999,
+    disableForReducedMotion: true,
+  };
+
+  // First burst
+  confetti({
+    ...defaults,
+    particleCount: Math.floor(count * 0.4),
+    spread: 50,
+    startVelocity: 35,
+    colors: ['#f97316', '#fb923c', '#fdba74'], // Orange tones
+  });
+
+  // Second burst with delay
+  setTimeout(() => {
+    confetti({
+      ...defaults,
+      particleCount: Math.floor(count * 0.3),
+      spread: 70,
+      startVelocity: 25,
+      colors: ['#22c55e', '#4ade80', '#86efac'], // Green tones
+    });
+  }, 100);
+
+  // Third burst
+  setTimeout(() => {
+    confetti({
+      ...defaults,
+      particleCount: Math.floor(count * 0.3),
+      spread: 90,
+      startVelocity: 20,
+      decay: 0.92,
+      colors: ['#eab308', '#facc15', '#fde047'], // Yellow/gold tones
+    });
+  }, 200);
+};
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
@@ -18,6 +67,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const tt = useTranslations('toast');
   const balanceRefreshRef = useRef<(() => void) | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Push notifications hook
+  const { sendNotification, isEnabled: pushNotificationsEnabled } = useNotifications();
 
   const refreshBalance = useCallback(() => {
     if (balanceRefreshRef.current) {
@@ -52,23 +104,41 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   const { isConnected } = useWebSocket({
     onPaymentReceived: (event) => {
+      const amount = event.amountSat || 0;
+
       // Show toast
       toast({
         title: `⚡ ${tt('paymentReceived')}`,
-        description: `${formatSats(event.amountSat || 0)} ${tt('received')}${
+        description: `${formatSats(amount)} ${tt('received')}${
           event.payerNote ? ` - "${event.payerNote}"` : ''
         }`,
         variant: 'default',
       });
 
-      // Add notification
+      // Add in-app notification
       addNotification({
         type: 'payment_received',
         title: t('paymentReceived'),
         message: event.payerNote || t('youReceivedPayment'),
-        amount: event.amountSat || 0,
+        amount: amount,
         timestamp: Date.now(),
       });
+
+      // Fire confetti celebration for any payment received! 🎉
+      firePaymentConfetti();
+
+      // Send push notification if enabled
+      if (pushNotificationsEnabled) {
+        sendNotification({
+          title: `⚡ ${tt('paymentReceived')}`,
+          body: `${formatSatsForNotification(amount)}${event.payerNote ? ` - "${event.payerNote}"` : ''}`,
+          tag: `payment-${event.paymentHash || Date.now()}`,
+          data: { paymentHash: event.paymentHash, amount },
+        });
+
+        // Play notification sound
+        playNotificationSound();
+      }
 
       refreshBalance();
     },
@@ -87,9 +157,12 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <div className="premium-bg flex h-screen overflow-hidden">
+    <div className="premium-bg flex h-screen overflow-hidden pt-safe">
+      {/* PWA: Status bar fill for Dynamic Island/Notch - matches background */}
+      <div className="status-bar-fill" />
+
       {/* Sidebar - Hidden on mobile */}
-      <div className="hidden md:block">
+      <div className="hidden md:block overflow-hidden">
         <Sidebar />
       </div>
 
@@ -107,13 +180,16 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         />
 
         {/* Page Content - Extra padding bottom for mobile nav */}
-        <main className="flex-1 overflow-auto px-4 md:px-8 pb-24 md:pb-8">
+        <main className="flex-1 overflow-auto px-4 md:px-8 pb-24 md:pb-8 mobile-scrollbar-hide">
           <div className="relative z-10">{children}</div>
         </main>
       </div>
 
       {/* Bottom Navigation - Only on mobile */}
       <BottomNav />
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
 
       <Toaster />
     </div>

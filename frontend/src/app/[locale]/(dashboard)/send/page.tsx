@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Send,
   Zap,
@@ -11,16 +12,24 @@ import {
   ArrowUpFromLine,
   Check,
   AlertCircle,
+  ScanLine,
+  Clock,
+  FileText,
+  Hash,
 } from 'lucide-react';
-import { payInvoice, payOffer, payLnAddress, sendToAddress, getNodeInfo } from '@/lib/api';
+import { payInvoice, payOffer, payLnAddress, sendToAddress, getNodeInfo, decodeInvoice } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { cn, formatSats } from '@/lib/utils';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 import { useTranslations } from 'next-intl';
+import { QRScanner } from '@/components/qr-scanner';
+import { useRouter } from '@/i18n/navigation';
 
 export default function SendPage() {
   const t = useTranslations('send');
-  const _tc = useTranslations('common'); // Prefixed with _ for future use
+  const ts = useTranslations('scanner');
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer' | 'address' | 'onchain'>(
     'invoice'
   );
@@ -29,6 +38,7 @@ export default function SendPage() {
     null
   );
   const [chain, setChain] = useState<string>('mainnet');
+  const [scannerOpen, setScannerOpen] = useState(false);
   const { toast } = useToast();
 
   // Fetch node info to get current chain
@@ -38,11 +48,129 @@ export default function SendPage() {
       .catch(() => setChain('mainnet'));
   }, []);
 
+  // Read URL params and populate fields
+  useEffect(() => {
+    const invoiceParam = searchParams.get('invoice');
+    const offerParam = searchParams.get('offer');
+    const addressParam = searchParams.get('address');
+    const btcaddressParam = searchParams.get('btcaddress');
+
+    if (invoiceParam) {
+      setInvoice(invoiceParam);
+      setActiveTab('invoice');
+    } else if (offerParam) {
+      setOffer(offerParam);
+      setActiveTab('offer');
+    } else if (addressParam) {
+      setLnAddress(addressParam);
+      setActiveTab('address');
+    } else if (btcaddressParam) {
+      setBtcAddress(btcaddressParam);
+      setActiveTab('onchain');
+    }
+  }, [searchParams]);
+
+  // Handle scanned QR code
+  const handleScan = (data: string) => {
+    const lowerData = data.toLowerCase().trim();
+
+    // Lightning invoice (lnbc, lntb, lnbcrt)
+    if (
+      lowerData.startsWith('lnbc') ||
+      lowerData.startsWith('lntb') ||
+      lowerData.startsWith('lnbcrt') ||
+      lowerData.startsWith('lightning:')
+    ) {
+      const invoiceData = data.replace(/^lightning:/i, '');
+      setInvoice(invoiceData);
+      setActiveTab('invoice');
+      return;
+    }
+
+    // BOLT12 Offer (lno)
+    if (lowerData.startsWith('lno')) {
+      setOffer(data);
+      setActiveTab('offer');
+      return;
+    }
+
+    // Lightning Address (contains @)
+    if (data.includes('@') && !data.includes('://')) {
+      setLnAddress(data);
+      setActiveTab('address');
+      return;
+    }
+
+    // Bitcoin address (bc1, 1, 3, tb1)
+    if (
+      lowerData.startsWith('bc1') ||
+      lowerData.startsWith('tb1') ||
+      lowerData.startsWith('1') ||
+      lowerData.startsWith('3') ||
+      lowerData.startsWith('bitcoin:')
+    ) {
+      const address = data.replace(/^bitcoin:/i, '').split('?')[0];
+      setBtcAddress(address);
+      setActiveTab('onchain');
+      return;
+    }
+
+    // LNURL - redirect to lnurl page
+    if (lowerData.startsWith('lnurl')) {
+      router.push(`/lnurl?lnurl=${encodeURIComponent(data)}`);
+      return;
+    }
+
+    // Default: try as invoice
+    setInvoice(data);
+    setActiveTab('invoice');
+  };
+
   const isTestnet = chain.toLowerCase().includes('testnet');
   const addressPlaceholder = isTestnet ? 'tb1...' : 'bc1...';
 
   // Invoice form
   const [invoice, setInvoice] = useState('');
+  const [decodedInvoice, setDecodedInvoice] = useState<{
+    description: string;
+    amountMsat?: number;
+    expiry: number;
+    timestamp: number;
+    paymentHash: string;
+  } | null>(null);
+  const [decoding, setDecoding] = useState(false);
+
+  // Decode invoice when it changes
+  useEffect(() => {
+    const decode = async () => {
+      if (!invoice || invoice.length < 20) {
+        setDecodedInvoice(null);
+        return;
+      }
+
+      // Check if it looks like a valid invoice
+      const lower = invoice.toLowerCase().trim();
+      if (!lower.startsWith('lnbc') && !lower.startsWith('lntb') && !lower.startsWith('lnbcrt')) {
+        setDecodedInvoice(null);
+        return;
+      }
+
+      setDecoding(true);
+      try {
+        const decoded = await decodeInvoice({ invoice: invoice.trim() });
+        setDecodedInvoice(decoded);
+      } catch (error) {
+        console.error('Failed to decode invoice:', error);
+        setDecodedInvoice(null);
+      } finally {
+        setDecoding(false);
+      }
+    };
+
+    // Debounce the decode call
+    const timeout = setTimeout(decode, 300);
+    return () => clearTimeout(timeout);
+  }, [invoice]);
 
   // Offer form
   const [offer, setOffer] = useState('');
@@ -186,10 +314,19 @@ export default function SendPage() {
 
   return (
     <div className="space-y-4 md:space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{t('title')}</h1>
-        <p className="mt-1 text-sm md:text-base text-muted-foreground">{t('subtitle')}</p>
+      {/* Header with Scan Button */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{t('title')}</h1>
+          <p className="mt-1 text-sm md:text-base text-muted-foreground">{t('subtitle')}</p>
+        </div>
+        <button
+          onClick={() => setScannerOpen(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-sm shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors shrink-0"
+        >
+          <ScanLine className="h-5 w-5" />
+          <span className="hidden sm:inline">{ts('scan')}</span>
+        </button>
       </div>
 
       {/* Tab Switcher */}
@@ -227,13 +364,81 @@ export default function SendPage() {
                 />
               </div>
 
+              {/* Decoded Invoice Info */}
+              {decoding && (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-sm text-muted-foreground">{t('decoding')}</span>
+                </div>
+              )}
+
+              {decodedInvoice && !decoding && (
+                <div className="rounded-xl bg-success/5 border border-success/20 p-4 space-y-3">
+                  <div className="flex items-center gap-2 text-success">
+                    <Check className="h-4 w-4" />
+                    <span className="text-sm font-medium">{t('invoiceDecoded')}</span>
+                  </div>
+
+                  {/* Amount */}
+                  {decodedInvoice.amountMsat !== undefined && decodedInvoice.amountMsat > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Zap className="h-4 w-4" />
+                        <span className="text-sm">{t('amount')}</span>
+                      </div>
+                      <span className="text-lg font-bold text-foreground">
+                        {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))} sats
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  {decodedInvoice.description && (
+                    <div className="flex items-start gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <div className="flex-1">
+                        <span className="text-xs text-muted-foreground block">{t('description')}</span>
+                        <span className="text-sm">{decodedInvoice.description}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Expiry */}
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      <span>{t('expiry')}</span>
+                    </div>
+                    <span className={cn(
+                      ((decodedInvoice.timestamp + decodedInvoice.expiry) * 1000) < Date.now()
+                        ? 'text-destructive'
+                        : 'text-foreground'
+                    )}>
+                      {((decodedInvoice.timestamp + decodedInvoice.expiry) * 1000) < Date.now()
+                        ? t('expired')
+                        : new Date((decodedInvoice.timestamp + decodedInvoice.expiry) * 1000).toLocaleString()}
+                    </span>
+                  </div>
+
+                  {/* Payment Hash (truncated) */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Hash className="h-3 w-3" />
+                    <span className="font-mono truncate">{decodedInvoice.paymentHash}</span>
+                  </div>
+                </div>
+              )}
+
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !!(decodedInvoice && ((decodedInvoice.timestamp + decodedInvoice.expiry) * 1000) < Date.now())}
                 className="btn-gradient w-full flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
+                ) : decodedInvoice && decodedInvoice.amountMsat ? (
+                  <>
+                    <Send className="h-5 w-5" /> {t('pay')} {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))} sats
+                  </>
                 ) : (
                   <>
                     <Send className="h-5 w-5" /> {t('payInvoice')}
@@ -275,12 +480,17 @@ export default function SendPage() {
                   {t('amountSats')} *
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="0"
                   value={offerAmount}
-                  onChange={(e) => setOfferAmount(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setOfferAmount(value);
+                  }}
                   className="glass-input w-full px-4 py-3.5 text-lg font-mono"
-                  min="1"
+                  autoComplete="off"
                 />
               </div>
 
@@ -346,12 +556,17 @@ export default function SendPage() {
                   {t('amountSats')} *
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="0"
                   value={lnAddressAmount}
-                  onChange={(e) => setLnAddressAmount(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setLnAddressAmount(value);
+                  }}
                   className="glass-input w-full px-4 py-3.5 text-lg font-mono"
-                  min="1"
+                  autoComplete="off"
                 />
               </div>
 
@@ -417,12 +632,17 @@ export default function SendPage() {
                   {t('amountSats')} *
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="0"
                   value={btcAmount}
-                  onChange={(e) => setBtcAmount(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setBtcAmount(value);
+                  }}
                   className="glass-input w-full px-4 py-3.5 text-lg font-mono"
-                  min="1"
+                  autoComplete="off"
                 />
               </div>
 
@@ -431,12 +651,17 @@ export default function SendPage() {
                   {t('feeRate')}
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder={t('feeRateAuto')}
                   value={btcFeeRate}
-                  onChange={(e) => setBtcFeeRate(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setBtcFeeRate(value);
+                  }}
                   className="glass-input w-full px-4 py-3"
-                  min="1"
+                  autoComplete="off"
                 />
               </div>
 
@@ -495,6 +720,9 @@ export default function SendPage() {
           </div>
         </div>
       )}
+
+      {/* QR Scanner */}
+      <QRScanner open={scannerOpen} onClose={() => setScannerOpen(false)} onScan={handleScan} />
     </div>
   );
 }

@@ -9,16 +9,11 @@ import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 import { useTranslations } from 'next-intl';
 
 interface DecodedInvoice {
-  prefix: string;
-  timestamp: number;
-  nodeId: string;
-  serialized: string;
   description: string;
-  paymentHash: string;
-  expiry: number;
-  minFinalCltvExpiry: number;
   amountMsat?: number;
-  [key: string]: unknown;
+  expiry: number;
+  timestamp: number;
+  paymentHash: string;
 }
 
 interface DecodedOffer {
@@ -238,12 +233,6 @@ export default function ToolsPage() {
                         {new Date(decodedInvoice.timestamp * 1000).toLocaleDateString()}
                       </p>
                     </div>
-                  </div>
-
-                  {/* Node ID */}
-                  <div className="rounded-xl bg-white/5 p-4">
-                    <p className="text-xs text-muted-foreground mb-1">{t('destinationNode')}</p>
-                    <p className="font-mono text-xs break-all">{decodedInvoice.nodeId}</p>
                   </div>
 
                   {/* Raw data for debugging */}

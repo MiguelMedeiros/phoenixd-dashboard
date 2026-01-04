@@ -242,6 +242,7 @@ describe('truncateMiddle utility', () => {
 
 describe('copyToClipboard utility', () => {
   let mockClipboard: { writeText: ReturnType<typeof vi.fn> };
+  let originalIsSecureContext: boolean;
 
   beforeEach(() => {
     mockClipboard = {
@@ -249,6 +250,22 @@ describe('copyToClipboard utility', () => {
     };
     Object.assign(navigator, {
       clipboard: mockClipboard,
+    });
+    // Mock isSecureContext to true so clipboard API is used
+    originalIsSecureContext = window.isSecureContext;
+    Object.defineProperty(window, 'isSecureContext', {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    // Restore original isSecureContext
+    Object.defineProperty(window, 'isSecureContext', {
+      value: originalIsSecureContext,
+      writable: true,
+      configurable: true,
     });
   });
 
@@ -289,8 +306,9 @@ describe('copyToClipboard utility', () => {
   it('should handle clipboard failure gracefully', async () => {
     mockClipboard.writeText.mockRejectedValue(new Error('Clipboard access denied'));
 
-    // Function should not throw, it catches errors silently for better UX
-    await expect(copyToClipboard('test')).resolves.toBeUndefined();
+    // Function should not throw, it returns false on failure
+    const result = await copyToClipboard('test');
+    expect(result).toBe(false);
   });
 
   it('should return a Promise', () => {

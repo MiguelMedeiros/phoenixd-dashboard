@@ -69,3 +69,55 @@ export function getMempoolUrl(chain: string, txId?: string): string {
 
   return baseUrl;
 }
+
+export type ParsedPaymentRequest =
+  | { type: 'invoice'; invoice: string }
+  | { type: 'offer'; offer: string }
+  | { type: 'address'; address: string }
+  | { type: 'btcaddress'; btcaddress: string }
+  | { type: 'lnurl'; lnurl: string }
+  | { type: 'unknown' };
+
+export function parsePaymentRequest(data: string): ParsedPaymentRequest {
+  const lowerData = data.toLowerCase().trim();
+
+  // Lightning invoice (lnbc, lntb, lnbcrt)
+  if (
+    lowerData.startsWith('lnbc') ||
+    lowerData.startsWith('lntb') ||
+    lowerData.startsWith('lnbcrt') ||
+    lowerData.startsWith('lightning:')
+  ) {
+    const invoiceData = data.replace(/^lightning:/i, '');
+    return { type: 'invoice', invoice: invoiceData };
+  }
+
+  // BOLT12 Offer (lno)
+  if (lowerData.startsWith('lno')) {
+    return { type: 'offer', offer: data };
+  }
+
+  // Lightning Address (contains @)
+  if (data.includes('@') && !data.includes('://')) {
+    return { type: 'address', address: data };
+  }
+
+  // Bitcoin address (bc1, 1, 3, tb1)
+  if (
+    lowerData.startsWith('bc1') ||
+    lowerData.startsWith('tb1') ||
+    lowerData.startsWith('1') ||
+    lowerData.startsWith('3') ||
+    lowerData.startsWith('bitcoin:')
+  ) {
+    const address = data.replace(/^bitcoin:/i, '').split('?')[0];
+    return { type: 'btcaddress', btcaddress: address };
+  }
+
+  // LNURL
+  if (lowerData.startsWith('lnurl')) {
+    return { type: 'lnurl', lnurl: data };
+  }
+
+  return { type: 'unknown' };
+}

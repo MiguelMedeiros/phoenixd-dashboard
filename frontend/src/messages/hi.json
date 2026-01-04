@@ -108,6 +108,7 @@
     "createOffer": "ऑफर बनाएं",
     "oneTimeBolt11": "एक बार का Bolt11",
     "reusableBolt12": "पुन: प्रयोज्य Bolt12",
+    "offerExplanation": "BOLT12 ऑफर स्थायी भुगतान लिंक की तरह हैं। समाप्त हो जाने वाले इनवॉइस के विपरीत, एक ऑफर एक बार साझा करके कोई भी कई बार भुगतान के लिए उपयोग कर सकता है। दान, टिप्स या आवर्ती भुगतान के लिए बिल्कुल सही।",
     "amountSats": "राशि (सैट्स)",
     "whatIsThisFor": "यह भुगतान किसके लिए है?",
     "describeThisOffer": "इस ऑफर का वर्णन करें...",
@@ -121,6 +122,7 @@
     "copyInvoice": "इनवॉइस कॉपी करें",
     "copyOffer": "ऑफर कॉपी करें",
     "copied": "कॉपी हो गया!",
+    "share": "साझा करें",
     "noInvoiceYet": "अभी तक कोई इनवॉइस नहीं",
     "noOfferYet": "अभी तक कोई ऑफर नहीं",
     "fillAmountToGenerate": "राशि भरें और QR कोड जनरेट करने के लिए इनवॉइस बनाएं",
@@ -168,7 +170,17 @@
     "paymentSuccessful": "भुगतान सफल!",
     "sendPayment": "भुगतान भेजें",
     "sendBitcoin": "बिटकॉइन भेजें",
-    "payViaLnurl": "LNURL से भुगतान करें"
+    "payViaLnurl": "LNURL से भुगतान करें",
+    "amountSats": "राशि (sats)",
+    "message": "संदेश",
+    "bitcoinAddress": "बिटकॉइन पता",
+    "decoding": "इनवॉइस डिकोड हो रहा है...",
+    "invoiceDecoded": "इनवॉइस डिकोड किया गया",
+    "amount": "राशि",
+    "description": "विवरण",
+    "expiry": "समाप्ति",
+    "expired": "समाप्त",
+    "pay": "भुगतान करें"
   },
   "payments": {
     "title": "भुगतान",
@@ -357,7 +369,15 @@
     "thunderFlash": "गरज की चमक",
     "electricStorm": "विद्युत तूफान",
     "nightLightning": "रात की बिजली",
-    "skyThunder": "आकाश गर्जन"
+    "skyThunder": "आकाश गर्जन",
+    "notifications": "सूचनाएं",
+    "pushNotifications": "पुश सूचनाएं",
+    "notificationsEnabled": "जब आप सैट प्राप्त करेंगे तो आपको सूचित किया जाएगा",
+    "notificationsDisabled": "आने वाले भुगतानों की सूचना पाने के लिए सक्षम करें",
+    "notificationsDenied": "सूचनाएं आपके ब्राउज़र द्वारा अवरुद्ध हैं",
+    "notificationsBlocked": "सूचनाएं अवरुद्ध",
+    "enableInBrowser": "सूचनाएं सक्षम करने के लिए, कृपया इस साइट के लिए अपनी ब्राउज़र सेटिंग्स में अनुमति दें।",
+    "notificationsDescription": "सक्षम होने पर, जब भी आप Lightning भुगतान प्राप्त करेंगे, आपको ब्राउज़र पुश सूचनाएं मिलेंगी, भले ही टैब पृष्ठभूमि में हो।"
   },
   "nodeInfo": {
     "title": "नोड जानकारी",
@@ -383,6 +403,21 @@
     "hoursAgo": "{hours}घं पहले",
     "daysAgo": "{days}दि पहले",
     "youReceivedPayment": "आपको एक Lightning भुगतान मिला"
+  },
+  "scanner": {
+    "scanQrCode": "QR कोड स्कैन करें",
+    "scanToPayDescription": "कैमरे को QR कोड की ओर रखें",
+    "scanInvoiceOrAddress": "इनवॉइस, ऑफर या LN पता स्कैन करें",
+    "startingCamera": "कैमरा शुरू हो रहा है...",
+    "cameraPermissionDenied": "कैमरा अनुमति अस्वीकृत।",
+    "noCameraFound": "कोई कैमरा नहीं मिला।",
+    "cameraError": "कैमरा एक्सेस नहीं हो सका।",
+    "tryAgain": "पुनः प्रयास करें",
+    "scan": "स्कैन",
+    "scanToPay": "भुगतान के लिए स्कैन करें",
+    "pay": "भुगतान",
+    "invalidQrCode": "अमान्य QR कोड। Lightning इनवॉइस, ऑफर या पता स्कैन करें।",
+    "payManually": "मैन्युअल रूप से दर्ज करें"
   },
   "lockScreen": {
     "title": "Phoenixd",

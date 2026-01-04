@@ -108,6 +108,7 @@
     "createOffer": "Angebot erstellen",
     "oneTimeBolt11": "Einmalige Bolt11",
     "reusableBolt12": "Wiederverwendbare Bolt12",
+    "offerExplanation": "BOLT12-Angebote sind wie permanente Zahlungslinks. Im Gegensatz zu Rechnungen, die ablaufen, kann ein Angebot einmal geteilt und von jedem mehrfach verwendet werden, um Sie zu bezahlen. Perfekt für Spenden, Trinkgelder oder wiederkehrende Zahlungen.",
     "amountSats": "Betrag (Sats)",
     "whatIsThisFor": "Wofür ist diese Zahlung?",
     "describeThisOffer": "Beschreiben Sie dieses Angebot...",
@@ -121,6 +122,7 @@
     "copyInvoice": "Rechnung kopieren",
     "copyOffer": "Angebot kopieren",
     "copied": "Kopiert!",
+    "share": "Teilen",
     "noInvoiceYet": "Noch keine Rechnung",
     "noOfferYet": "Noch kein Angebot",
     "fillAmountToGenerate": "Geben Sie den Betrag ein und erstellen Sie eine Rechnung, um einen QR-Code zu generieren",
@@ -168,7 +170,17 @@
     "paymentSuccessful": "Zahlung erfolgreich!",
     "sendPayment": "Zahlung senden",
     "sendBitcoin": "Bitcoin senden",
-    "payViaLnurl": "Via LNURL bezahlen"
+    "payViaLnurl": "Via LNURL bezahlen",
+    "amountSats": "Betrag (sats)",
+    "message": "Nachricht",
+    "bitcoinAddress": "Bitcoin-Adresse",
+    "decoding": "Rechnung wird dekodiert...",
+    "invoiceDecoded": "Rechnung dekodiert",
+    "amount": "Betrag",
+    "description": "Beschreibung",
+    "expiry": "Läuft ab",
+    "expired": "Abgelaufen",
+    "pay": "Bezahlen"
   },
   "payments": {
     "title": "Zahlungen",
@@ -357,7 +369,15 @@
     "thunderFlash": "Donnerblitz",
     "electricStorm": "Elektrischer Sturm",
     "nightLightning": "Nachtblitz",
-    "skyThunder": "Himmelsdonner"
+    "skyThunder": "Himmelsdonner",
+    "notifications": "Benachrichtigungen",
+    "pushNotifications": "Push-Benachrichtigungen",
+    "notificationsEnabled": "Sie werden benachrichtigt, wenn Sie Sats erhalten",
+    "notificationsDisabled": "Aktivieren Sie, um über eingehende Zahlungen benachrichtigt zu werden",
+    "notificationsDenied": "Benachrichtigungen sind von Ihrem Browser blockiert",
+    "notificationsBlocked": "Benachrichtigungen Blockiert",
+    "enableInBrowser": "Um Benachrichtigungen zu aktivieren, erlauben Sie diese in den Browsereinstellungen für diese Website.",
+    "notificationsDescription": "Wenn aktiviert, erhalten Sie Browser-Push-Benachrichtigungen, wann immer Sie eine Lightning-Zahlung erhalten, auch wenn der Tab im Hintergrund ist."
   },
   "nodeInfo": {
     "title": "Node-Informationen",
@@ -383,6 +403,21 @@
     "hoursAgo": "vor {hours}h",
     "daysAgo": "vor {days}T",
     "youReceivedPayment": "Sie haben eine Lightning-Zahlung erhalten"
+  },
+  "scanner": {
+    "scanQrCode": "QR-Code scannen",
+    "scanToPayDescription": "Kamera auf QR-Code richten",
+    "scanInvoiceOrAddress": "Rechnung, Angebot oder LN-Adresse scannen",
+    "startingCamera": "Kamera wird gestartet...",
+    "cameraPermissionDenied": "Kamerazugriff verweigert.",
+    "noCameraFound": "Keine Kamera gefunden.",
+    "cameraError": "Kamerazugriff fehlgeschlagen.",
+    "tryAgain": "Erneut versuchen",
+    "scan": "Scannen",
+    "scanToPay": "Scannen zum Bezahlen",
+    "pay": "Bezahlen",
+    "invalidQrCode": "Ungültiger QR-Code. Scannen Sie eine Lightning-Rechnung, ein Angebot oder eine Adresse.",
+    "payManually": "Manuell eingeben"
   },
   "lockScreen": {
     "title": "Phoenixd",
