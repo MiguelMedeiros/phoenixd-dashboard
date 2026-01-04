@@ -72,7 +72,7 @@ services:
       - ./backend/src:/app/src:ro
       - ./data/phoenixd:/phoenix-data:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./tor:/tor-config:ro
+      - ./services/tor:/tor-config:ro
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s
@@ -101,7 +101,7 @@ services:
   # Tor SOCKS5 Proxy - managed dynamically by backend
   tor:
     build:
-      context: ./tor
+      context: ./services/tor
       dockerfile: Dockerfile
     container_name: phoenixd-tor
     restart: unless-stopped

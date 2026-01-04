@@ -1,0 +1,89 @@
+# Phoenixd Dashboard - Cursor Rules
+
+## /check Command
+
+When the user types `/check`, run all CI/CD checks locally before committing. Execute these commands in order:
+
+### Quick Check (default)
+
+```bash
+# From project root
+cd /Users/miguelmedeiros/code/phoenixd-dashboard
+
+# 1. Backend checks
+cd backend && npm run db:generate && npm run format:check && npm run lint && npm run test && npm run build && cd ..
+
+# 2. Frontend checks
+cd frontend && npm run format:check && npm run lint && npm run test && npm run build && cd ..
+```
+
+### Full Check (with E2E)
+
+If user requests `/check full` or `/check e2e`, also run:
+
+```bash
+cd e2e && npm run test && cd ..
+```
+
+### Check Summary
+
+After running checks, provide a summary:
+
+- ✅ Format check passed
+- ✅ Lint passed
+- ✅ Tests passed
+- ✅ Build successful
+
+If any check fails, stop and report the error immediately.
+
+---
+
+## Docker Development Workflow
+
+When modifying any Docker-related files (Dockerfile, docker-compose.yml, entrypoint scripts, or configuration files in /services/\*), always:
+
+1. **Rebuild the affected containers** after making changes:
+
+   ```bash
+   docker compose build --no-cache <service-name>
+   ```
+
+2. **Recreate and restart the containers** to apply changes:
+
+   ```bash
+   docker compose up -d --force-recreate <service-name>
+   ```
+
+3. **For changes affecting multiple services**, rebuild all:
+
+   ```bash
+   docker compose down
+   docker compose build --no-cache
+   docker compose up -d
+   ```
+
+4. **Verify the containers are running correctly**:
+   ```bash
+   docker compose ps
+   docker compose logs -f <service-name>
+   ```
+
+## Service-Specific Commands
+
+- **Backend changes**: `docker compose up -d --build backend`
+- **Frontend changes**: `docker compose up -d --build frontend`
+- **Tor changes**: `docker compose --profile tor up -d --build tor`
+- **All services**: `docker compose down && docker compose up -d --build`
+
+## Important Notes
+
+- The Tor service uses a profile (`--profile tor`), so include it when working with Tor
+- Always check logs after rebuilding to ensure services started correctly
+- Use `docker compose logs -f` to follow logs in real-time
+
+## File Structure
+
+Services configuration files are organized under `/services/`:
+
+- `/services/tor/` - Tor SOCKS5 proxy configuration
+- Future: `/services/tailscale/`, `/services/cloudflared/`
