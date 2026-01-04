@@ -29,6 +29,14 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Build-time args for Next.js public environment variables
+ARG NEXT_PUBLIC_API_URL=http://localhost:4001
+ARG NEXT_PUBLIC_WS_URL=ws://localhost:4001
+
+# Set as ENV so they're available during build
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+
 RUN npm run build
 
 # Production image

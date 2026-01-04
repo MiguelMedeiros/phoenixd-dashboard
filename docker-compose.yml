@@ -61,6 +61,7 @@ services:
       PHOENIXD_URL: http://phoenixd:9740
       PHOENIXD_PASSWORD: ${PHOENIXD_PASSWORD:-}
       DOCKER_HOST: unix:///var/run/docker.sock
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     ports:
       - '4001:4000'
     depends_on:
@@ -83,14 +84,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:4001}
     container_name: phoenixd-frontend
     restart: unless-stopped
     networks:
       - phoenixd-network
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_API_URL: http://localhost:4001
-      NEXT_PUBLIC_WS_URL: ws://localhost:4001
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4001}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:4001}
     ports:
       - '3000:3000'
     depends_on:
