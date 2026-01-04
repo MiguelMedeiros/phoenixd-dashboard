@@ -28,11 +28,7 @@ interface CurrencyProviderProps {
 export function CurrencyProvider({ children }: CurrencyProviderProps) {
   const currencyState = useCurrency();
 
-  return (
-    <CurrencyContext.Provider value={currencyState}>
-      {children}
-    </CurrencyContext.Provider>
-  );
+  return <CurrencyContext.Provider value={currencyState}>{children}</CurrencyContext.Provider>;
 }
 
 // Re-export types and constants for convenience

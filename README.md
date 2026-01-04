@@ -36,6 +36,8 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✓ **Tools** · Decode invoices, estimate liquidity fees, LNURL support
 
+✓ **Currency** · Display values in 10+ fiat currencies (USD, EUR, BRL, etc.)
+
 ✓ **PWA** · Install as native app — no app store required!
 
 ✓ **Remote** · Access from anywhere via Tailscale VPN

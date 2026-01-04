@@ -35,7 +35,8 @@ const PRICE_CACHE_KEY = 'phoenixd-btc-prices';
 const CACHE_DURATION = 60 * 1000; // 60 seconds
 
 // CoinGecko API endpoint for BTC prices
-const COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,brl,cad,gbp,jpy,aud,chf,mxn';
+const COINGECKO_API =
+  'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,brl,cad,gbp,jpy,aud,chf,mxn';
 
 export interface UseCurrencyReturn {
   currency: FiatCurrencyCode;
@@ -107,8 +108,7 @@ export function useCurrency(): UseCurrencyReturn {
   const fetchingRef = useRef(false);
 
   // Get currency info
-  const currencyInfo =
-    FIAT_CURRENCIES.find((c) => c.code === currency) || FIAT_CURRENCIES[0];
+  const currencyInfo = FIAT_CURRENCIES.find((c) => c.code === currency) || FIAT_CURRENCIES[0];
 
   // Load saved currency preference on mount
   useEffect(() => {

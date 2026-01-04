@@ -64,6 +64,33 @@ docker compose up -d
 
 ---
 
+## Dashboard Settings
+
+The Settings page provides access to various dashboard preferences:
+
+### Display Currency
+
+Choose how monetary values are displayed throughout the dashboard:
+
+- **BTC (sats)** - Default, shows values in satoshis
+- **Fiat currencies** - Real-time conversion using CoinGecko API
+
+**Supported currencies:** USD, EUR, BRL, CAD, GBP, JPY, AUD, CHF, MXN
+
+The preference is saved locally and prices are cached for 60 seconds to avoid rate limiting.
+
+### Other Settings
+
+- **Password Protection** - Secure your dashboard with a password
+- **Auto-lock** - Automatically lock after inactivity
+- **Lock Screen Background** - Choose from 6 animated backgrounds
+- **Push Notifications** - Get notified when you receive payments
+- **Tor Proxy** - Route traffic through Tor network
+- **Tailscale VPN** - Remote access from anywhere
+- **Theme** - Dark, Light, or Auto mode
+
+---
+
 ## Forgot Dashboard Password?
 
 Reset the password using the provided script:
