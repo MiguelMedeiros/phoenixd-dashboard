@@ -79,7 +79,8 @@ describe('Authentication & Security', () => {
       cy.visit('/');
       cy.wait(['@getAuthStatus', '@getNodeInfo', '@getBalance']);
 
-      cy.contains('Lightning Balance').should('be.visible');
+      // Dashboard should be visible (check for Receive button which is visible on both layouts)
+      cy.contains('button', 'Receive').should('be.visible');
     });
 
     it('does not show lock button in header when no password is set', () => {

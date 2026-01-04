@@ -6,6 +6,15 @@
 
 import './commands';
 
+// Clear state before each test to ensure clean slate
+beforeEach(() => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+  cy.window().then((win) => {
+    win.sessionStorage.clear();
+  });
+});
+
 // Prevent uncaught exceptions from failing tests
 Cypress.on('uncaught:exception', (err) => {
   // Ignore ResizeObserver errors (common in React apps)

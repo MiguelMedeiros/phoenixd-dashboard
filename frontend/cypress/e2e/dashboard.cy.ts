@@ -11,7 +11,7 @@ describe('Dashboard Overview', () => {
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels', '@getIncomingPayments', '@getOutgoingPayments']);
 
       // Check balance section exists
-      cy.contains('Lightning Balance').should('be.visible');
+      cy.contains('button', 'Receive').should('be.visible');
     });
 
     it('displays the balance amount', () => {
@@ -121,7 +121,7 @@ describe('Dashboard Overview', () => {
       cy.visit('/');
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      cy.contains('Lightning Balance').should('be.visible');
+      cy.contains('button', 'Receive').should('be.visible');
     });
 
     it('displays correctly on tablet', () => {
@@ -129,7 +129,7 @@ describe('Dashboard Overview', () => {
       cy.visit('/');
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      cy.contains('Lightning Balance').should('be.visible');
+      cy.contains('button', 'Receive').should('be.visible');
     });
   });
 });

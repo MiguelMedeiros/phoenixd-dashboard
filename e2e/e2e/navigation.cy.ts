@@ -9,7 +9,8 @@ describe('Navigation', () => {
       cy.visit('/');
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      cy.contains('Lightning Balance').should('be.visible');
+      // Check dashboard loaded (Receive button visible on both layouts)
+      cy.contains('button', 'Receive').should('be.visible');
     });
 
     it('loads receive page directly', () => {
