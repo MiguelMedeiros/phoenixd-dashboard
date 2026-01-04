@@ -17,7 +17,14 @@ import {
   FileText,
   Hash,
 } from 'lucide-react';
-import { payInvoice, payOffer, payLnAddress, sendToAddress, getNodeInfo, decodeInvoice } from '@/lib/api';
+import {
+  payInvoice,
+  payOffer,
+  payLnAddress,
+  sendToAddress,
+  getNodeInfo,
+  decodeInvoice,
+} from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { cn, formatSats } from '@/lib/utils';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
@@ -397,7 +404,9 @@ export default function SendPage() {
                     <div className="flex items-start gap-2">
                       <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
                       <div className="flex-1">
-                        <span className="text-xs text-muted-foreground block">{t('description')}</span>
+                        <span className="text-xs text-muted-foreground block">
+                          {t('description')}
+                        </span>
                         <span className="text-sm">{decodedInvoice.description}</span>
                       </div>
                     </div>
@@ -409,14 +418,18 @@ export default function SendPage() {
                       <Clock className="h-4 w-4" />
                       <span>{t('expiry')}</span>
                     </div>
-                    <span className={cn(
-                      ((decodedInvoice.timestamp + decodedInvoice.expiry) * 1000) < Date.now()
-                        ? 'text-destructive'
-                        : 'text-foreground'
-                    )}>
-                      {((decodedInvoice.timestamp + decodedInvoice.expiry) * 1000) < Date.now()
+                    <span
+                      className={cn(
+                        (decodedInvoice.timestamp + decodedInvoice.expiry) * 1000 < Date.now()
+                          ? 'text-destructive'
+                          : 'text-foreground'
+                      )}
+                    >
+                      {(decodedInvoice.timestamp + decodedInvoice.expiry) * 1000 < Date.now()
                         ? t('expired')
-                        : new Date((decodedInvoice.timestamp + decodedInvoice.expiry) * 1000).toLocaleString()}
+                        : new Date(
+                            (decodedInvoice.timestamp + decodedInvoice.expiry) * 1000
+                          ).toLocaleString()}
                     </span>
                   </div>
 
@@ -430,14 +443,21 @@ export default function SendPage() {
 
               <button
                 type="submit"
-                disabled={loading || !!(decodedInvoice && ((decodedInvoice.timestamp + decodedInvoice.expiry) * 1000) < Date.now())}
+                disabled={
+                  loading ||
+                  !!(
+                    decodedInvoice &&
+                    (decodedInvoice.timestamp + decodedInvoice.expiry) * 1000 < Date.now()
+                  )
+                }
                 className="btn-gradient w-full flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : decodedInvoice && decodedInvoice.amountMsat ? (
                   <>
-                    <Send className="h-5 w-5" /> {t('pay')} {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))} sats
+                    <Send className="h-5 w-5" /> {t('pay')}{' '}
+                    {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))} sats
                   </>
                 ) : (
                   <>

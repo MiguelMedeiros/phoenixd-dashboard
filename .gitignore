@@ -50,3 +50,5 @@ prisma/migrations/*.sql.backup
 
 # Backups (contain sensitive data - NEVER commit!)
 backups/
+
+.cursor/plans

@@ -421,20 +421,25 @@ describe('API Client', () => {
   describe('Decode', () => {
     describe('decodeInvoice', () => {
       it('should decode bolt11 invoice', async () => {
-        const mockDecoded = {
-          prefix: 'lnbc',
-          timestamp: 1700000000,
-          nodeId: '02abc...',
-          description: 'Test',
+        const mockPhoenixdResponse = {
+          chain: 'mainnet',
+          amount: 100000,
           paymentHash: 'a'.repeat(64),
-          expiry: 3600,
+          description: 'Test payment',
+          minFinalCltvExpiryDelta: 144,
+          paymentSecret: 'b'.repeat(64),
+          timestampSeconds: 1700000000,
         };
 
-        mockFetch.mockResolvedValueOnce(mockSuccessResponse(mockDecoded));
+        mockFetch.mockResolvedValueOnce(mockSuccessResponse(mockPhoenixdResponse));
 
         const result = await decodeInvoice({ invoice: 'lnbc1...' });
 
-        expect(result.prefix).toBe('lnbc');
+        expect(result.paymentHash).toBe('a'.repeat(64));
+        expect(result.description).toBe('Test payment');
+        expect(result.timestamp).toBe(1700000000);
+        expect(result.amountMsat).toBe(100000);
+        expect(result.expiry).toBe(3600);
       });
     });
 

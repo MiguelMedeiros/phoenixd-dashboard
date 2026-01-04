@@ -258,134 +258,136 @@ export default function ReceivePage() {
             (invoiceResult || isPaid) &&
             createPortal(
               <div className="md:hidden fixed inset-0 z-[9999] bg-background flex flex-col min-h-screen min-h-[100dvh]">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
-                <button
-                  onClick={resetInvoice}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-                <div className="flex items-center gap-2">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
+                  <button
+                    onClick={resetInvoice}
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {isPaid ? (
+                      <>
+                        <div className="h-2.5 w-2.5 rounded-full bg-success animate-pulse" />
+                        <span className="font-medium text-success text-sm">
+                          {t('paymentReceived')}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="h-2.5 w-2.5 rounded-full bg-warning animate-pulse" />
+                        <span className="font-medium text-sm">{t('waiting')}</span>
+                      </>
+                    )}
+                  </div>
+                  <button
+                    onClick={resetInvoice}
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+                  >
+                    <RefreshCw className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-8">
                   {isPaid ? (
+                    /* Payment Received */
                     <>
-                      <div className="h-2.5 w-2.5 rounded-full bg-success animate-pulse" />
-                      <span className="font-medium text-success text-sm">{t('paymentReceived')}</span>
+                      <div className="relative mb-6">
+                        <div className="absolute inset-0 rounded-full bg-success/20 animate-ping" />
+                        <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-success to-emerald-600 shadow-lg shadow-success/30">
+                          <CheckCircle2 className="h-12 w-12 text-white" strokeWidth={2.5} />
+                        </div>
+                      </div>
+                      <div className="text-center space-y-2 mb-8">
+                        <h2 className="text-xl font-bold text-success flex items-center justify-center gap-2">
+                          <PartyPopper className="h-5 w-5" />
+                          {t('paymentReceived')}
+                          <PartyPopper className="h-5 w-5 scale-x-[-1]" />
+                        </h2>
+                        <p className="text-4xl font-bold font-mono text-foreground">
+                          +{formatSats(paidAmount || parseInt(invoiceAmount))}
+                        </p>
+                      </div>
                     </>
                   ) : (
+                    /* Waiting for Payment */
                     <>
-                      <div className="h-2.5 w-2.5 rounded-full bg-warning animate-pulse" />
-                      <span className="font-medium text-sm">{t('waiting')}</span>
+                      {/* Amount */}
+                      <div className="text-center mb-6">
+                        <p className="text-sm text-muted-foreground mb-1">{t('amountSats')}</p>
+                        <p className="text-3xl font-bold font-mono text-lightning">
+                          {formatSats(parseInt(invoiceAmount))}
+                        </p>
+                        {invoiceDescription && (
+                          <p className="text-sm text-muted-foreground mt-2 max-w-xs">
+                            {invoiceDescription}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Large QR Code */}
+                      <div className="p-4 bg-white rounded-3xl shadow-2xl mb-6">
+                        <QRCodeSVG
+                          value={invoiceResult!.serialized.toUpperCase()}
+                          size={260}
+                          level="M"
+                          includeMargin={false}
+                          bgColor="#FFFFFF"
+                          fgColor="#000000"
+                        />
+                      </div>
                     </>
                   )}
                 </div>
-                <button
-                  onClick={resetInvoice}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
-                >
-                  <RefreshCw className="h-5 w-5" />
-                </button>
-              </div>
 
-              {/* Main Content */}
-              <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-8">
-                {isPaid ? (
-                  /* Payment Received */
-                  <>
-                    <div className="relative mb-6">
-                      <div className="absolute inset-0 rounded-full bg-success/20 animate-ping" />
-                      <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-success to-emerald-600 shadow-lg shadow-success/30">
-                        <CheckCircle2 className="h-12 w-12 text-white" strokeWidth={2.5} />
-                      </div>
-                    </div>
-                    <div className="text-center space-y-2 mb-8">
-                      <h2 className="text-xl font-bold text-success flex items-center justify-center gap-2">
-                        <PartyPopper className="h-5 w-5" />
-                        {t('paymentReceived')}
-                        <PartyPopper className="h-5 w-5 scale-x-[-1]" />
-                      </h2>
-                      <p className="text-4xl font-bold font-mono text-foreground">
-                        +{formatSats(paidAmount || parseInt(invoiceAmount))}
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  /* Waiting for Payment */
-                  <>
-                    {/* Amount */}
-                    <div className="text-center mb-6">
-                      <p className="text-sm text-muted-foreground mb-1">{t('amountSats')}</p>
-                      <p className="text-3xl font-bold font-mono text-lightning">
-                        {formatSats(parseInt(invoiceAmount))}
-                      </p>
-                      {invoiceDescription && (
-                        <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-                          {invoiceDescription}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Large QR Code */}
-                    <div className="p-4 bg-white rounded-3xl shadow-2xl mb-6">
-                      <QRCodeSVG
-                        value={invoiceResult!.serialized.toUpperCase()}
-                        size={260}
-                        level="M"
-                        includeMargin={false}
-                        bgColor="#FFFFFF"
-                        fgColor="#000000"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Bottom Actions */}
-              <div className="p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] space-y-3">
-                {isPaid ? (
-                  <button
-                    onClick={resetInvoice}
-                    className="btn-gradient w-full flex items-center justify-center gap-2 py-4 text-base font-semibold"
-                  >
-                    <Zap className="h-5 w-5" />
-                    {t('createAnother')}
-                  </button>
-                ) : (
-                  <>
+                {/* Bottom Actions */}
+                <div className="p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] space-y-3">
+                  {isPaid ? (
                     <button
-                      onClick={() => copyToClipboard(invoiceResult!.serialized)}
+                      onClick={resetInvoice}
                       className="btn-gradient w-full flex items-center justify-center gap-2 py-4 text-base font-semibold"
                     >
-                      {copied ? (
-                        <>
-                          <Check className="h-5 w-5 text-white" />
-                          {t('copied')}
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-5 w-5" />
-                          {t('copyInvoice')}
-                        </>
-                      )}
+                      <Zap className="h-5 w-5" />
+                      {t('createAnother')}
                     </button>
-                    {typeof navigator !== 'undefined' && navigator.share && (
+                  ) : (
+                    <>
                       <button
-                        onClick={() => {
-                          navigator.share({
-                            title: t('invoice'),
-                            text: invoiceResult!.serialized,
-                          });
-                        }}
-                        className="glass-button w-full flex items-center justify-center gap-2 py-4 text-base"
+                        onClick={() => copyToClipboard(invoiceResult!.serialized)}
+                        className="btn-gradient w-full flex items-center justify-center gap-2 py-4 text-base font-semibold"
                       >
-                        <Share2 className="h-5 w-5" />
-                        {t('share')}
+                        {copied ? (
+                          <>
+                            <Check className="h-5 w-5 text-white" />
+                            {t('copied')}
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-5 w-5" />
+                            {t('copyInvoice')}
+                          </>
+                        )}
                       </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>,
+                      {typeof navigator !== 'undefined' && navigator.share && (
+                        <button
+                          onClick={() => {
+                            navigator.share({
+                              title: t('invoice'),
+                              text: invoiceResult!.serialized,
+                            });
+                          }}
+                          className="glass-button w-full flex items-center justify-center gap-2 py-4 text-base"
+                        >
+                          <Share2 className="h-5 w-5" />
+                          {t('share')}
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>,
               document.body
             )}
 
@@ -399,7 +401,9 @@ export default function ReceivePage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-xs md:text-sm">{t('createInvoice')}</h3>
-                  <p className="text-[10px] md:text-xs text-muted-foreground">{t('oneTimeBolt11')}</p>
+                  <p className="text-[10px] md:text-xs text-muted-foreground">
+                    {t('oneTimeBolt11')}
+                  </p>
                 </div>
               </div>
 
@@ -589,86 +593,86 @@ export default function ReceivePage() {
             offerResult &&
             createPortal(
               <div className="md:hidden fixed inset-0 z-[9999] bg-background flex flex-col min-h-screen min-h-[100dvh]">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
-                <button
-                  onClick={resetOffer}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-success animate-pulse" />
-                  <span className="font-medium text-success text-sm">{t('bolt12Ready')}</span>
-                </div>
-                <button
-                  onClick={resetOffer}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
-                >
-                  <RefreshCw className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Main Content */}
-              <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-8">
-                {/* Description */}
-                <div className="text-center mb-6">
-                  <p className="text-sm text-muted-foreground mb-1">{t('offer')}</p>
-                  <p className="text-xl font-semibold text-accent">{t('reusableBolt12')}</p>
-                  {offerDescription && (
-                    <p className="text-sm text-muted-foreground mt-2 max-w-xs">
-                      {offerDescription}
-                    </p>
-                  )}
-                </div>
-
-                {/* Large QR Code */}
-                <div className="p-4 bg-white rounded-3xl shadow-2xl mb-6">
-                  <QRCodeSVG
-                    value={offerResult.toUpperCase()}
-                    size={260}
-                    level="M"
-                    includeMargin={false}
-                    bgColor="#FFFFFF"
-                    fgColor="#000000"
-                  />
-                </div>
-              </div>
-
-              {/* Bottom Actions */}
-              <div className="p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] space-y-3">
-                <button
-                  onClick={() => copyToClipboard(offerResult)}
-                  className="btn-gradient w-full flex items-center justify-center gap-2 py-4 text-base font-semibold"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-5 w-5 text-white" />
-                      {t('copied')}
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-5 w-5" />
-                      {t('copyOffer')}
-                    </>
-                  )}
-                </button>
-                {typeof navigator !== 'undefined' && navigator.share && (
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
                   <button
-                    onClick={() => {
-                      navigator.share({
-                        title: t('offer'),
-                        text: offerResult,
-                      });
-                    }}
-                    className="glass-button w-full flex items-center justify-center gap-2 py-4 text-base"
+                    onClick={resetOffer}
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
                   >
-                    <Share2 className="h-5 w-5" />
-                    {t('share')}
+                    <X className="h-5 w-5" />
                   </button>
-                )}
-              </div>
-            </div>,
+                  <div className="flex items-center gap-2">
+                    <div className="h-2.5 w-2.5 rounded-full bg-success animate-pulse" />
+                    <span className="font-medium text-success text-sm">{t('bolt12Ready')}</span>
+                  </div>
+                  <button
+                    onClick={resetOffer}
+                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+                  >
+                    <RefreshCw className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-8">
+                  {/* Description */}
+                  <div className="text-center mb-6">
+                    <p className="text-sm text-muted-foreground mb-1">{t('offer')}</p>
+                    <p className="text-xl font-semibold text-accent">{t('reusableBolt12')}</p>
+                    {offerDescription && (
+                      <p className="text-sm text-muted-foreground mt-2 max-w-xs">
+                        {offerDescription}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Large QR Code */}
+                  <div className="p-4 bg-white rounded-3xl shadow-2xl mb-6">
+                    <QRCodeSVG
+                      value={offerResult.toUpperCase()}
+                      size={260}
+                      level="M"
+                      includeMargin={false}
+                      bgColor="#FFFFFF"
+                      fgColor="#000000"
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom Actions */}
+                <div className="p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] space-y-3">
+                  <button
+                    onClick={() => copyToClipboard(offerResult)}
+                    className="btn-gradient w-full flex items-center justify-center gap-2 py-4 text-base font-semibold"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-5 w-5 text-white" />
+                        {t('copied')}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-5 w-5" />
+                        {t('copyOffer')}
+                      </>
+                    )}
+                  </button>
+                  {typeof navigator !== 'undefined' && navigator.share && (
+                    <button
+                      onClick={() => {
+                        navigator.share({
+                          title: t('offer'),
+                          text: offerResult,
+                        });
+                      }}
+                      className="glass-button w-full flex items-center justify-center gap-2 py-4 text-base"
+                    >
+                      <Share2 className="h-5 w-5" />
+                      {t('share')}
+                    </button>
+                  )}
+                </div>
+              </div>,
               document.body
             )}
 

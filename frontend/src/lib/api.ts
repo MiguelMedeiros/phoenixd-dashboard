@@ -281,7 +281,7 @@ export async function decodeInvoice(params: { invoice: string }): Promise<{
     method: 'POST',
     body: JSON.stringify(params),
   });
-  
+
   // Map phoenixd response to our expected format
   // Default expiry is 3600 seconds (1 hour) if not specified
   // amount from phoenixd is already in millisats

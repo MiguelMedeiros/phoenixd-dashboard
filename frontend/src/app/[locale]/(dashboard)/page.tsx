@@ -131,7 +131,6 @@ export default function OverviewPage() {
               <span className="text-base text-white/40">{tc('sats')}</span>
             </div>
           </div>
-
         </div>
 
         {/* Recent Payments */}
@@ -489,7 +488,6 @@ export default function OverviewPage() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }

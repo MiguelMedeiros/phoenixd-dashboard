@@ -1,11 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import {
-  Html5Qrcode,
-  Html5QrcodeScannerState,
-  Html5QrcodeSupportedFormats,
-} from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeScannerState, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { X, Camera, Loader2, AlertCircle, Zap, Keyboard } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
