@@ -180,8 +180,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           onNotificationRemove={handleNotificationRemove}
         />
 
-        {/* Page Content - Extra padding bottom for mobile nav, top for header spacing */}
-        <main className="flex-1 px-4 md:px-8 pt-4 md:pt-6 pb-24 md:pb-8">
+        {/* Page Content - Extra padding bottom for mobile nav */}
+        <main className="flex-1 px-4 md:px-8 pb-24 md:pb-8">
           <div className="relative z-10">{children}</div>
         </main>
       </div>

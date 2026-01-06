@@ -15,6 +15,8 @@ import { cn, getMempoolUrl } from '@/lib/utils';
 import { useCurrencyContext } from '@/components/currency-provider';
 import { useToast } from '@/hooks/use-toast';
 import { CloseChannelDialog } from '@/components/close-channel-dialog';
+import { PageHeader } from '@/components/page-header';
+import { StatCard, StatCardGrid } from '@/components/stat-card';
 import { useTranslations } from 'next-intl';
 
 export default function ChannelsPage() {
@@ -114,45 +116,30 @@ export default function ChannelsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
-        <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
-      </div>
+    <div className="pt-4 md:pt-6 space-y-6">
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="metric-card">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold">{formatValue(totalCapacity)}</span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-              <Layers className="h-5 w-5 text-primary" />
-            </div>
-          </div>
-          <span className="text-sm text-muted-foreground">{t('totalCapacity')}</span>
-        </div>
-
-        <div className="metric-card">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold value-highlight">{formatValue(totalBalance)}</span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-lightning/10">
-              <ArrowUpFromLine className="h-5 w-5 text-lightning" />
-            </div>
-          </div>
-          <span className="text-sm text-muted-foreground">{t('outbound')}</span>
-        </div>
-
-        <div className="metric-card">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold text-success">{formatValue(totalInbound)}</span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
-              <ArrowDownToLine className="h-5 w-5 text-success" />
-            </div>
-          </div>
-          <span className="text-sm text-muted-foreground">{t('inbound')}</span>
-        </div>
-      </div>
+      <StatCardGrid columns={3}>
+        <StatCard
+          label={t('totalCapacity')}
+          value={formatValue(totalCapacity)}
+          icon={Layers}
+          variant="primary"
+        />
+        <StatCard
+          label={t('outbound')}
+          value={formatValue(totalBalance)}
+          icon={ArrowUpFromLine}
+          variant="warning"
+        />
+        <StatCard
+          label={t('inbound')}
+          value={formatValue(totalInbound)}
+          icon={ArrowDownToLine}
+          variant="success"
+        />
+      </StatCardGrid>
 
       {/* Channels List */}
       {channels.length === 0 ? (

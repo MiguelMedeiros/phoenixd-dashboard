@@ -513,7 +513,7 @@ export default function SettingsPage() {
     : null;
 
   return (
-    <div className="py-6 max-w-2xl mx-auto space-y-8">
+    <div className="pt-4 md:pt-6 pb-6 max-w-2xl mx-auto space-y-8">
       {/* Page Header */}
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">

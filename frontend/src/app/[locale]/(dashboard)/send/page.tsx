@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useCurrencyContext } from '@/components/currency-provider';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
+import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
 import { QRScanner } from '@/components/qr-scanner';
 import { useRouter } from '@/i18n/navigation';
@@ -322,13 +323,8 @@ export default function SendPage() {
   ];
 
   return (
-    <div className="space-y-4 md:space-y-8">
-      {/* Header with Scan Button */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{t('title')}</h1>
-          <p className="mt-1 text-sm md:text-base text-muted-foreground">{t('subtitle')}</p>
-        </div>
+    <div className="pt-4 md:pt-6 space-y-6">
+      <PageHeader title={t('title')} subtitle={t('subtitle')}>
         <button
           onClick={() => setScannerOpen(true)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-sm shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors shrink-0"
@@ -336,7 +332,7 @@ export default function SendPage() {
           <ScanLine className="h-5 w-5" />
           <span className="hidden sm:inline">{ts('scan')}</span>
         </button>
-      </div>
+      </PageHeader>
 
       {/* Tab Switcher */}
       <PageTabs

@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useCurrencyContext } from '@/components/currency-provider';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
+import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
 
 // Success sound using Web Audio API
@@ -249,14 +250,8 @@ export default function ReceivePage() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight gradient-text">
-          {t('title')}
-        </h1>
-        <p className="mt-1 text-sm md:text-base text-muted-foreground">{t('subtitle')}</p>
-      </div>
+    <div className="pt-4 md:pt-6 space-y-6">
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
 
       {/* Tab Switcher */}
       <PageTabs

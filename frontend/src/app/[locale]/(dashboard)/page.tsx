@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { Link } from '@/i18n/navigation';
 import { PaymentsChart } from '@/components/payments-chart';
+import { StatCard, StatCardGrid } from '@/components/stat-card';
 import { useTranslations } from 'next-intl';
 
 interface NodeInfo {
@@ -251,59 +252,32 @@ export default function OverviewPage() {
         </div>
 
         {/* Stats Row */}
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <div className="glass-card rounded-2xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-2xl font-bold">{activeChannels}</p>
-                <p className="text-xs text-muted-foreground">{t('channels')}</p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Layers className="h-4 w-4 text-primary" />
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-2xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-2xl font-bold truncate">{formatValue(totalCapacity)}</p>
-                <p className="text-xs text-muted-foreground">{t('capacity')}</p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-bitcoin/10 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="h-4 w-4 text-bitcoin" />
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-2xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-2xl font-bold text-success truncate">
-                  {formatValue(totalInbound)}
-                </p>
-                <p className="text-xs text-muted-foreground">{t('inbound')}</p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
-                <ArrowDownToLine className="h-4 w-4 text-success" />
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-2xl p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-2xl font-bold value-highlight truncate">
-                  {formatValue(balance?.feeCreditSat || 0)}
-                </p>
-                <p className="text-xs text-muted-foreground">{t('feeCredit')}</p>
-              </div>
-              <div className="h-9 w-9 rounded-xl bg-lightning/10 flex items-center justify-center flex-shrink-0">
-                <Zap className="h-4 w-4 text-lightning" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatCardGrid columns={4}>
+          <StatCard
+            label={t('channels')}
+            value={activeChannels}
+            icon={Layers}
+            variant="primary"
+          />
+          <StatCard
+            label={t('capacity')}
+            value={formatValue(totalCapacity)}
+            icon={TrendingUp}
+            variant="warning"
+          />
+          <StatCard
+            label={t('inbound')}
+            value={formatValue(totalInbound)}
+            icon={ArrowDownToLine}
+            variant="success"
+          />
+          <StatCard
+            label={t('feeCredit')}
+            value={formatValue(balance?.feeCreditSat || 0)}
+            icon={Zap}
+            variant="warning"
+          />
+        </StatCardGrid>
 
         {/* Payment Activity Chart */}
         <PaymentsChart incomingPayments={allIncoming} outgoingPayments={allOutgoing} />
