@@ -38,20 +38,24 @@ nodeRouter.get('/channels', requireAuth, async (_req: AuthenticatedRequest, res:
 });
 
 // Close Channel
-nodeRouter.post('/channels/close', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { channelId, address, feerateSatByte } = req.body;
-    const result = await phoenixd.closeChannel({
-      channelId,
-      address,
-      feerateSatByte: parseInt(feerateSatByte),
-    });
-    res.json({ txId: result });
-  } catch (error) {
-    console.error('Error closing channel:', error);
-    res.status(500).json({ error: (error as Error).message });
+nodeRouter.post(
+  '/channels/close',
+  requireAuth,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { channelId, address, feerateSatByte } = req.body;
+      const result = await phoenixd.closeChannel({
+        channelId,
+        address,
+        feerateSatByte: parseInt(feerateSatByte),
+      });
+      res.json({ txId: result });
+    } catch (error) {
+      console.error('Error closing channel:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   }
-});
+);
 
 // Estimate Liquidity Fees
 nodeRouter.get('/estimatefees', requireAuth, async (req: AuthenticatedRequest, res: Response) => {

@@ -24,16 +24,20 @@ paymentsRouter.get('/incoming', requireAuth, async (req: AuthenticatedRequest, r
 });
 
 // Get Incoming Payment by Hash
-paymentsRouter.get('/incoming/:paymentHash', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { paymentHash } = req.params;
-    const result = await phoenixd.getIncomingPayment(paymentHash);
-    res.json(result);
-  } catch (error) {
-    console.error('Error getting incoming payment:', error);
-    res.status(500).json({ error: (error as Error).message });
+paymentsRouter.get(
+  '/incoming/:paymentHash',
+  requireAuth,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { paymentHash } = req.params;
+      const result = await phoenixd.getIncomingPayment(paymentHash);
+      res.json(result);
+    } catch (error) {
+      console.error('Error getting incoming payment:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   }
-});
+);
 
 // List Outgoing Payments
 paymentsRouter.get('/outgoing', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
@@ -54,25 +58,33 @@ paymentsRouter.get('/outgoing', requireAuth, async (req: AuthenticatedRequest, r
 });
 
 // Get Outgoing Payment by ID
-paymentsRouter.get('/outgoing/:paymentId', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { paymentId } = req.params;
-    const result = await phoenixd.getOutgoingPayment(paymentId);
-    res.json(result);
-  } catch (error) {
-    console.error('Error getting outgoing payment:', error);
-    res.status(500).json({ error: (error as Error).message });
+paymentsRouter.get(
+  '/outgoing/:paymentId',
+  requireAuth,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { paymentId } = req.params;
+      const result = await phoenixd.getOutgoingPayment(paymentId);
+      res.json(result);
+    } catch (error) {
+      console.error('Error getting outgoing payment:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   }
-});
+);
 
 // Get Outgoing Payment by Hash
-paymentsRouter.get('/outgoingbyhash/:paymentHash', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const { paymentHash } = req.params;
-    const result = await phoenixd.getOutgoingPaymentByHash(paymentHash);
-    res.json(result);
-  } catch (error) {
-    console.error('Error getting outgoing payment by hash:', error);
-    res.status(500).json({ error: (error as Error).message });
+paymentsRouter.get(
+  '/outgoingbyhash/:paymentHash',
+  requireAuth,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { paymentHash } = req.params;
+      const result = await phoenixd.getOutgoingPaymentByHash(paymentHash);
+      res.json(result);
+    } catch (error) {
+      console.error('Error getting outgoing payment by hash:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   }
-});
+);
