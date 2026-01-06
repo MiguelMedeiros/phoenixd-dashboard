@@ -15,7 +15,6 @@ import { configRouter } from './routes/config.js';
 import {
   dockerRouter,
   isProjectContainer,
-  getDockerClient,
   execInContainer,
   getContainerLogs,
 } from './routes/docker.js';
