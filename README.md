@@ -34,16 +34,21 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ## Features
 
-| | Feature | Description |
-|---|---|---|
-| ⚡ | **Send & Receive** | Bolt11, Bolt12 offers, Lightning Address, On-chain |
-| 📊 | **Dashboard** | Real-time balance, channel stats, payment activity |
-| 📜 | **History** | Full payment history with filters & CSV export |
-| 🛠️ | **Tools** | Decode invoices, liquidity fees, LNURL support |
-| 💱 | **Multi-Currency** | Display in 10+ fiat currencies |
-| 📱 | **PWA** | Install as native app on any device |
-| 🔐 | **Remote Access** | Secure access via Tailscale VPN |
-| 🧅 | **Tor Support** | Optional hidden service for privacy |
+✅ **Send & Receive** — Bolt11, Bolt12 offers, Lightning Address, On-chain
+
+✅ **Dashboard** — Real-time balance, channel stats, payment activity
+
+✅ **History** — Full payment history with filters & CSV export
+
+✅ **Tools** — Decode invoices, liquidity fees, LNURL support
+
+✅ **Multi-Currency** — Display in 10+ fiat currencies
+
+✅ **PWA** — Install as native app on any device
+
+✅ **Remote Access** — Secure access via Tailscale VPN
+
+✅ **Tor Support** — Optional hidden service for privacy
 
 <br>
 
