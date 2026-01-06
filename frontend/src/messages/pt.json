@@ -460,7 +460,9 @@
     "viewLogs": "Ver Logs dos Containers",
     "viewLogsDescription": "Logs em tempo real dos containers Docker",
     "openTerminal": "Abrir Terminal",
-    "openTerminalDescription": "Acesso interativo ao shell dos containers"
+    "openTerminalDescription": "Acesso interativo ao shell dos containers",
+    "resources": "Recursos",
+    "resourcesDescription": "Documentação e código fonte"
   },
   "notifications": {
     "title": "Notificações",

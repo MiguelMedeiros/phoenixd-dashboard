@@ -14,6 +14,9 @@ import {
   Play,
   Trash2,
   Layers,
+  BookOpen,
+  Github,
+  ExternalLink,
 } from 'lucide-react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
@@ -92,10 +95,30 @@ export default function NodePage() {
 // ============= NODE INFO TAB =============
 function NodeInfoTab() {
   const t = useTranslations('node');
+  const tc = useTranslations('common');
   const [nodeInfo, setNodeInfo] = useState<NodeInfoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { copied: nodeIdCopied, copy: copyNodeId } = useCopyToClipboard();
+
+  // External links
+  const externalLinks = [
+    {
+      title: tc('phoenixdDocs'),
+      href: 'https://phoenix.acinq.co/server/api',
+      icon: BookOpen,
+    },
+    {
+      title: tc('phoenixd'),
+      href: 'https://github.com/ACINQ/phoenixd',
+      icon: Github,
+    },
+    {
+      title: tc('dashboard'),
+      href: 'https://github.com/MiguelMedeiros/phoenixd-dashboard',
+      icon: Github,
+    },
+  ];
 
   useEffect(() => {
     const fetchNodeInfo = async () => {
@@ -233,6 +256,36 @@ function NodeInfoTab() {
               <p className="text-xs text-muted-foreground">{t('openTerminalDescription')}</p>
             </div>
           </button>
+        </div>
+      </div>
+
+      {/* External Resources Card */}
+      <div className="glass-card rounded-3xl p-6 lg:col-span-2">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10">
+            <ExternalLink className="h-6 w-6 text-blue-500" />
+          </div>
+          <div>
+            <h3 className="font-semibold">{t('resources')}</h3>
+            <p className="text-sm text-muted-foreground">{t('resourcesDescription')}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          {externalLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors group"
+            >
+              <link.icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+              <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors text-center">
+                {link.title}
+              </span>
+            </a>
+          ))}
         </div>
       </div>
     </div>

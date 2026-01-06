@@ -460,7 +460,9 @@
     "viewLogs": "Ver Registros del Contenedor",
     "viewLogsDescription": "Registros en tiempo real de contenedores Docker",
     "openTerminal": "Abrir Terminal",
-    "openTerminalDescription": "Acceso interactivo al shell de contenedores"
+    "openTerminalDescription": "Acceso interactivo al shell de contenedores",
+    "resources": "Recursos",
+    "resourcesDescription": "Documentación y código fuente"
   },
   "notifications": {
     "title": "Notificaciones",

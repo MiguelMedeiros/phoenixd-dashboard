@@ -14,6 +14,8 @@ import {
   ScrollText,
   Terminal,
   Server,
+  BookOpen,
+  Github,
 } from 'lucide-react';
 import {
   getNodeInfo,
@@ -389,7 +391,7 @@ export default function OverviewPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2 mb-3">
               <Link
                 href="/node?tab=info"
                 className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
@@ -423,6 +425,49 @@ export default function OverviewPage() {
                   {t('terminal')}
                 </span>
               </Link>
+            </div>
+
+            {/* External Links */}
+            <div className="grid grid-cols-3 gap-2">
+              <a
+                href="https://phoenix.acinq.co/server/api"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                  <BookOpen className="h-4 w-4 text-purple-500" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {tc('phoenixdDocs')}
+                </span>
+              </a>
+              <a
+                href="https://github.com/ACINQ/phoenixd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-gray-500/10 flex items-center justify-center group-hover:bg-gray-500/20 transition-colors">
+                  <Github className="h-4 w-4 text-gray-400" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {tc('phoenixd')}
+                </span>
+              </a>
+              <a
+                href="https://github.com/MiguelMedeiros/phoenixd-dashboard"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-gray-500/10 flex items-center justify-center group-hover:bg-gray-500/20 transition-colors">
+                  <Github className="h-4 w-4 text-gray-400" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {tc('dashboard')}
+                </span>
+              </a>
             </div>
           </div>
 

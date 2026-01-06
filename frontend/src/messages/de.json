@@ -460,7 +460,9 @@
     "viewLogs": "Container-Protokolle anzeigen",
     "viewLogsDescription": "Echtzeit-Protokolle von Docker-Containern",
     "openTerminal": "Terminal öffnen",
-    "openTerminalDescription": "Interaktiver Shell-Zugriff auf Container"
+    "openTerminalDescription": "Interaktiver Shell-Zugriff auf Container",
+    "resources": "Ressourcen",
+    "resourcesDescription": "Dokumentation und Quellcode"
   },
   "notifications": {
     "title": "Benachrichtigungen",

@@ -459,7 +459,9 @@
     "viewLogs": "कंटेनर लॉग्स देखें",
     "viewLogsDescription": "Docker कंटेनरों के रीयल-टाइम लॉग्स",
     "openTerminal": "टर्मिनल खोलें",
-    "openTerminalDescription": "कंटेनरों तक इंटरैक्टिव शेल एक्सेस"
+    "openTerminalDescription": "कंटेनरों तक इंटरैक्टिव शेल एक्सेस",
+    "resources": "संसाधन",
+    "resourcesDescription": "दस्तावेज़ीकरण और स्रोत कोड"
   },
   "notifications": {
     "title": "सूचनाएं",

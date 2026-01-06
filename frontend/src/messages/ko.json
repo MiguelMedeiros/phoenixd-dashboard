@@ -459,7 +459,9 @@
     "viewLogs": "컨테이너 로그 보기",
     "viewLogsDescription": "Docker 컨테이너의 실시간 로그",
     "openTerminal": "터미널 열기",
-    "openTerminalDescription": "컨테이너에 대한 대화형 셸 접근"
+    "openTerminalDescription": "컨테이너에 대한 대화형 셸 접근",
+    "resources": "리소스",
+    "resourcesDescription": "문서 및 소스 코드"
   },
   "notifications": {
     "title": "알림",

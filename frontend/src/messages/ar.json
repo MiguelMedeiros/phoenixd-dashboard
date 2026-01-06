@@ -459,7 +459,9 @@
     "viewLogs": "عرض سجلات الحاوية",
     "viewLogsDescription": "سجلات في الوقت الفعلي من حاويات Docker",
     "openTerminal": "فتح المحطة الطرفية",
-    "openTerminalDescription": "وصول تفاعلي إلى شل الحاويات"
+    "openTerminalDescription": "وصول تفاعلي إلى شل الحاويات",
+    "resources": "الموارد",
+    "resourcesDescription": "التوثيق والشيفرة المصدرية"
   },
   "notifications": {
     "title": "الإشعارات",

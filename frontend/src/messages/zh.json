@@ -459,7 +459,9 @@
     "viewLogs": "查看容器日志",
     "viewLogsDescription": "Docker容器的实时日志",
     "openTerminal": "打开终端",
-    "openTerminalDescription": "容器的交互式Shell访问"
+    "openTerminalDescription": "容器的交互式Shell访问",
+    "resources": "资源",
+    "resourcesDescription": "文档和源代码"
   },
   "notifications": {
     "title": "通知",

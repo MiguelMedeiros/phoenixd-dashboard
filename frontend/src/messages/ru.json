@@ -459,7 +459,9 @@
     "viewLogs": "Просмотр логов контейнера",
     "viewLogsDescription": "Логи контейнеров Docker в реальном времени",
     "openTerminal": "Открыть терминал",
-    "openTerminalDescription": "Интерактивный доступ к оболочке контейнеров"
+    "openTerminalDescription": "Интерактивный доступ к оболочке контейнеров",
+    "resources": "Ресурсы",
+    "resourcesDescription": "Документация и исходный код"
   },
   "notifications": {
     "title": "Уведомления",

@@ -460,7 +460,9 @@
     "viewLogs": "Voir les Journaux du Conteneur",
     "viewLogsDescription": "Journaux en temps réel des conteneurs Docker",
     "openTerminal": "Ouvrir le Terminal",
-    "openTerminalDescription": "Accès interactif au shell des conteneurs"
+    "openTerminalDescription": "Accès interactif au shell des conteneurs",
+    "resources": "Ressources",
+    "resourcesDescription": "Documentation et code source"
   },
   "notifications": {
     "title": "Notifications",

@@ -459,7 +459,9 @@
     "viewLogs": "コンテナログを表示",
     "viewLogsDescription": "Dockerコンテナのリアルタイムログ",
     "openTerminal": "ターミナルを開く",
-    "openTerminalDescription": "コンテナへのインタラクティブシェルアクセス"
+    "openTerminalDescription": "コンテナへのインタラクティブシェルアクセス",
+    "resources": "リソース",
+    "resourcesDescription": "ドキュメントとソースコード"
   },
   "notifications": {
     "title": "通知",

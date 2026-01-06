@@ -459,7 +459,9 @@
     "viewLogs": "View Container Logs",
     "viewLogsDescription": "Real-time logs from Docker containers",
     "openTerminal": "Open Terminal",
-    "openTerminalDescription": "Interactive shell access to containers"
+    "openTerminalDescription": "Interactive shell access to containers",
+    "resources": "Resources",
+    "resourcesDescription": "Documentation and source code"
   },
   "notifications": {
     "title": "Notifications",
