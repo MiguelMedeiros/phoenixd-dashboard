@@ -192,12 +192,7 @@ export default function PaymentsPage() {
             icon={TrendingDown}
             variant="primary"
           />
-          <StatCard
-            label={t('fees')}
-            value={formatValue(totalFees)}
-            icon={Zap}
-            variant="muted"
-          />
+          <StatCard label={t('fees')} value={formatValue(totalFees)} icon={Zap} variant="muted" />
         </StatCardGrid>
 
         {/* Tab Switcher */}

@@ -74,7 +74,5 @@ export function StatCardGrid({ children, columns = 3, className }: StatCardGridP
     4: 'grid-cols-2 md:grid-cols-4',
   };
 
-  return (
-    <div className={cn('grid gap-2 md:gap-4', colsClass[columns], className)}>{children}</div>
-  );
+  return <div className={cn('grid gap-2 md:gap-4', colsClass[columns], className)}>{children}</div>;
 }

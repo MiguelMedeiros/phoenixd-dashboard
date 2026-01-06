@@ -253,12 +253,7 @@ export default function OverviewPage() {
 
         {/* Stats Row */}
         <StatCardGrid columns={4}>
-          <StatCard
-            label={t('channels')}
-            value={activeChannels}
-            icon={Layers}
-            variant="primary"
-          />
+          <StatCard label={t('channels')} value={activeChannels} icon={Layers} variant="primary" />
           <StatCard
             label={t('capacity')}
             value={formatValue(totalCapacity)}
