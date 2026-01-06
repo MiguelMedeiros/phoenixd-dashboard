@@ -3,7 +3,13 @@ import express from 'express';
 import request from 'supertest';
 
 // Use vi.hoisted to create mocks that work with hoisted vi.mock calls
-const { mockGetInfo, mockGetBalance, mockListChannels, mockCloseChannel, mockEstimateLiquidityFees } = vi.hoisted(() => ({
+const {
+  mockGetInfo,
+  mockGetBalance,
+  mockListChannels,
+  mockCloseChannel,
+  mockEstimateLiquidityFees,
+} = vi.hoisted(() => ({
   mockGetInfo: vi.fn(),
   mockGetBalance: vi.fn(),
   mockListChannels: vi.fn(),

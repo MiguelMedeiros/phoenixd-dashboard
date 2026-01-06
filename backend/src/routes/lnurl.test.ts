@@ -26,7 +26,11 @@ vi.mock('../index.js', () => ({
 
 import { lnurlRouter } from './lnurl';
 
-const mockPhoenixd = { lnurlPay: mockLnurlPay, lnurlWithdraw: mockLnurlWithdraw, lnurlAuth: mockLnurlAuth };
+const mockPhoenixd = {
+  lnurlPay: mockLnurlPay,
+  lnurlWithdraw: mockLnurlWithdraw,
+  lnurlAuth: mockLnurlAuth,
+};
 
 describe('LNURL Routes', () => {
   let app: express.Express;
