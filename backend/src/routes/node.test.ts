@@ -1,22 +1,42 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { nodeRouter } from './node';
+
+// Use vi.hoisted to create mocks that work with hoisted vi.mock calls
+const { mockGetInfo, mockGetBalance, mockListChannels, mockCloseChannel, mockEstimateLiquidityFees } = vi.hoisted(() => ({
+  mockGetInfo: vi.fn(),
+  mockGetBalance: vi.fn(),
+  mockListChannels: vi.fn(),
+  mockCloseChannel: vi.fn(),
+  mockEstimateLiquidityFees: vi.fn(),
+}));
+
+// Mock the auth middleware to allow all requests
+vi.mock('../middleware/auth.js', () => ({
+  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  AuthenticatedRequest: {},
+}));
 
 // Mock the phoenixd service
 vi.mock('../index.js', () => ({
   phoenixd: {
-    getInfo: vi.fn(),
-    getBalance: vi.fn(),
-    listChannels: vi.fn(),
-    closeChannel: vi.fn(),
-    estimateLiquidityFees: vi.fn(),
+    getInfo: mockGetInfo,
+    getBalance: mockGetBalance,
+    listChannels: mockListChannels,
+    closeChannel: mockCloseChannel,
+    estimateLiquidityFees: mockEstimateLiquidityFees,
   },
 }));
 
-import { phoenixd } from '../index.js';
+import { nodeRouter } from './node';
 
-const mockPhoenixd = vi.mocked(phoenixd);
+const mockPhoenixd = {
+  getInfo: mockGetInfo,
+  getBalance: mockGetBalance,
+  listChannels: mockListChannels,
+  closeChannel: mockCloseChannel,
+  estimateLiquidityFees: mockEstimateLiquidityFees,
+};
 
 describe('Node Routes', () => {
   let app: express.Express;

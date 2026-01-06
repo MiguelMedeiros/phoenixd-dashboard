@@ -1,28 +1,72 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { phoenixdRouter } from './phoenixd';
+
+// Use vi.hoisted to create mocks that work with hoisted vi.mock calls
+const {
+  mockCreateInvoice,
+  mockCreateOffer,
+  mockGetLnAddress,
+  mockPayInvoice,
+  mockPayOffer,
+  mockPayLnAddress,
+  mockSendToAddress,
+  mockBumpFee,
+  mockDecodeInvoice,
+  mockDecodeOffer,
+  mockExportCsv,
+} = vi.hoisted(() => ({
+  mockCreateInvoice: vi.fn(),
+  mockCreateOffer: vi.fn(),
+  mockGetLnAddress: vi.fn(),
+  mockPayInvoice: vi.fn(),
+  mockPayOffer: vi.fn(),
+  mockPayLnAddress: vi.fn(),
+  mockSendToAddress: vi.fn(),
+  mockBumpFee: vi.fn(),
+  mockDecodeInvoice: vi.fn(),
+  mockDecodeOffer: vi.fn(),
+  mockExportCsv: vi.fn(),
+}));
+
+// Mock the auth middleware to allow all requests
+vi.mock('../middleware/auth.js', () => ({
+  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  AuthenticatedRequest: {},
+}));
 
 // Mock the phoenixd service
 vi.mock('../index.js', () => ({
   phoenixd: {
-    createInvoice: vi.fn(),
-    createOffer: vi.fn(),
-    getLnAddress: vi.fn(),
-    payInvoice: vi.fn(),
-    payOffer: vi.fn(),
-    payLnAddress: vi.fn(),
-    sendToAddress: vi.fn(),
-    bumpFee: vi.fn(),
-    decodeInvoice: vi.fn(),
-    decodeOffer: vi.fn(),
-    exportCsv: vi.fn(),
+    createInvoice: mockCreateInvoice,
+    createOffer: mockCreateOffer,
+    getLnAddress: mockGetLnAddress,
+    payInvoice: mockPayInvoice,
+    payOffer: mockPayOffer,
+    payLnAddress: mockPayLnAddress,
+    sendToAddress: mockSendToAddress,
+    bumpFee: mockBumpFee,
+    decodeInvoice: mockDecodeInvoice,
+    decodeOffer: mockDecodeOffer,
+    exportCsv: mockExportCsv,
   },
 }));
 
-import { phoenixd } from '../index.js';
+import { phoenixdRouter } from './phoenixd';
 
-const mockPhoenixd = vi.mocked(phoenixd);
+const mockPhoenixd = {
+  createInvoice: mockCreateInvoice,
+  createOffer: mockCreateOffer,
+  getLnAddress: mockGetLnAddress,
+  payInvoice: mockPayInvoice,
+  payOffer: mockPayOffer,
+  payLnAddress: mockPayLnAddress,
+  sendToAddress: mockSendToAddress,
+  bumpFee: mockBumpFee,
+  decodeInvoice: mockDecodeInvoice,
+  decodeOffer: mockDecodeOffer,
+  exportCsv: mockExportCsv,
+};
 
 describe('Phoenixd Routes', () => {
   let app: express.Express;
@@ -212,7 +256,7 @@ describe('Phoenixd Routes', () => {
       // Use type assertion since phoenixd can return error responses with different shape
       mockPhoenixd.payInvoice.mockResolvedValueOnce({
         reason: 'payment could not be sent through existing channels',
-      } as unknown as ReturnType<typeof phoenixd.payInvoice> extends Promise<infer T> ? T : never);
+      });
 
       const response = await request(app)
         .post('/api/phoenixd/payinvoice')
@@ -225,7 +269,7 @@ describe('Phoenixd Routes', () => {
     it('should handle phoenixd returning no_route_to_recipient reason', async () => {
       mockPhoenixd.payInvoice.mockResolvedValueOnce({
         reason: 'no_route_to_recipient',
-      } as unknown as ReturnType<typeof phoenixd.payInvoice> extends Promise<infer T> ? T : never);
+      });
 
       const response = await request(app)
         .post('/api/phoenixd/payinvoice')
@@ -300,9 +344,7 @@ describe('Phoenixd Routes', () => {
       // Use type assertion since phoenixd can return error responses with different shape
       mockPhoenixd.payLnAddress.mockResolvedValueOnce({
         reason: 'payment could not be sent through existing channels',
-      } as unknown as ReturnType<typeof phoenixd.payLnAddress> extends Promise<infer T>
-        ? T
-        : never);
+      });
 
       const response = await request(app).post('/api/phoenixd/paylnaddress').send({
         address: 'user@getalby.com',

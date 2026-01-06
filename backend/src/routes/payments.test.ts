@@ -1,22 +1,48 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import { paymentsRouter } from './payments';
+
+// Use vi.hoisted to create mocks that work with hoisted vi.mock calls
+const {
+  mockListIncomingPayments,
+  mockGetIncomingPayment,
+  mockListOutgoingPayments,
+  mockGetOutgoingPayment,
+  mockGetOutgoingPaymentByHash,
+} = vi.hoisted(() => ({
+  mockListIncomingPayments: vi.fn(),
+  mockGetIncomingPayment: vi.fn(),
+  mockListOutgoingPayments: vi.fn(),
+  mockGetOutgoingPayment: vi.fn(),
+  mockGetOutgoingPaymentByHash: vi.fn(),
+}));
+
+// Mock the auth middleware to allow all requests
+vi.mock('../middleware/auth.js', () => ({
+  requireAuth: (_req: unknown, _res: unknown, next: () => void) => next(),
+  AuthenticatedRequest: {},
+}));
 
 // Mock the phoenixd service
 vi.mock('../index.js', () => ({
   phoenixd: {
-    listIncomingPayments: vi.fn(),
-    getIncomingPayment: vi.fn(),
-    listOutgoingPayments: vi.fn(),
-    getOutgoingPayment: vi.fn(),
-    getOutgoingPaymentByHash: vi.fn(),
+    listIncomingPayments: mockListIncomingPayments,
+    getIncomingPayment: mockGetIncomingPayment,
+    listOutgoingPayments: mockListOutgoingPayments,
+    getOutgoingPayment: mockGetOutgoingPayment,
+    getOutgoingPaymentByHash: mockGetOutgoingPaymentByHash,
   },
 }));
 
-import { phoenixd } from '../index.js';
+import { paymentsRouter } from './payments';
 
-const mockPhoenixd = vi.mocked(phoenixd);
+const mockPhoenixd = {
+  listIncomingPayments: mockListIncomingPayments,
+  getIncomingPayment: mockGetIncomingPayment,
+  listOutgoingPayments: mockListOutgoingPayments,
+  getOutgoingPayment: mockGetOutgoingPayment,
+  getOutgoingPaymentByHash: mockGetOutgoingPaymentByHash,
+};
 
 describe('Payments Routes', () => {
   let app: express.Express;
