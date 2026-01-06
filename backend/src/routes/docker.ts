@@ -25,14 +25,14 @@ export interface ContainerInfo {
 async function getProjectContainers(): Promise<ContainerInfo[]> {
   try {
     const containers = await docker.listContainers({ all: true });
-    
+
     // Filter containers that belong to this project
-    const projectContainers = containers.filter(container => {
+    const projectContainers = containers.filter((container) => {
       const names = container.Names || [];
-      return names.some(name => name.includes(PROJECT_PREFIX));
+      return names.some((name) => name.includes(PROJECT_PREFIX));
     });
 
-    return projectContainers.map(container => ({
+    return projectContainers.map((container) => ({
       id: container.Id.substring(0, 12),
       name: (container.Names[0] || '').replace(/^\//, ''),
       image: container.Image,
@@ -67,7 +67,7 @@ dockerRouter.get('/containers', requireAuth, async (_req: AuthenticatedRequest, 
 dockerRouter.get('/containers/:name', requireAuth, async (req: Request, res: Response) => {
   try {
     const { name } = req.params;
-    
+
     // Security: Only allow project containers
     if (!name.includes(PROJECT_PREFIX)) {
       return res.status(403).json({ error: 'Access denied' });
@@ -75,7 +75,7 @@ dockerRouter.get('/containers/:name', requireAuth, async (req: Request, res: Res
 
     const container = docker.getContainer(name);
     const info = await container.inspect();
-    
+
     res.json({
       id: info.Id.substring(0, 12),
       name: info.Name.replace(/^\//, ''),
@@ -109,7 +109,7 @@ export function getDockerClient(): Docker {
  */
 export async function execInContainer(containerName: string, cmd: string[] = ['/bin/sh']) {
   const container = docker.getContainer(containerName);
-  
+
   const exec = await container.exec({
     Cmd: cmd,
     AttachStdin: true,
@@ -130,7 +130,7 @@ export async function execInContainer(containerName: string, cmd: string[] = ['/
  */
 export async function getContainerLogs(containerName: string, tail: number = 100) {
   const container = docker.getContainer(containerName);
-  
+
   return container.logs({
     follow: true,
     stdout: true,
