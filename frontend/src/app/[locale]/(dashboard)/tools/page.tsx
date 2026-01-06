@@ -119,9 +119,9 @@ export default function ToolsPage() {
   };
 
   const tabs: TabItem[] = [
-    { id: 'invoice', label: tc('invoice'), icon: Zap },
-    { id: 'offer', label: tc('offer'), icon: Gift },
-    { id: 'fees', label: tc('fees'), icon: Calculator },
+    { id: 'invoice', label: t('decodeInvoice'), icon: Zap },
+    { id: 'offer', label: t('decodeOffer'), icon: Gift },
+    { id: 'fees', label: t('estimateFees'), icon: Calculator },
   ];
 
   return (

@@ -11,24 +11,24 @@ describe('Send Page', () => {
     });
 
     it('shows all payment type tabs', () => {
-      cy.contains('Invoice').should('be.visible');
-      cy.contains('Offer').should('be.visible');
+      cy.contains('One-time').should('be.visible');
+      cy.contains('Reusable').should('be.visible');
       cy.contains('LN Address').should('be.visible');
       cy.contains('On-chain').should('be.visible');
     });
   });
 
-  describe('Pay Invoice Tab', () => {
-    it('shows Pay Invoice form by default', () => {
-      cy.contains('Pay Invoice').should('be.visible');
+  describe('Pay One-time Invoice Tab', () => {
+    it('shows Pay One-time Invoice form by default', () => {
+      cy.contains('Pay One-time Invoice').should('be.visible');
     });
 
     it('has invoice textarea', () => {
       cy.get('textarea').should('be.visible');
     });
 
-    it('has Pay Invoice button', () => {
-      cy.contains('button', /pay invoice/i).should('be.visible');
+    it('has Pay One-time Invoice button', () => {
+      cy.contains('button', /pay one-time invoice/i).should('be.visible');
     });
 
     it('successfully pays invoice', () => {
@@ -40,14 +40,14 @@ describe('Send Page', () => {
     });
   });
 
-  describe('Pay Offer Tab', () => {
-    it('switches to Offer tab', () => {
-      cy.contains('button', 'Offer').click();
-      cy.contains('Pay Offer').should('be.visible');
+  describe('Pay Reusable Invoice Tab', () => {
+    it('switches to Reusable tab', () => {
+      cy.contains('button', 'Reusable').click();
+      cy.contains('Pay Reusable Invoice').should('be.visible');
     });
 
-    it('has offer textarea and amount input', () => {
-      cy.contains('button', 'Offer').click();
+    it('has reusable invoice textarea and amount input', () => {
+      cy.contains('button', 'Reusable').click();
       cy.get('textarea').should('be.visible');
       cy.get('input[inputmode="numeric"]').should('be.visible');
     });

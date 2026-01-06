@@ -11,15 +11,15 @@ describe('Tools Page', () => {
     });
 
     it('shows all tabs', () => {
-      cy.contains('Invoice').should('be.visible');
-      cy.contains('Offer').should('be.visible');
+      cy.contains('One-time').should('be.visible');
+      cy.contains('Reusable').should('be.visible');
       cy.contains('Fees').should('be.visible');
     });
   });
 
-  describe('Decode Invoice Tab', () => {
-    it('shows Decode Invoice form by default', () => {
-      cy.contains('Decode Invoice').should('be.visible');
+  describe('Decode One-time Invoice Tab', () => {
+    it('shows One-time invoice form by default', () => {
+      cy.contains('One-time invoice (Bolt11)').should('be.visible');
     });
 
     it('has invoice textarea', () => {
@@ -58,32 +58,37 @@ describe('Tools Page', () => {
     });
   });
 
-  describe('Decode Offer Tab', () => {
-    it('switches to Offer tab', () => {
-      cy.contains('button', 'Offer').click();
-      cy.contains('Decode Offer').should('be.visible');
+  describe('Decode Reusable Invoice Tab', () => {
+    it('switches to Reusable tab', () => {
+      cy.contains('button', 'Reusable').click();
+      // Check the tab content shows Bolt12 info
+      cy.contains(/reusable invoice|bolt12/i).should('be.visible');
     });
 
-    it('has offer textarea', () => {
-      cy.contains('button', 'Offer').click();
+    it('has reusable invoice textarea', () => {
+      cy.contains('button', 'Reusable').click();
+      // Wait for tab content to load
+      cy.wait(500);
       cy.get('textarea').should('be.visible');
     });
 
-    it('decodes an offer successfully', () => {
-      cy.contains('button', 'Offer').click();
+    it('decodes a reusable invoice successfully', () => {
+      cy.contains('button', 'Reusable').click();
+      // Wait for tab content to load
+      cy.wait(500);
       cy.get('textarea').first().type('lno1test123...');
       cy.contains('button', 'Decode').click();
 
       cy.wait('@decodeOffer');
 
-      cy.contains(/offer|bolt12/i).should('exist');
+      cy.contains(/reusable|bolt12/i).should('exist');
     });
   });
 
   describe('Estimate Fees Tab', () => {
     it('switches to Fees tab', () => {
       cy.contains('button', 'Fees').click();
-      cy.contains('Estimate Liquidity Fees').should('be.visible');
+      cy.contains('Inbound liquidity costs').should('be.visible');
     });
 
     it('has amount input', () => {
@@ -108,13 +113,13 @@ describe('Tools Page', () => {
   });
 
   describe('Empty States', () => {
-    it('shows empty state for invoice', () => {
+    it('shows empty state for one-time invoice', () => {
       cy.contains(/decode|invoice/i).should('exist');
     });
 
-    it('shows empty state for offer', () => {
-      cy.contains('button', 'Offer').click();
-      cy.contains(/decode|offer/i).should('exist');
+    it('shows empty state for reusable invoice', () => {
+      cy.contains('button', 'Reusable').click();
+      cy.contains(/decode|reusable/i).should('exist');
     });
 
     it('shows empty state for fees', () => {
