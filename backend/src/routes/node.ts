@@ -1,10 +1,11 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { phoenixd } from '../index.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const nodeRouter = Router();
 
 // Get Node Info
-nodeRouter.get('/info', async (_req: Request, res: Response) => {
+nodeRouter.get('/info', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await phoenixd.getInfo();
     res.json(result);
@@ -15,7 +16,7 @@ nodeRouter.get('/info', async (_req: Request, res: Response) => {
 });
 
 // Get Balance
-nodeRouter.get('/balance', async (_req: Request, res: Response) => {
+nodeRouter.get('/balance', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await phoenixd.getBalance();
     res.json(result);
@@ -26,7 +27,7 @@ nodeRouter.get('/balance', async (_req: Request, res: Response) => {
 });
 
 // List Channels
-nodeRouter.get('/channels', async (_req: Request, res: Response) => {
+nodeRouter.get('/channels', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await phoenixd.listChannels();
     res.json(result);
@@ -37,7 +38,7 @@ nodeRouter.get('/channels', async (_req: Request, res: Response) => {
 });
 
 // Close Channel
-nodeRouter.post('/channels/close', async (req: Request, res: Response) => {
+nodeRouter.post('/channels/close', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { channelId, address, feerateSatByte } = req.body;
     const result = await phoenixd.closeChannel({
@@ -53,7 +54,7 @@ nodeRouter.post('/channels/close', async (req: Request, res: Response) => {
 });
 
 // Estimate Liquidity Fees
-nodeRouter.get('/estimatefees', async (req: Request, res: Response) => {
+nodeRouter.get('/estimatefees', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { amountSat } = req.query;
     if (!amountSat) {

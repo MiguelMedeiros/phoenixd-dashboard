@@ -1,10 +1,11 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { phoenixd } from '../index.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const lnurlRouter = Router();
 
 // LNURL Pay
-lnurlRouter.post('/pay', async (req: Request, res: Response) => {
+lnurlRouter.post('/pay', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { lnurl, amountSat, message } = req.body;
     const result = await phoenixd.lnurlPay(lnurl, parseInt(amountSat), message);
@@ -16,7 +17,7 @@ lnurlRouter.post('/pay', async (req: Request, res: Response) => {
 });
 
 // LNURL Withdraw
-lnurlRouter.post('/withdraw', async (req: Request, res: Response) => {
+lnurlRouter.post('/withdraw', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { lnurl } = req.body;
     const result = await phoenixd.lnurlWithdraw(lnurl);
@@ -28,7 +29,7 @@ lnurlRouter.post('/withdraw', async (req: Request, res: Response) => {
 });
 
 // LNURL Auth
-lnurlRouter.post('/auth', async (req: Request, res: Response) => {
+lnurlRouter.post('/auth', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { lnurl } = req.body;
     const result = await phoenixd.lnurlAuth(lnurl);

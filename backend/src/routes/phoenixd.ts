@@ -1,10 +1,11 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { phoenixd } from '../index.js';
+import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 
 export const phoenixdRouter = Router();
 
 // Create Bolt11 Invoice
-phoenixdRouter.post('/createinvoice', async (req: Request, res: Response) => {
+phoenixdRouter.post('/createinvoice', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { description, descriptionHash, amountSat, expirySeconds, externalId, webhookUrl } =
       req.body;
@@ -26,7 +27,7 @@ phoenixdRouter.post('/createinvoice', async (req: Request, res: Response) => {
 });
 
 // Create Bolt12 Offer
-phoenixdRouter.post('/createoffer', async (req: Request, res: Response) => {
+phoenixdRouter.post('/createoffer', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { description, amountSat } = req.body;
     const result = await phoenixd.createOffer({
@@ -41,7 +42,7 @@ phoenixdRouter.post('/createoffer', async (req: Request, res: Response) => {
 });
 
 // Get Lightning Address
-phoenixdRouter.get('/getlnaddress', async (_req: Request, res: Response) => {
+phoenixdRouter.get('/getlnaddress', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await phoenixd.getLnAddress();
     res.json({ address: result });
@@ -52,7 +53,7 @@ phoenixdRouter.get('/getlnaddress', async (_req: Request, res: Response) => {
 });
 
 // Pay Bolt11 Invoice
-phoenixdRouter.post('/payinvoice', async (req: Request, res: Response) => {
+phoenixdRouter.post('/payinvoice', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { invoice, amountSat } = req.body;
     const result = (await phoenixd.payInvoice({
@@ -73,7 +74,7 @@ phoenixdRouter.post('/payinvoice', async (req: Request, res: Response) => {
 });
 
 // Pay Bolt12 Offer
-phoenixdRouter.post('/payoffer', async (req: Request, res: Response) => {
+phoenixdRouter.post('/payoffer', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { offer, amountSat, message } = req.body;
     const result = (await phoenixd.payOffer({
@@ -95,7 +96,7 @@ phoenixdRouter.post('/payoffer', async (req: Request, res: Response) => {
 });
 
 // Pay Lightning Address (with fallback to manual LNURL resolution)
-phoenixdRouter.post('/paylnaddress', async (req: Request, res: Response) => {
+phoenixdRouter.post('/paylnaddress', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { address, amountSat, message } = req.body;
     const amount = parseInt(amountSat);
@@ -213,7 +214,7 @@ phoenixdRouter.post('/paylnaddress', async (req: Request, res: Response) => {
 });
 
 // Send to On-chain Address
-phoenixdRouter.post('/sendtoaddress', async (req: Request, res: Response) => {
+phoenixdRouter.post('/sendtoaddress', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { address, amountSat, feerateSatByte } = req.body;
     const result = await phoenixd.sendToAddress({
@@ -229,7 +230,7 @@ phoenixdRouter.post('/sendtoaddress', async (req: Request, res: Response) => {
 });
 
 // Bump Fee
-phoenixdRouter.post('/bumpfee', async (req: Request, res: Response) => {
+phoenixdRouter.post('/bumpfee', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { feerateSatByte } = req.body;
     const result = await phoenixd.bumpFee(parseInt(feerateSatByte));
@@ -241,7 +242,7 @@ phoenixdRouter.post('/bumpfee', async (req: Request, res: Response) => {
 });
 
 // Decode Invoice
-phoenixdRouter.post('/decodeinvoice', async (req: Request, res: Response) => {
+phoenixdRouter.post('/decodeinvoice', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { invoice } = req.body;
     const result = await phoenixd.decodeInvoice(invoice);
@@ -253,7 +254,7 @@ phoenixdRouter.post('/decodeinvoice', async (req: Request, res: Response) => {
 });
 
 // Decode Offer
-phoenixdRouter.post('/decodeoffer', async (req: Request, res: Response) => {
+phoenixdRouter.post('/decodeoffer', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { offer } = req.body;
     const result = await phoenixd.decodeOffer(offer);
@@ -265,7 +266,7 @@ phoenixdRouter.post('/decodeoffer', async (req: Request, res: Response) => {
 });
 
 // Export CSV
-phoenixdRouter.post('/export', async (req: Request, res: Response) => {
+phoenixdRouter.post('/export', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { from, to } = req.body;
     const result = await phoenixd.exportCsv(
