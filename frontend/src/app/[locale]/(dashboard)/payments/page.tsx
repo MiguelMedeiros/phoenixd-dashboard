@@ -28,10 +28,13 @@ import {
   type IncomingPayment,
   type OutgoingPayment,
 } from '@/lib/api';
-import { formatSats, cn, getMempoolUrl } from '@/lib/utils';
+import { cn, getMempoolUrl } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
+import { PageHeader } from '@/components/page-header';
+import { StatCard, StatCardGrid } from '@/components/stat-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslations } from 'next-intl';
 
@@ -42,6 +45,7 @@ export default function PaymentsPage() {
   const tc = useTranslations('common');
   const tt = useTranslations('toast');
   const te = useTranslations('errors');
+  const { formatValue } = useCurrencyContext();
   const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing'>('incoming');
   const [incomingPayments, setIncomingPayments] = useState<IncomingPayment[]>([]);
   const [outgoingPayments, setOutgoingPayments] = useState<OutgoingPayment[]>([]);
@@ -158,15 +162,8 @@ export default function PaymentsPage() {
 
   return (
     <>
-      <div className="space-y-4 md:space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-xl md:text-3xl font-bold tracking-tight gradient-text">
-              {t('title')}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground hidden md:block">{t('subtitle')}</p>
-          </div>
+      <div className="pt-4 md:pt-6 space-y-6">
+        <PageHeader title={t('title')} subtitle={t('subtitle')}>
           <button
             onClick={handleExport}
             disabled={exporting}
@@ -179,52 +176,24 @@ export default function PaymentsPage() {
             )}
             <span className="hidden sm:inline">{t('exportCsv')}</span>
           </button>
-        </div>
+        </PageHeader>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
-          <div className="glass-card rounded-xl md:rounded-2xl p-3 md:p-5 group md:hover:scale-[1.02] transition-all">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-[10px] md:text-sm text-muted-foreground">{t('received')}</p>
-                <p className="text-sm md:text-2xl font-bold text-success mt-0.5 md:mt-1 truncate">
-                  {formatSats(totalReceived)}
-                </p>
-              </div>
-              <div className="hidden md:flex h-12 w-12 rounded-xl bg-success/10 items-center justify-center group-hover:scale-110 transition-transform">
-                <TrendingUp className="h-6 w-6 text-success" />
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-xl md:rounded-2xl p-3 md:p-5 group md:hover:scale-[1.02] transition-all">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-[10px] md:text-sm text-muted-foreground">{t('sent')}</p>
-                <p className="text-sm md:text-2xl font-bold text-primary mt-0.5 md:mt-1 truncate">
-                  {formatSats(totalSent)}
-                </p>
-              </div>
-              <div className="hidden md:flex h-12 w-12 rounded-xl bg-primary/10 items-center justify-center group-hover:scale-110 transition-transform">
-                <TrendingDown className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-xl md:rounded-2xl p-3 md:p-5 group md:hover:scale-[1.02] transition-all">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-[10px] md:text-sm text-muted-foreground">{t('fees')}</p>
-                <p className="text-sm md:text-2xl font-bold text-muted-foreground mt-0.5 md:mt-1 truncate">
-                  {formatSats(totalFees)}
-                </p>
-              </div>
-              <div className="hidden md:flex h-12 w-12 rounded-xl bg-white/5 items-center justify-center group-hover:scale-110 transition-transform">
-                <Zap className="h-6 w-6 text-muted-foreground" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatCardGrid columns={3}>
+          <StatCard
+            label={t('received')}
+            value={formatValue(totalReceived)}
+            icon={TrendingUp}
+            variant="success"
+          />
+          <StatCard
+            label={t('sent')}
+            value={formatValue(totalSent)}
+            icon={TrendingDown}
+            variant="primary"
+          />
+          <StatCard label={t('fees')} value={formatValue(totalFees)} icon={Zap} variant="muted" />
+        </StatCardGrid>
 
         {/* Tab Switcher */}
         <PageTabs
@@ -300,7 +269,7 @@ export default function PaymentsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1">
                           <span className="font-bold text-sm md:text-lg text-success">
-                            +{formatSats(payment.receivedSat)}
+                            +{formatValue(payment.receivedSat)}
                           </span>
                           <span
                             className={cn(
@@ -354,7 +323,7 @@ export default function PaymentsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
                           <span className="font-bold text-sm md:text-lg">
-                            -{formatSats(payment.sent)}
+                            -{formatValue(payment.sent)}
                           </span>
                           <span
                             className={cn(
@@ -368,7 +337,7 @@ export default function PaymentsPage() {
                           </span>
                           {payment.fees > 0 && (
                             <span className="text-[10px] md:text-xs text-muted-foreground hidden sm:inline">
-                              {t('fee')}: {formatSats(Math.floor(payment.fees / 1000))}
+                              {t('fee')}: {formatValue(Math.floor(payment.fees / 1000))}
                             </span>
                           )}
                         </div>
@@ -423,14 +392,14 @@ export default function PaymentsPage() {
               <div className="text-center py-6 glass-card rounded-2xl bg-gradient-to-br from-white/[0.02] to-transparent">
                 {'receivedSat' in selectedPayment ? (
                   <p className="text-4xl font-bold text-success">
-                    +{formatSats(selectedPayment.receivedSat)}
+                    +{formatValue(selectedPayment.receivedSat)}
                   </p>
                 ) : (
-                  <p className="text-4xl font-bold">-{formatSats(selectedPayment.sent)}</p>
+                  <p className="text-4xl font-bold">-{formatValue(selectedPayment.sent)}</p>
                 )}
                 {'fees' in selectedPayment && selectedPayment.fees > 0 && (
                   <p className="text-sm text-muted-foreground mt-2">
-                    {t('fee')}: {formatSats(Math.floor(selectedPayment.fees / 1000))}
+                    {t('fee')}: {formatValue(Math.floor(selectedPayment.fees / 1000))}
                   </p>
                 )}
               </div>

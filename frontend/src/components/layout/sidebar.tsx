@@ -15,12 +15,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Server,
-  Shield,
+  Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getNodeInfo, getTorStatus, type TorStatus } from '@/lib/api';
+import { getNodeInfo } from '@/lib/api';
 import { NodeInfoDialog } from '@/components/node-info-dialog';
 import { useTranslations } from 'next-intl';
+import { useAuthContext } from '@/components/auth-provider';
 
 const sidebarNavItems = [
   {
@@ -63,9 +64,9 @@ const sidebarNavItems = [
 export function Sidebar() {
   const t = useTranslations('common');
   const pathname = usePathname();
+  const { hasPassword, lock } = useAuthContext();
   const [expanded, setExpanded] = useState(false);
   const [chain, setChain] = useState<string>('mainnet');
-  const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
   const [nodeInfoOpen, setNodeInfoOpen] = useState(false);
 
   // Persist state in localStorage
@@ -76,7 +77,7 @@ export function Sidebar() {
     }
   }, []);
 
-  // Fetch network info and Tor status
+  // Fetch network info
   useEffect(() => {
     const fetchNodeInfo = async () => {
       try {
@@ -87,23 +88,7 @@ export function Sidebar() {
       }
     };
 
-    const fetchTorStatus = async () => {
-      try {
-        const status = await getTorStatus();
-        setTorStatus(status);
-      } catch (error) {
-        // Tor status fetch failed - likely no Docker access or Tor not configured
-        console.debug('Tor status not available:', error);
-        setTorStatus(null);
-      }
-    };
-
     fetchNodeInfo();
-    fetchTorStatus();
-
-    // Poll Tor status every 10 seconds for faster updates
-    const interval = setInterval(fetchTorStatus, 10000);
-    return () => clearInterval(interval);
   }, []);
 
   const toggleExpanded = () => {
@@ -132,77 +117,31 @@ export function Sidebar() {
             {expanded ? (
               <div className="overflow-hidden flex-1">
                 <h1 className="font-bold text-lg tracking-tight whitespace-nowrap">Phoenixd</h1>
-                <div className="flex items-center gap-2">
-                  {/* Network indicator */}
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      className={cn(
-                        'h-2 w-2 rounded-full',
-                        chain === 'mainnet'
-                          ? 'bg-bitcoin shadow-[0_0_6px_hsl(var(--bitcoin))]'
-                          : 'bg-yellow-500 shadow-[0_0_6px_hsl(45,100%,50%)]'
-                      )}
-                    />
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {chain === 'mainnet' ? t('mainnet') : t('testnet')}
-                    </span>
-                  </div>
-                  {/* Tor indicator */}
-                  {torStatus?.enabled && torStatus?.running && (
-                    <div
-                      className="flex items-center gap-1"
-                      title={torStatus.healthy ? t('torEnabled') : t('torConnecting')}
-                    >
-                      <Shield
-                        className={cn(
-                          'h-3 w-3',
-                          torStatus.healthy
-                            ? 'text-emerald-500'
-                            : 'text-emerald-500/50 animate-pulse'
-                        )}
-                      />
-                      <span
-                        className={cn(
-                          'text-xs whitespace-nowrap',
-                          torStatus.healthy ? 'text-emerald-500' : 'text-emerald-500/50'
-                        )}
-                      >
-                        Tor
-                      </span>
-                    </div>
-                  )}
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className={cn(
+                      'h-2 w-2 rounded-full',
+                      chain === 'mainnet'
+                        ? 'bg-bitcoin shadow-[0_0_6px_hsl(var(--bitcoin))]'
+                        : 'bg-yellow-500 shadow-[0_0_6px_hsl(45,100%,50%)]'
+                    )}
+                  />
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {chain === 'mainnet' ? t('mainnet') : t('testnet')}
+                  </span>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-1">
-                <span
-                  className={cn(
-                    'px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider',
-                    chain === 'mainnet'
-                      ? 'bg-bitcoin/20 text-bitcoin'
-                      : 'bg-yellow-500/20 text-yellow-500'
-                  )}
-                >
-                  {chain === 'mainnet' ? t('mainnetShort') : t('testnetShort')}
-                </span>
-                {/* Tor indicator (collapsed) */}
-                {torStatus?.enabled && torStatus?.running && (
-                  <div
-                    className={cn(
-                      'flex items-center justify-center',
-                      torStatus.healthy ? '' : 'animate-pulse'
-                    )}
-                    title={torStatus.healthy ? t('torEnabled') : t('torConnecting')}
-                  >
-                    <Shield
-                      className={cn(
-                        'h-3 w-3',
-                        torStatus.healthy ? 'text-emerald-500' : 'text-emerald-500/50'
-                      )}
-                    />
-                  </div>
+              <span
+                className={cn(
+                  'px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider',
+                  chain === 'mainnet'
+                    ? 'bg-bitcoin/20 text-bitcoin'
+                    : 'bg-yellow-500/20 text-yellow-500'
                 )}
-              </div>
+              >
+                {chain === 'mainnet' ? t('mainnetShort') : t('testnetShort')}
+              </span>
             )}
           </div>
         </div>
@@ -292,6 +231,27 @@ export function Sidebar() {
               )}
             </div>
           </Link>
+
+          {/* Lock Button - Only visible if password is configured */}
+          {hasPassword && (
+            <button
+              onClick={lock}
+              title={expanded ? undefined : t('lock')}
+              className={cn(
+                'group flex items-center gap-3 transition-all duration-200 w-full',
+                expanded
+                  ? 'px-3 py-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
+                  : 'icon-circle'
+              )}
+            >
+              <Lock className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
+              {expanded && (
+                <span className="text-sm font-medium whitespace-nowrap transition-colors">
+                  {t('lock')}
+                </span>
+              )}
+            </button>
+          )}
 
           {/* Node Info Button */}
           <button

@@ -14,6 +14,7 @@ import { lnurlPay, lnurlWithdraw, lnurlAuth } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
+import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
 
 export default function LnurlPage() {
@@ -116,12 +117,8 @@ export default function LnurlPage() {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
-        <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
-      </div>
+    <div className="pt-4 md:pt-6 space-y-6">
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
 
       {/* Tab Switcher */}
       <PageTabs

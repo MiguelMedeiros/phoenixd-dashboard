@@ -41,17 +41,17 @@ export function LanguageSwitcher({ openUp = false }: LanguageSwitcherProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2 px-3 py-2 rounded-xl transition-all',
+          'flex items-center gap-1.5 px-2.5 py-2 rounded-xl transition-all',
           'bg-white/5 hover:bg-white/10 border border-white/10',
           isOpen && 'bg-white/10 ring-2 ring-primary/50'
         )}
       >
-        <Globe className="h-4 w-4 text-muted-foreground" />
-        <span className="text-lg">{localeFlags[locale]}</span>
-        <span className="text-sm font-medium hidden sm:inline">{localeNames[locale]}</span>
+        <Globe className="h-4 w-4 text-muted-foreground hidden xl:block" />
+        <span className="text-base">{localeFlags[locale]}</span>
+        <span className="text-sm font-medium hidden xl:inline">{localeNames[locale]}</span>
         <ChevronDown
           className={cn(
-            'h-4 w-4 text-muted-foreground transition-transform',
+            'h-3.5 w-3.5 text-muted-foreground transition-transform',
             isOpen && 'rotate-180'
           )}
         />

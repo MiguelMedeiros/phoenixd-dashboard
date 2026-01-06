@@ -41,7 +41,60 @@ docker compose up -d
 
 ---
 
-## Troubleshooting Permission Issues
+## Troubleshooting
+
+### "Failed to Fetch" or Backend Unhealthy
+
+If the frontend loads but shows "Failed to fetch" errors, the issue is usually that the **frontend can't reach the backend API**.
+
+**Symptoms:**
+- Dashboard UI loads but shows errors
+- `docker ps` shows backend as "unhealthy"
+- Backend logs show successful startup
+
+**Cause:** The frontend is trying to connect to `localhost:4001`, but you're accessing from a different machine.
+
+**Solution 1: Automatic Detection (v1.x+)**
+
+The dashboard now auto-detects the correct API URL based on how you access it. If you're running an older version, update to the latest:
+
+```bash
+git pull
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+```
+
+**Solution 2: Manual Configuration**
+
+If auto-detection doesn't work, set the API URLs in your `.env` file:
+
+```bash
+# Replace with your server's IP or hostname
+NEXT_PUBLIC_API_URL=http://192.168.1.100:4001
+NEXT_PUBLIC_WS_URL=ws://192.168.1.100:4001
+```
+
+Then rebuild the frontend:
+
+```bash
+docker compose down
+docker compose build frontend --no-cache
+docker compose up -d
+```
+
+**Solution 3: Use Tailscale (Recommended for Remote Access)**
+
+Tailscale provides automatic URL detection and secure remote access:
+
+1. Go to Settings > Tailscale in the dashboard
+2. Add your Tailscale auth key
+3. Enable Tailscale
+4. Access via `https://phoenixd-dashboard.your-tailnet.ts.net:3000`
+
+---
+
+### Permission Denied Errors
 
 If you encounter a permission error like:
 

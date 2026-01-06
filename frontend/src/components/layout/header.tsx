@@ -2,11 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import {
-  RefreshCw,
   Zap,
   Search,
   Bell,
-  Lock,
   Menu,
   X,
   Home,
@@ -16,14 +14,17 @@ import {
   Link2,
   Settings,
   Globe,
+  DollarSign,
 } from 'lucide-react';
 import { getBalance } from '@/lib/api';
 import { useAuthContext } from '@/components/auth-provider';
-import { formatSats } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { cn } from '@/lib/utils';
 import { SearchDialog } from '@/components/search-dialog';
 import { NotificationsPopover, type Notification } from '@/components/notifications-popover';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { CurrencySwitcher } from '@/components/currency-switcher';
+import { NetworkStatusButton } from '@/components/network-status-button';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 
@@ -71,7 +72,9 @@ export function Header({
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { hasPassword, lock } = useAuthContext();
+  useAuthContext(); // Keep auth context active for session management
+  const { formatValueParts, bitcoinDisplayMode, setBitcoinDisplayMode, currency } =
+    useCurrencyContext();
 
   const displayTitle = title || t('dashboard');
 
@@ -177,8 +180,12 @@ export function Header({
               })}
             </nav>
 
-            {/* Language Switcher */}
-            <div className="border-t border-white/10 pt-4 mt-4">
+            {/* Currency & Language Switchers */}
+            <div className="border-t border-white/10 pt-4 mt-4 space-y-2">
+              <div className="flex items-center gap-3 px-4 py-2">
+                <DollarSign className="h-5 w-5 text-muted-foreground" />
+                <CurrencySwitcher openUp />
+              </div>
               <div className="flex items-center gap-3 px-4 py-2">
                 <Globe className="h-5 w-5 text-muted-foreground" />
                 <LanguageSwitcher openUp />
@@ -188,7 +195,7 @@ export function Header({
         </div>
       )}
 
-      <header className="flex items-center justify-between px-4 md:px-8 py-3 md:py-6">
+      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 py-3 md:py-6 bg-background/80 backdrop-blur-xl border-b border-white/5">
         {/* Left - Menu Button (mobile) / Title (desktop) */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Mobile menu button */}
@@ -206,31 +213,28 @@ export function Header({
         </div>
 
         {/* Right - Actions */}
-        <div className="flex items-center gap-1.5 md:gap-3">
-          {/* Language Switcher - Hidden on mobile */}
-          <div className="hidden md:block">
+        <div className="flex items-center gap-1.5 md:gap-2">
+          {/* Currency Switcher - Hidden on mobile and small tablets */}
+          <div className="hidden lg:block">
+            <CurrencySwitcher />
+          </div>
+
+          {/* Language Switcher - Hidden on mobile and small tablets */}
+          <div className="hidden lg:block">
             <LanguageSwitcher />
           </div>
 
-          {/* Search - Hidden on mobile */}
+          {/* Search - Hidden on mobile and small tablets */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="hidden md:flex icon-circle group"
+            className="hidden lg:flex icon-circle group"
             title={t('search')}
           >
             <Search className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
 
-          {/* Lock Button - Only visible if password is configured */}
-          {hasPassword && (
-            <button
-              onClick={lock}
-              className="icon-circle !w-9 !h-9 md:!w-11 md:!h-11 group"
-              title="Lock Dashboard"
-            >
-              <Lock className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </button>
-          )}
+          {/* Network Status - Tor and Tailscale */}
+          <NetworkStatusButton />
 
           {/* Notifications */}
           <div className="relative">
@@ -261,43 +265,64 @@ export function Header({
             />
           </div>
 
-          {/* Balance Pill */}
-          {balance && (
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 md:gap-3 px-2.5 md:px-5 py-1.5 md:py-2.5 rounded-full glass-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer"
-            >
-              <div className="relative flex items-center justify-center">
-                <Zap className="h-3.5 w-3.5 md:h-5 md:w-5 text-primary" />
-                <div className="absolute inset-0 blur-md hidden md:block">
-                  <Zap className="h-5 w-5 text-primary opacity-40" />
-                </div>
-              </div>
-              <span
-                className={cn(
-                  'font-mono text-xs md:text-lg font-bold value-highlight transition-transform',
-                  balanceAnimating && 'scale-110'
-                )}
-              >
-                {formatSats(balance.balanceSat)}
-              </span>
+          {/* Balance Pill - Click to toggle display mode (BTC) or refresh (fiat) */}
+          {balance &&
+            (() => {
+              const parts = formatValueParts(balance.balanceSat);
+              const isBip177 = currency === 'BTC' && bitcoinDisplayMode === 'bip177';
 
-              {/* Refresh - Hidden on mobile */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+              const handleBalanceClick = () => {
+                if (currency === 'BTC') {
+                  // Toggle between sats and bip177 display modes
+                  setBitcoinDisplayMode(bitcoinDisplayMode === 'sats' ? 'bip177' : 'sats');
+                } else {
+                  // For fiat currencies, refresh the balance
                   handleRefresh();
-                }}
-                disabled={loading}
-                className="hidden md:block ml-1 p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-              >
-                <RefreshCw
-                  className={cn('h-4 w-4 text-muted-foreground', loading && 'animate-spin')}
-                />
-              </button>
-            </Link>
-          )}
+                }
+              };
+
+              return (
+                <button
+                  onClick={handleBalanceClick}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full glass-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer disabled:opacity-70 border border-primary/20"
+                >
+                  {/* Show Zap icon only for classic sats mode, not for BIP-177 to avoid symbol overload */}
+                  {!isBip177 && (
+                    <div className="relative flex items-center justify-center">
+                      <Zap
+                        className={cn(
+                          'h-4 w-4 md:h-5 md:w-5 text-primary',
+                          loading && 'animate-pulse'
+                        )}
+                      />
+                    </div>
+                  )}
+                  <span
+                    className={cn(
+                      'font-mono text-sm md:text-base font-bold transition-transform flex items-baseline gap-1',
+                      balanceAnimating && 'scale-110'
+                    )}
+                  >
+                    {isBip177 ? (
+                      <>
+                        <span className="text-primary">{parts.unit}</span>
+                        <span className="value-highlight">{parts.value}</span>
+                      </>
+                    ) : currency === 'BTC' ? (
+                      <>
+                        <span className="value-highlight">{parts.value}</span>
+                        <span className="text-muted-foreground font-normal text-xs">
+                          {parts.unit}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="value-highlight">{parts.full}</span>
+                    )}
+                  </span>
+                </button>
+              );
+            })()}
         </div>
       </header>
 

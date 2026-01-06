@@ -20,8 +20,9 @@ import confetti from 'canvas-confetti';
 import { createInvoice, createOffer } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
-import { formatSats } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
+import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
 
 // Success sound using Web Audio API
@@ -118,6 +119,7 @@ const fireConfetti = () => {
 export default function ReceivePage() {
   const t = useTranslations('receive');
   const _tc = useTranslations('common'); // Prefixed with _ for future use
+  const { formatValue } = useCurrencyContext();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer'>('invoice');
   const [loading, setLoading] = useState(false);
   const [invoiceResult, setInvoiceResult] = useState<{
@@ -248,14 +250,8 @@ export default function ReceivePage() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl md:text-2xl font-semibold tracking-tight gradient-text">
-          {t('title')}
-        </h1>
-        <p className="mt-1 text-sm md:text-base text-muted-foreground">{t('subtitle')}</p>
-      </div>
+    <div className="pt-4 md:pt-6 space-y-6">
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
 
       {/* Tab Switcher */}
       <PageTabs
@@ -321,7 +317,7 @@ export default function ReceivePage() {
                           <PartyPopper className="h-5 w-5 scale-x-[-1]" />
                         </h2>
                         <p className="text-4xl font-bold font-mono text-foreground">
-                          +{formatSats(paidAmount || parseInt(invoiceAmount))}
+                          +{formatValue(paidAmount || parseInt(invoiceAmount))}
                         </p>
                       </div>
                     </>
@@ -332,7 +328,7 @@ export default function ReceivePage() {
                       <div className="text-center mb-6">
                         <p className="text-sm text-muted-foreground mb-1">{t('amountSats')}</p>
                         <p className="text-3xl font-bold font-mono text-lightning">
-                          {formatSats(parseInt(invoiceAmount))}
+                          {formatValue(parseInt(invoiceAmount))}
                         </p>
                         {invoiceDescription && (
                           <p className="text-sm text-muted-foreground mt-2 max-w-xs">
@@ -507,7 +503,7 @@ export default function ReceivePage() {
                       <PartyPopper className="h-4 w-4 md:h-6 md:w-6 scale-x-[-1]" />
                     </h2>
                     <p className="text-2xl md:text-4xl font-bold font-mono text-foreground">
-                      +{formatSats(paidAmount || parseInt(invoiceAmount))}
+                      +{formatValue(paidAmount || parseInt(invoiceAmount))}
                     </p>
                     <p className="text-xs md:text-base text-muted-foreground">
                       {t('invoicePaidSuccessfully')}
@@ -531,7 +527,7 @@ export default function ReceivePage() {
                       <div className="h-2 w-2 md:h-2.5 md:w-2.5 rounded-full bg-warning animate-pulse" />
                       <span className="font-medium text-xs md:text-base">{t('waiting')}</span>
                       <span className="font-mono text-lightning font-semibold text-sm md:text-base">
-                        {formatSats(parseInt(invoiceAmount))}
+                        {formatValue(parseInt(invoiceAmount))}
                       </span>
                     </div>
                     <button

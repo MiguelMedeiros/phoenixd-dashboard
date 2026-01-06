@@ -1,23 +1,40 @@
-// Detect if we're being accessed via Tailscale Magic DNS
+// Detect API URL dynamically based on access method
+// This enables the dashboard to work from any hostname without configuration
 function getApiUrl(): string {
   // On server-side, use the environment variable
   if (typeof window === 'undefined') {
     return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
   }
 
-  // On client-side, check if we're accessing via Tailscale
-  const hostname = window.location.hostname;
-  const protocol = window.location.protocol;
+  const { protocol, hostname } = window.location;
+  const configuredUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  // If hostname ends with .ts.net, we're accessing via Tailscale
-  // Use the same hostname but with the backend port (4001)
-  // The backend is exposed on port 4001 via Docker port mapping
+  // If a custom API URL is explicitly configured (not the default localhost),
+  // respect that configuration
+  if (configuredUrl && !configuredUrl.includes('localhost:4001')) {
+    return configuredUrl;
+  }
+
+  // Auto-detect API URL based on current hostname
+  // This allows the dashboard to work when accessed via:
+  // - localhost (development)
+  // - Local IP (e.g., 192.168.1.100)
+  // - Tailscale Magic DNS (*.ts.net)
+  // - Custom domain
+
+  // For Tailscale, we may need to use port 4001
   if (hostname.endsWith('.ts.net')) {
     return `${protocol}//${hostname}:4001`;
   }
 
-  // Otherwise, use the configured API URL
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+  // For localhost, use the default port mapping
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://localhost:4001';
+  }
+
+  // For any other hostname (IP address, domain, etc.),
+  // auto-detect using the same hostname with backend port
+  return `${protocol}//${hostname}:4001`;
 }
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {

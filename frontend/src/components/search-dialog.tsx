@@ -16,7 +16,8 @@ import {
   Settings,
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { cn, formatSats } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import {
   getIncomingPayments,
   getOutgoingPayments,
@@ -42,6 +43,7 @@ type SearchResult = {
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const router = useRouter();
   const t = useTranslations('search');
+  const { formatValue } = useCurrencyContext();
 
   const pages: SearchResult[] = useMemo(
     () => [
@@ -154,8 +156,8 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         return {
           type: 'payment' as const,
           title: isIncoming
-            ? `+${formatSats((p as IncomingPayment).receivedSat)}`
-            : `-${formatSats((p as OutgoingPayment).sent)}`,
+            ? `+${formatValue((p as IncomingPayment).receivedSat)}`
+            : `-${formatValue((p as OutgoingPayment).sent)}`,
           subtitle:
             'description' in p && p.description
               ? p.description
@@ -174,6 +176,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
 
     setResults([...filteredPages, ...filteredPayments]);
     setSelectedIndex(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, payments, pages]);
 
   // Keyboard navigation

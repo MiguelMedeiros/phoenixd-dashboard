@@ -10,17 +10,17 @@ describe('Receive Page', () => {
       cy.contains('h1', 'Receive Payment').should('be.visible');
     });
 
-    it('shows Invoice and Offer tabs', () => {
-      cy.contains('Invoice').should('be.visible');
-      cy.contains('Offer').should('be.visible');
+    it('shows One-time and Reusable tabs', () => {
+      cy.contains('One-time').should('be.visible');
+      cy.contains('Reusable').should('be.visible');
     });
 
-    it('shows Invoice tab content by default', () => {
-      cy.contains('Create Invoice').should('be.visible');
+    it('shows One-time tab content by default', () => {
+      cy.contains('Create One-time Invoice').should('be.visible');
     });
   });
 
-  describe('Create Invoice', () => {
+  describe('Create One-time Invoice', () => {
     it('has amount input field', () => {
       cy.get('input[inputmode="numeric"]').should('be.visible');
     });
@@ -29,19 +29,19 @@ describe('Receive Page', () => {
       cy.get('textarea').should('be.visible');
     });
 
-    it('has Create Invoice button', () => {
-      cy.contains('button', 'Create Invoice').should('be.visible');
+    it('has Create One-time Invoice button', () => {
+      cy.contains('button', 'Create One-time Invoice').should('be.visible');
     });
 
     it('button is disabled without amount', () => {
-      cy.contains('button', 'Create Invoice').should('be.disabled');
+      cy.contains('button', 'Create One-time Invoice').should('be.disabled');
     });
 
     it('creates an invoice with amount', () => {
       cy.get('input[inputmode="numeric"]').first().type('1000');
       cy.get('textarea').first().type('Test payment');
 
-      cy.contains('button', 'Create Invoice').click();
+      cy.contains('button', 'Create One-time Invoice').click();
 
       cy.wait('@createInvoice');
 
@@ -49,25 +49,25 @@ describe('Receive Page', () => {
       cy.contains('lnbc').should('be.visible');
     });
 
-    it('shows Copy Invoice button after creation', () => {
+    it('shows Copy button after creation', () => {
       cy.get('input[inputmode="numeric"]').first().type('1000');
-      cy.contains('button', 'Create Invoice').click();
+      cy.contains('button', 'Create One-time Invoice').click();
       cy.wait('@createInvoice');
 
       cy.contains('button', /copy/i).should('be.visible');
     });
   });
 
-  describe('Create Offer (BOLT12)', () => {
-    it('switches to Offer tab', () => {
-      cy.contains('button', 'Offer').click();
-      cy.contains('Create Offer').should('be.visible');
+  describe('Create Reusable Invoice (BOLT12)', () => {
+    it('switches to Reusable tab', () => {
+      cy.contains('button', 'Reusable').click();
+      cy.contains('Create Reusable Invoice').should('be.visible');
     });
 
-    it('creates a BOLT12 offer', () => {
-      cy.contains('button', 'Offer').click();
-      cy.get('textarea').first().type('My reusable offer');
-      cy.contains('button', 'Create Offer').click();
+    it('creates a BOLT12 reusable invoice', () => {
+      cy.contains('button', 'Reusable').click();
+      cy.get('textarea').first().type('My reusable invoice');
+      cy.contains('button', 'Create Reusable Invoice').click();
 
       cy.wait('@createOffer');
 
@@ -79,7 +79,7 @@ describe('Receive Page', () => {
   describe('No Invoice State', () => {
     it('shows empty state before creating invoice', () => {
       // Empty state text on desktop
-      cy.contains('No Invoice Yet').should('exist');
+      cy.contains('No One-time Invoice Yet').should('exist');
     });
   });
 
@@ -91,7 +91,7 @@ describe('Receive Page', () => {
       }).as('createInvoiceError');
 
       cy.get('input[inputmode="numeric"]').first().type('1000');
-      cy.contains('button', 'Create Invoice').click();
+      cy.contains('button', 'Create One-time Invoice').click();
 
       cy.wait('@createInvoiceError');
       // Should show error toast or message
@@ -112,40 +112,40 @@ describe('Receive Page', () => {
       }).as('createLargeInvoice');
 
       cy.get('input[inputmode="numeric"]').first().type('1000000');
-      cy.contains('button', 'Create Invoice').click();
+      cy.contains('button', 'Create One-time Invoice').click();
 
       cy.wait('@createLargeInvoice');
       cy.contains('lnbc').should('be.visible');
     });
   });
 
-  describe('Offer Creation Errors', () => {
-    it('shows error when offer creation fails', () => {
+  describe('Reusable Invoice Creation Errors', () => {
+    it('shows error when reusable invoice creation fails', () => {
       cy.intercept('POST', '**/api/phoenixd/createoffer', {
         statusCode: 500,
-        body: { error: 'Failed to create offer' },
+        body: { error: 'Failed to create reusable invoice' },
       }).as('createOfferError');
 
-      cy.contains('button', 'Offer').click();
-      cy.get('textarea').first().type('My offer');
-      cy.contains('button', 'Create Offer').click();
+      cy.contains('button', 'Reusable').click();
+      cy.get('textarea').first().type('My reusable invoice');
+      cy.contains('button', 'Create Reusable Invoice').click();
 
       cy.wait('@createOfferError');
       cy.get('[role="alert"], [data-state="open"]', { timeout: 5000 }).should('exist');
     });
 
-    it('creates offer without amount (variable amount offer)', () => {
+    it('creates reusable invoice without amount (variable amount)', () => {
       cy.intercept('POST', '**/api/phoenixd/createoffer', (req) => {
-        expect(req.body.description).to.equal('Variable amount offer');
+        expect(req.body.description).to.equal('Variable amount invoice');
         req.reply({
           statusCode: 200,
           body: { offer: 'lno1variableamount...' },
         });
       }).as('createOfferNoAmount');
 
-      cy.contains('button', 'Offer').click();
-      cy.get('textarea').first().type('Variable amount offer');
-      cy.contains('button', 'Create Offer').click();
+      cy.contains('button', 'Reusable').click();
+      cy.get('textarea').first().type('Variable amount invoice');
+      cy.contains('button', 'Create Reusable Invoice').click();
 
       cy.wait('@createOfferNoAmount');
       cy.contains('lno').should('be.visible');
@@ -155,7 +155,7 @@ describe('Receive Page', () => {
   describe('QR Code Display', () => {
     it('displays QR code after invoice creation', () => {
       cy.get('input[inputmode="numeric"]').first().type('1000');
-      cy.contains('button', 'Create Invoice').click();
+      cy.contains('button', 'Create One-time Invoice').click();
       cy.wait('@createInvoice');
 
       // QR code container should be visible (white background)
@@ -174,7 +174,7 @@ describe('Receive Page', () => {
       }).as('createNewInvoice');
 
       cy.get('input[inputmode="numeric"]').first().type('2000');
-      cy.contains('button', 'Create Invoice').click();
+      cy.contains('button', 'Create One-time Invoice').click();
       cy.wait('@createNewInvoice');
 
       cy.contains('lnbc20u').should('be.visible');
@@ -187,7 +187,7 @@ describe('Receive Page', () => {
       cy.visit('/receive');
 
       cy.contains('h1', 'Receive Payment').should('be.visible');
-      cy.contains('button', 'Create Invoice').should('be.visible');
+      cy.contains('button', 'Create One-time Invoice').should('be.visible');
     });
 
     it('displays correctly on tablet', () => {
@@ -195,7 +195,7 @@ describe('Receive Page', () => {
       cy.visit('/receive');
 
       cy.contains('h1', 'Receive Payment').should('be.visible');
-      cy.contains('button', 'Create Invoice').should('be.visible');
+      cy.contains('button', 'Create One-time Invoice').should('be.visible');
     });
   });
 });

@@ -26,8 +26,10 @@ import {
   decodeInvoice,
 } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { cn, formatSats } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
+import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
 import { QRScanner } from '@/components/qr-scanner';
 import { useRouter } from '@/i18n/navigation';
@@ -35,6 +37,7 @@ import { useRouter } from '@/i18n/navigation';
 export default function SendPage() {
   const t = useTranslations('send');
   const ts = useTranslations('scanner');
+  const { formatValue } = useCurrencyContext();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer' | 'address' | 'onchain'>(
@@ -320,13 +323,8 @@ export default function SendPage() {
   ];
 
   return (
-    <div className="space-y-4 md:space-y-8">
-      {/* Header with Scan Button */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{t('title')}</h1>
-          <p className="mt-1 text-sm md:text-base text-muted-foreground">{t('subtitle')}</p>
-        </div>
+    <div className="pt-4 md:pt-6 space-y-6">
+      <PageHeader title={t('title')} subtitle={t('subtitle')}>
         <button
           onClick={() => setScannerOpen(true)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-medium text-sm shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors shrink-0"
@@ -334,7 +332,7 @@ export default function SendPage() {
           <ScanLine className="h-5 w-5" />
           <span className="hidden sm:inline">{ts('scan')}</span>
         </button>
-      </div>
+      </PageHeader>
 
       {/* Tab Switcher */}
       <PageTabs
@@ -361,7 +359,7 @@ export default function SendPage() {
             <form onSubmit={handlePayInvoice} className="space-y-5">
               <div className="space-y-2">
                 <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  {t('invoice')} *
+                  {t('invoiceLabel')} *
                 </label>
                 <textarea
                   placeholder={t('invoicePlaceholder')}
@@ -394,7 +392,7 @@ export default function SendPage() {
                         <span className="text-sm">{t('amount')}</span>
                       </div>
                       <span className="text-lg font-bold text-foreground">
-                        {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))} sats
+                        {formatValue(Math.floor(decodedInvoice.amountMsat / 1000))} sats
                       </span>
                     </div>
                   )}
@@ -457,7 +455,7 @@ export default function SendPage() {
                 ) : decodedInvoice && decodedInvoice.amountMsat ? (
                   <>
                     <Send className="h-5 w-5" /> {t('pay')}{' '}
-                    {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))} sats
+                    {formatValue(Math.floor(decodedInvoice.amountMsat / 1000))} sats
                   </>
                 ) : (
                   <>
@@ -485,7 +483,7 @@ export default function SendPage() {
             <form onSubmit={handlePayOffer} className="space-y-5">
               <div className="space-y-2">
                 <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  {t('offer')} *
+                  {t('offerLabel')} *
                 </label>
                 <textarea
                   placeholder={t('offerPlaceholder')}

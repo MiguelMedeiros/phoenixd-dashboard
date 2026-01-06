@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { Search, FileCode, Calculator, Loader2, Zap, Gift, Check, Info } from 'lucide-react';
 import { decodeInvoice, decodeOffer, estimateLiquidityFees } from '@/lib/api';
-import { formatSats, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { useToast } from '@/hooks/use-toast';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
+import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
 
 interface DecodedInvoice {
@@ -33,6 +35,7 @@ interface LiquidityFees {
 export default function ToolsPage() {
   const t = useTranslations('tools');
   const tc = useTranslations('common');
+  const { formatValue, currency } = useCurrencyContext();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer' | 'fees'>('invoice');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -117,18 +120,14 @@ export default function ToolsPage() {
   };
 
   const tabs: TabItem[] = [
-    { id: 'invoice', label: tc('invoice'), icon: Zap },
-    { id: 'offer', label: tc('offer'), icon: Gift },
-    { id: 'fees', label: tc('fees'), icon: Calculator },
+    { id: 'invoice', label: t('decodeInvoice'), icon: Zap },
+    { id: 'offer', label: t('decodeOffer'), icon: Gift },
+    { id: 'fees', label: t('estimateFees'), icon: Calculator },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
-        <p className="mt-1 text-muted-foreground">{t('subtitle')}</p>
-      </div>
+    <div className="pt-4 md:pt-6 space-y-6">
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
 
       {/* Tab Switcher */}
       <PageTabs
@@ -203,9 +202,11 @@ export default function ToolsPage() {
                   <div className="rounded-2xl bg-white/5 p-6 text-center">
                     <p className="text-sm text-muted-foreground">{tc('amount')}</p>
                     <p className="text-4xl font-bold value-highlight mt-1">
-                      {formatSats(Math.floor(decodedInvoice.amountMsat / 1000))}
+                      {formatValue(Math.floor(decodedInvoice.amountMsat / 1000))}
                     </p>
-                    <p className="text-sm text-muted-foreground">{tc('sats')}</p>
+                    {currency === 'BTC' && (
+                      <p className="text-sm text-muted-foreground">{tc('sats')}</p>
+                    )}
                   </div>
                 )}
 
@@ -329,7 +330,7 @@ export default function ToolsPage() {
                   <div className="rounded-2xl bg-white/5 p-6 text-center">
                     <p className="text-sm text-muted-foreground">{tc('amount')}</p>
                     <p className="text-4xl font-bold value-highlight mt-1">
-                      {formatSats(Math.floor(decodedOffer.amount.amountMsat / 1000))}
+                      {formatValue(Math.floor(decodedOffer.amount.amountMsat / 1000))}
                     </p>
                   </div>
                 )}
@@ -436,7 +437,7 @@ export default function ToolsPage() {
                 <div className="rounded-2xl bg-white/5 p-6 text-center">
                   <p className="text-sm text-muted-foreground">{t('totalEstimatedFee')}</p>
                   <p className="text-4xl font-bold text-bitcoin mt-2">
-                    {formatSats(estimatedFees.miningFeeSat + estimatedFees.serviceFeeSat)}
+                    {formatValue(estimatedFees.miningFeeSat + estimatedFees.serviceFeeSat)}
                   </p>
                 </div>
 
@@ -444,13 +445,13 @@ export default function ToolsPage() {
                   <div className="rounded-xl bg-white/5 p-4">
                     <p className="text-xs text-muted-foreground mb-1">{t('miningFee')}</p>
                     <p className="font-mono font-medium">
-                      {formatSats(estimatedFees.miningFeeSat)}
+                      {formatValue(estimatedFees.miningFeeSat)}
                     </p>
                   </div>
                   <div className="rounded-xl bg-white/5 p-4">
                     <p className="text-xs text-muted-foreground mb-1">{t('serviceFee')}</p>
                     <p className="font-mono font-medium">
-                      {formatSats(estimatedFees.serviceFeeSat)}
+                      {formatValue(estimatedFees.serviceFeeSat)}
                     </p>
                   </div>
                 </div>

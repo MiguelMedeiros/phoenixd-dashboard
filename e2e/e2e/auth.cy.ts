@@ -80,11 +80,11 @@ describe('Authentication & Security', () => {
       cy.get('.hero-card').should('be.visible');
     });
 
-    it('does not show lock button in header when no password is set', () => {
+    it('does not show lock button in sidebar when no password is set', () => {
       cy.visit('/');
       cy.wait(['@getAuthStatus', '@getNodeInfo', '@getBalance']);
 
-      cy.get('button[title="Lock Dashboard"]').should('not.exist');
+      cy.get('button[title="Lock"]').should('not.exist');
     });
   });
 
@@ -94,11 +94,11 @@ describe('Authentication & Security', () => {
       cy.mockAuthAuthenticated();
     });
 
-    it('shows lock button in header', () => {
+    it('shows lock button in sidebar', () => {
       cy.visit('/');
       cy.wait(['@getAuthStatus', '@getNodeInfo', '@getBalance']);
 
-      cy.get('button[title="Lock Dashboard"]').should('be.visible');
+      cy.get('button[title="Lock"]').should('be.visible');
     });
 
     it('clicking lock button shows lock screen', () => {
@@ -114,7 +114,7 @@ describe('Authentication & Security', () => {
         },
       }).as('getAuthStatusLocked');
 
-      cy.get('button[title="Lock Dashboard"]').click();
+      cy.get('button[title="Lock"]').click();
 
       cy.contains('Enter password to continue').should('be.visible');
     });
@@ -338,7 +338,9 @@ describe('Authentication & Security', () => {
       cy.visit('/');
       cy.wait(['@getAuthStatus', '@getNodeInfo', '@getBalance']);
 
-      cy.get('button[title="Lock Dashboard"]').should('be.visible');
+      // On mobile, the sidebar is hidden, so we check that the lock button exists
+      // but may not be visible in collapsed sidebar view
+      cy.get('button[title="Lock"]').should('exist');
     });
   });
 });

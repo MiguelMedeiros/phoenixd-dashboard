@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { ArrowDownToLine, ArrowUpFromLine, Bell, Check, Trash2, X, Zap } from 'lucide-react';
-import { cn, formatSats } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { useCurrencyContext } from '@/components/currency-provider';
 import { useTranslations } from 'next-intl';
 
 export interface Notification {
@@ -35,6 +36,7 @@ export function NotificationsPopover({
   onRemove,
 }: NotificationsPopoverProps) {
   const t = useTranslations('notifications');
+  const { formatValue } = useCurrencyContext();
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const formatTime = (timestamp: number) => {
@@ -172,7 +174,7 @@ export function NotificationsPopover({
                             )}
                           >
                             {notification.type === 'payment_received' ? '+' : '-'}
-                            {formatSats(notification.amount)}
+                            {formatValue(notification.amount)}
                           </span>
                         )}
                         <span className="text-xs text-muted-foreground">
