@@ -18,6 +18,22 @@ export const FIAT_CURRENCIES = [
 
 export type FiatCurrencyCode = (typeof FIAT_CURRENCIES)[number]['code'];
 
+// Bitcoin display modes (BIP-177 support)
+export type BitcoinDisplayMode = 'sats' | 'bip177';
+
+export const BITCOIN_DISPLAY_MODES = [
+  {
+    mode: 'sats' as const,
+    name: 'Classic (sats)',
+    description: 'Display as satoshis (e.g., 100,000 sats)',
+  },
+  {
+    mode: 'bip177' as const,
+    name: 'Modern (BIP-177)',
+    description: 'Display with ₿ symbol (e.g., ₿100,000)',
+  },
+] as const;
+
 export interface CurrencyInfo {
   code: FiatCurrencyCode;
   name: string;
@@ -31,6 +47,7 @@ interface PriceCache {
 }
 
 const STORAGE_KEY = 'phoenixd-currency';
+const BITCOIN_DISPLAY_MODE_KEY = 'phoenixd-bitcoin-display-mode';
 const PRICE_CACHE_KEY = 'phoenixd-btc-prices';
 const CACHE_DURATION = 60 * 1000; // 60 seconds
 
@@ -38,28 +55,76 @@ const CACHE_DURATION = 60 * 1000; // 60 seconds
 const COINGECKO_API =
   'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,eur,brl,cad,gbp,jpy,aud,chf,mxn';
 
+export interface ValueParts {
+  unit: string;
+  value: string;
+  full: string;
+}
+
 export interface UseCurrencyReturn {
   currency: FiatCurrencyCode;
   currencyInfo: CurrencyInfo;
   setCurrency: (currency: FiatCurrencyCode) => void;
+  bitcoinDisplayMode: BitcoinDisplayMode;
+  setBitcoinDisplayMode: (mode: BitcoinDisplayMode) => void;
   btcPrices: Record<string, number> | null;
   loading: boolean;
   error: string | null;
   formatValue: (sats: number) => string;
+  formatValueParts: (sats: number) => ValueParts;
   refreshPrices: () => Promise<void>;
 }
 
-function formatSatsInternal(sats: number): string {
+interface SatsParts {
+  unit: string;
+  value: string;
+}
+
+function formatSatsClassicParts(sats: number): SatsParts {
   if (sats >= 100000000) {
-    return `${(sats / 100000000).toFixed(8)} BTC`;
+    return { value: (sats / 100000000).toFixed(8), unit: 'BTC' };
   }
   if (sats >= 1000000) {
-    return `${(sats / 1000000).toFixed(2)}M sats`;
+    return { value: `${(sats / 1000000).toFixed(2)}M`, unit: 'sats' };
   }
   if (sats >= 1000) {
-    return `${(sats / 1000).toFixed(1)}k sats`;
+    return { value: `${(sats / 1000).toFixed(1)}k`, unit: 'sats' };
   }
-  return `${sats} sats`;
+  return { value: String(sats), unit: 'sats' };
+}
+
+function formatSatsClassic(sats: number): string {
+  const parts = formatSatsClassicParts(sats);
+  return `${parts.value} ${parts.unit}`;
+}
+
+// BIP-177 format: Use ₿ symbol with the full satoshi value
+// Example: 34,500,000 sats becomes ₿ 34,500,000
+function formatSatsBip177Parts(sats: number): SatsParts {
+  const formattedNumber = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0,
+  }).format(sats);
+  return { value: formattedNumber, unit: '₿' };
+}
+
+function formatSatsBip177(sats: number): string {
+  const parts = formatSatsBip177Parts(sats);
+  // Add a thin space between symbol and number for better readability
+  return `${parts.unit}\u2009${parts.value}`;
+}
+
+function formatSatsInternalParts(sats: number, mode: BitcoinDisplayMode): SatsParts {
+  if (mode === 'bip177') {
+    return formatSatsBip177Parts(sats);
+  }
+  return formatSatsClassicParts(sats);
+}
+
+function formatSatsInternal(sats: number, mode: BitcoinDisplayMode): string {
+  if (mode === 'bip177') {
+    return formatSatsBip177(sats);
+  }
+  return formatSatsClassic(sats);
 }
 
 function formatFiatValue(
@@ -101,6 +166,7 @@ function formatFiatValue(
 
 export function useCurrency(): UseCurrencyReturn {
   const [currency, setCurrencyState] = useState<FiatCurrencyCode>('BTC');
+  const [bitcoinDisplayMode, setBitcoinDisplayModeState] = useState<BitcoinDisplayMode>('sats');
   const [btcPrices, setBtcPrices] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,6 +183,16 @@ export function useCurrency(): UseCurrencyReturn {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved && FIAT_CURRENCIES.some((c) => c.code === saved)) {
         setCurrencyState(saved as FiatCurrencyCode);
+      }
+    } catch {
+      // localStorage not available
+    }
+
+    // Load saved bitcoin display mode
+    try {
+      const savedMode = localStorage.getItem(BITCOIN_DISPLAY_MODE_KEY);
+      if (savedMode && (savedMode === 'sats' || savedMode === 'bip177')) {
+        setBitcoinDisplayModeState(savedMode as BitcoinDisplayMode);
       }
     } catch {
       // localStorage not available
@@ -219,31 +295,66 @@ export function useCurrency(): UseCurrencyReturn {
     }
   }, []);
 
+  const setBitcoinDisplayMode = useCallback((mode: BitcoinDisplayMode) => {
+    setBitcoinDisplayModeState(mode);
+    try {
+      localStorage.setItem(BITCOIN_DISPLAY_MODE_KEY, mode);
+    } catch {
+      // localStorage not available
+    }
+  }, []);
+
   const formatValue = useCallback(
     (sats: number): string => {
       // Always use sats format for BTC or when prices aren't loaded
       if (currency === 'BTC' || !btcPrices) {
-        return formatSatsInternal(sats);
+        return formatSatsInternal(sats, bitcoinDisplayMode);
       }
 
       const price = btcPrices[currency];
       if (!price) {
-        return formatSatsInternal(sats);
+        return formatSatsInternal(sats, bitcoinDisplayMode);
       }
 
       return formatFiatValue(sats, price, currency, currencyInfo.locale);
     },
-    [currency, btcPrices, currencyInfo.locale]
+    [currency, btcPrices, currencyInfo.locale, bitcoinDisplayMode]
+  );
+
+  const formatValueParts = useCallback(
+    (sats: number): ValueParts => {
+      // Always use sats format for BTC or when prices aren't loaded
+      if (currency === 'BTC' || !btcPrices) {
+        const parts = formatSatsInternalParts(sats, bitcoinDisplayMode);
+        const full = formatSatsInternal(sats, bitcoinDisplayMode);
+        return { unit: parts.unit, value: parts.value, full };
+      }
+
+      const price = btcPrices[currency];
+      if (!price) {
+        const parts = formatSatsInternalParts(sats, bitcoinDisplayMode);
+        const full = formatSatsInternal(sats, bitcoinDisplayMode);
+        return { unit: parts.unit, value: parts.value, full };
+      }
+
+      // For fiat, extract the currency symbol
+      const full = formatFiatValue(sats, price, currency, currencyInfo.locale);
+      return { unit: currencyInfo.symbol, value: full, full };
+    },
+    [currency, btcPrices, currencyInfo.locale, currencyInfo.symbol, bitcoinDisplayMode]
   );
 
   return {
     currency,
     currencyInfo,
     setCurrency,
+    bitcoinDisplayMode,
+    setBitcoinDisplayMode,
     btcPrices,
     loading,
     error,
     formatValue,
+    formatValueParts,
     refreshPrices: fetchPrices,
   };
 }

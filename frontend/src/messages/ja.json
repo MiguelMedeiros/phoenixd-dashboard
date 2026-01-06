@@ -415,7 +415,14 @@
     "displayCurrency": "表示通貨",
     "showingInSats": "ビットコイン（sats）で値を表示",
     "showingInFiat": "{currency}で値を表示",
-    "currencyDescription": "ダッシュボード全体で金額をどのように表示するかを選択します。BTCはサトシを表示し、法定通貨はCoinGeckoからのリアルタイム換算値を表示します。"
+    "currencyDescription": "ダッシュボード全体で金額をどのように表示するかを選択します。BTCはサトシを表示し、法定通貨はCoinGeckoからのリアルタイム換算値を表示します。",
+    "bitcoinUnitDisplay": "ビットコイン単位表示",
+    "unitDisplayFormat": "表示形式",
+    "showingClassicSats": "クラシックなsats形式で値を表示",
+    "showingBip177": "BIP-177形式で値を表示 (₿)",
+    "classicSats": "クラシック (sats)",
+    "modernBip177": "モダン (BIP-177)",
+    "bitcoinUnitDescription": "BIP-177は、'sats'の代わりに₿（小文字のbitcoin）を基本単位記号として使用することを提案しています。どちらの形式も同じ値を表します - 表示方法が異なるだけです。"
   },
   "nodeInfo": {
     "title": "ノード情報",

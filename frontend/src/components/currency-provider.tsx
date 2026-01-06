@@ -6,7 +6,9 @@ import {
   type UseCurrencyReturn,
   type FiatCurrencyCode,
   type CurrencyInfo,
+  type BitcoinDisplayMode,
   FIAT_CURRENCIES,
+  BITCOIN_DISPLAY_MODES,
 } from '@/hooks/use-currency';
 
 type CurrencyContextType = UseCurrencyReturn;
@@ -32,5 +34,5 @@ export function CurrencyProvider({ children }: CurrencyProviderProps) {
 }
 
 // Re-export types and constants for convenience
-export { FIAT_CURRENCIES };
-export type { FiatCurrencyCode, CurrencyInfo };
+export { FIAT_CURRENCIES, BITCOIN_DISPLAY_MODES };
+export type { FiatCurrencyCode, CurrencyInfo, BitcoinDisplayMode };

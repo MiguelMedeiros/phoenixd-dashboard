@@ -73,7 +73,7 @@ export function Header({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useAuthContext(); // Keep auth context active for session management
-  const { formatValue } = useCurrencyContext();
+  const { formatValueParts, bitcoinDisplayMode, currency } = useCurrencyContext();
 
   const displayTitle = title || t('dashboard');
 
@@ -265,27 +265,52 @@ export function Header({
           </div>
 
           {/* Balance Pill - Click to refresh */}
-          {balance && (
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="flex items-center gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full glass-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer disabled:opacity-70 border border-primary/20"
-            >
-              <div className="relative flex items-center justify-center">
-                <Zap
-                  className={cn('h-4 w-4 md:h-5 md:w-5 text-primary', loading && 'animate-pulse')}
-                />
-              </div>
-              <span
-                className={cn(
-                  'font-mono text-sm md:text-base font-bold value-highlight transition-transform',
-                  balanceAnimating && 'scale-110'
-                )}
-              >
-                {formatValue(balance.balanceSat)}
-              </span>
-            </button>
-          )}
+          {balance &&
+            (() => {
+              const parts = formatValueParts(balance.balanceSat);
+              const isBip177 = currency === 'BTC' && bitcoinDisplayMode === 'bip177';
+              return (
+                <button
+                  onClick={handleRefresh}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full glass-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer disabled:opacity-70 border border-primary/20"
+                >
+                  {/* Show Zap icon only for classic sats mode, not for BIP-177 to avoid symbol overload */}
+                  {!isBip177 && (
+                    <div className="relative flex items-center justify-center">
+                      <Zap
+                        className={cn(
+                          'h-4 w-4 md:h-5 md:w-5 text-primary',
+                          loading && 'animate-pulse'
+                        )}
+                      />
+                    </div>
+                  )}
+                  <span
+                    className={cn(
+                      'font-mono text-sm md:text-base font-bold transition-transform flex items-baseline gap-1',
+                      balanceAnimating && 'scale-110'
+                    )}
+                  >
+                    {isBip177 ? (
+                      <>
+                        <span className="text-primary">{parts.unit}</span>
+                        <span className="value-highlight">{parts.value}</span>
+                      </>
+                    ) : currency === 'BTC' ? (
+                      <>
+                        <span className="value-highlight">{parts.value}</span>
+                        <span className="text-muted-foreground font-normal text-xs">
+                          {parts.unit}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="value-highlight">{parts.full}</span>
+                    )}
+                  </span>
+                </button>
+              );
+            })()}
         </div>
       </header>
 

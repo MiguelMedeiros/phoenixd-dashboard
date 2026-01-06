@@ -60,7 +60,11 @@ import {
 import { clearUrlCache } from '@/hooks/use-dynamic-urls';
 import { cn } from '@/lib/utils';
 import { useAuthContext } from '@/components/auth-provider';
-import { useCurrencyContext, FIAT_CURRENCIES } from '@/components/currency-provider';
+import {
+  useCurrencyContext,
+  FIAT_CURRENCIES,
+  BITCOIN_DISPLAY_MODES,
+} from '@/components/currency-provider';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useTranslations } from 'next-intl';
 
@@ -93,7 +97,13 @@ export default function SettingsPage() {
     useAuthContext();
 
   // Currency context
-  const { currency, setCurrency, loading: currencyLoading } = useCurrencyContext();
+  const {
+    currency,
+    setCurrency,
+    bitcoinDisplayMode,
+    setBitcoinDisplayMode,
+    loading: currencyLoading,
+  } = useCurrencyContext();
 
   // Password form state
   const [showPasswordSection, setShowPasswordSection] = useState(false);
@@ -1443,6 +1453,64 @@ export default function SettingsPage() {
           </div>
         </div>
       </section>
+
+      {/* Bitcoin Unit Display Section - Only visible when BTC is selected */}
+      {currency === 'BTC' && (
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <span className="text-lg font-bold">₿</span>
+            {t('bitcoinUnitDisplay')}
+          </h2>
+
+          <div className="glass-card rounded-xl p-5 space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-lg flex items-center justify-center bg-bitcoin/10">
+                <Zap className="h-5 w-5 text-bitcoin" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">{t('unitDisplayFormat')}</p>
+                <p className="text-sm text-muted-foreground">
+                  {bitcoinDisplayMode === 'sats' ? t('showingClassicSats') : t('showingBip177')}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {BITCOIN_DISPLAY_MODES.map((displayMode) => (
+                <button
+                  key={displayMode.mode}
+                  onClick={() => setBitcoinDisplayMode(displayMode.mode)}
+                  className={cn(
+                    'flex flex-col items-start gap-2 p-4 rounded-xl border transition-all text-left',
+                    bitcoinDisplayMode === displayMode.mode
+                      ? 'bg-bitcoin/10 border-bitcoin/50 text-bitcoin'
+                      : 'bg-black/[0.02] dark:bg-white/[0.02] border-black/[0.08] dark:border-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-muted-foreground'
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold">
+                      {displayMode.mode === 'sats' ? 'sats' : '₿'}
+                    </span>
+                    {bitcoinDisplayMode === displayMode.mode && <Check className="h-4 w-4" />}
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium block">
+                      {t(displayMode.mode === 'sats' ? 'classicSats' : 'modernBip177')}
+                    </span>
+                    <span className="text-xs opacity-75">
+                      {displayMode.mode === 'sats' ? '100,000 sats' : '₿100,000'}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-4 border-t border-black/5 dark:border-white/5">
+              <p className="text-xs text-muted-foreground">{t('bitcoinUnitDescription')}</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Theme Section */}
       <section className="space-y-4">

@@ -415,7 +415,14 @@
     "displayCurrency": "Moneda de Visualización",
     "showingInSats": "Mostrando valores en Bitcoin (sats)",
     "showingInFiat": "Mostrando valores en {currency}",
-    "currencyDescription": "Elige cómo mostrar los valores monetarios en todo el dashboard. BTC muestra satoshis, mientras que las monedas fiat muestran valores convertidos en tiempo real desde CoinGecko."
+    "currencyDescription": "Elige cómo mostrar los valores monetarios en todo el dashboard. BTC muestra satoshis, mientras que las monedas fiat muestran valores convertidos en tiempo real desde CoinGecko.",
+    "bitcoinUnitDisplay": "Visualización de Unidad Bitcoin",
+    "unitDisplayFormat": "Formato de Visualización",
+    "showingClassicSats": "Mostrando valores en formato clásico de sats",
+    "showingBip177": "Mostrando valores en formato BIP-177 (₿)",
+    "classicSats": "Clásico (sats)",
+    "modernBip177": "Moderno (BIP-177)",
+    "bitcoinUnitDescription": "BIP-177 propone usar ₿ (bitcoin en minúscula) como símbolo de unidad base en lugar de 'sats'. Ambos formatos representan el mismo valor, solo se muestran de manera diferente."
   },
   "nodeInfo": {
     "title": "Información del Nodo",

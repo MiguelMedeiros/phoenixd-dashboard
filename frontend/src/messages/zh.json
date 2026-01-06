@@ -415,7 +415,14 @@
     "displayCurrency": "显示货币",
     "showingInSats": "以比特币（聪）显示数值",
     "showingInFiat": "以{currency}显示数值",
-    "currencyDescription": "选择在整个仪表板中如何显示货币数值。BTC显示聪，而法定货币显示来自CoinGecko的实时转换数值。"
+    "currencyDescription": "选择在整个仪表板中如何显示货币数值。BTC显示聪，而法定货币显示来自CoinGecko的实时转换数值。",
+    "bitcoinUnitDisplay": "比特币单位显示",
+    "unitDisplayFormat": "显示格式",
+    "showingClassicSats": "以经典聪格式显示数值",
+    "showingBip177": "以BIP-177格式显示数值 (₿)",
+    "classicSats": "经典 (sats)",
+    "modernBip177": "现代 (BIP-177)",
+    "bitcoinUnitDescription": "BIP-177提议使用₿（小写bitcoin）作为基本单位符号，而不是'sats'。两种格式代表相同的值 - 只是显示方式不同。"
   },
   "nodeInfo": {
     "title": "节点信息",
