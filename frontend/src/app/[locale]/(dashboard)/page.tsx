@@ -11,6 +11,11 @@ import {
   ChevronRight,
   Wrench,
   Link2,
+  ScrollText,
+  Terminal,
+  Server,
+  BookOpen,
+  Github,
 } from 'lucide-react';
 import {
   getNodeInfo,
@@ -337,11 +342,19 @@ export default function OverviewPage() {
         <div className="grid gap-4 lg:grid-cols-5">
           {/* Node Info */}
           <div className="lg:col-span-2 glass-card rounded-2xl p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-primary" />
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Zap className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm">{t('nodeInfo')}</h3>
               </div>
-              <h3 className="font-semibold text-sm">{t('nodeInfo')}</h3>
+              <Link
+                href="/node"
+                className="text-xs text-primary hover:underline flex items-center gap-0.5"
+              >
+                {tc('viewAll')} <ChevronRight className="h-3 w-3" />
+              </Link>
             </div>
 
             <div className="mb-3">
@@ -361,7 +374,7 @@ export default function OverviewPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 mb-3">
               <div className="rounded-xl bg-white/5 p-3">
                 <span className="text-[10px] text-muted-foreground block">{t('network')}</span>
                 <div className="flex items-center gap-1.5 mt-0.5">
@@ -375,6 +388,86 @@ export default function OverviewPage() {
                   {nodeInfo?.version}
                 </span>
               </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <Link
+                href="/node?tab=info"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <Server className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {t('details')}
+                </span>
+              </Link>
+              <Link
+                href="/node?tab=logs"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                  <ScrollText className="h-4 w-4 text-blue-500" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {t('logs')}
+                </span>
+              </Link>
+              <Link
+                href="/node?tab=terminal"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
+                  <Terminal className="h-4 w-4 text-green-500" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {t('terminal')}
+                </span>
+              </Link>
+            </div>
+
+            {/* External Links */}
+            <div className="grid grid-cols-3 gap-2">
+              <a
+                href="https://phoenix.acinq.co/server/api"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                  <BookOpen className="h-4 w-4 text-purple-500" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {tc('phoenixdDocs')}
+                </span>
+              </a>
+              <a
+                href="https://github.com/ACINQ/phoenixd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-gray-500/10 flex items-center justify-center group-hover:bg-gray-500/20 transition-colors">
+                  <Github className="h-4 w-4 text-gray-400" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {tc('phoenixd')}
+                </span>
+              </a>
+              <a
+                href="https://github.com/MiguelMedeiros/phoenixd-dashboard"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group"
+              >
+                <div className="h-8 w-8 rounded-lg bg-gray-500/10 flex items-center justify-center group-hover:bg-gray-500/20 transition-colors">
+                  <Github className="h-4 w-4 text-gray-400" />
+                </div>
+                <span className="text-[10px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {tc('dashboard')}
+                </span>
+              </a>
             </div>
           </div>
 

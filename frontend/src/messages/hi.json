@@ -67,7 +67,11 @@
     "phoenixdDocs": "Phoenixd डॉक्स",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "नोड जानकारी लोड करने में असमर्थ",
-    "fees": "शुल्क"
+    "fees": "शुल्क",
+    "terminal": "टर्मिनल",
+    "logs": "लॉग्स",
+    "node": "नोड",
+    "disconnected": "डिस्कनेक्टेड"
   },
   "navigation": {
     "overview": "अवलोकन",
@@ -97,6 +101,9 @@
     "nodeId": "नोड ID",
     "network": "नेटवर्क",
     "version": "संस्करण",
+    "details": "विवरण",
+    "logs": "लॉग्स",
+    "terminal": "टर्मिनल",
     "createInvoice": "इनवॉइस बनाएं",
     "payInvoice": "इनवॉइस भुगतान करें",
     "manageLiquidity": "तरलता प्रबंधन",
@@ -434,6 +441,28 @@
     "channelsCount": "चैनल",
     "copyNodeId": "नोड ID कॉपी करें"
   },
+  "node": {
+    "title": "नोड",
+    "subtitle": "नोड जानकारी, लॉग्स और टर्मिनल एक्सेस",
+    "info": "जानकारी",
+    "logs": "लॉग्स",
+    "terminal": "टर्मिनल",
+    "nodeId": "नोड ID",
+    "nodeIdDescription": "आपके Lightning नोड का सार्वजनिक पहचानकर्ता",
+    "network": "नेटवर्क",
+    "networkDescription": "वर्तमान नेटवर्क और नोड विवरण",
+    "chain": "चेन",
+    "version": "संस्करण",
+    "channels": "चैनल",
+    "quickActions": "त्वरित क्रियाएं",
+    "quickActionsDescription": "लॉग्स और टर्मिनल एक्सेस करें",
+    "viewLogs": "कंटेनर लॉग्स देखें",
+    "viewLogsDescription": "Docker कंटेनरों के रीयल-टाइम लॉग्स",
+    "openTerminal": "टर्मिनल खोलें",
+    "openTerminalDescription": "कंटेनरों तक इंटरैक्टिव शेल एक्सेस",
+    "resources": "संसाधन",
+    "resourcesDescription": "दस्तावेज़ीकरण और स्रोत कोड"
+  },
   "notifications": {
     "title": "सूचनाएं",
     "noNotifications": "कोई सूचना नहीं",
@@ -536,5 +565,29 @@
     "fixTheMoney": "पैसा ठीक करो, दुनिया ठीक करो",
     "proofOfWork": "प्रूफ ऑफ वर्क > प्रूफ ऑफ स्टेक",
     "runningBitcoin": "बिटकॉइन चला रहे हैं... अभी से!"
+  },
+  "docker": {
+    "terminal": "टर्मिनल",
+    "logs": "लॉग्स",
+    "interactiveShell": "इंटरैक्टिव शेल एक्सेस",
+    "realTimeLogs": "रियल-टाइम कंटेनर लॉग्स",
+    "selectContainer": "कंटेनर चुनें",
+    "noContainers": "कोई कंटेनर नहीं मिला",
+    "noRunningContainers": "कोई चल रहा कंटेनर नहीं",
+    "failedToLoadContainers": "कंटेनर लोड करने में विफल",
+    "connectingTo": "कनेक्ट हो रहा है",
+    "connectedTo": "कनेक्टेड",
+    "connectionClosed": "कनेक्शन बंद",
+    "connectionError": "कनेक्शन त्रुटि",
+    "failedToConnect": "कनेक्ट करने में विफल",
+    "reconnect": "पुनः कनेक्ट करें",
+    "error": "त्रुटि",
+    "pause": "रोकें",
+    "resume": "जारी रखें",
+    "paused": "रुका हुआ",
+    "clearLogs": "लॉग्स साफ़ करें",
+    "noLogs": "कोई लॉग उपलब्ध नहीं",
+    "logLines": "लॉग लाइनें",
+    "pausedHint": "लॉग स्ट्रीमिंग रुकी हुई है - जारी रखने के लिए प्ले क्लिक करें"
   }
 }

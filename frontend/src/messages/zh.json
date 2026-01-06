@@ -67,7 +67,11 @@
     "phoenixdDocs": "Phoenixd文档",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "无法加载节点信息",
-    "fees": "费用"
+    "fees": "费用",
+    "terminal": "终端",
+    "logs": "日志",
+    "node": "节点",
+    "disconnected": "已断开"
   },
   "navigation": {
     "overview": "概览",
@@ -97,6 +101,9 @@
     "nodeId": "节点ID",
     "network": "网络",
     "version": "版本",
+    "details": "详情",
+    "logs": "日志",
+    "terminal": "终端",
     "createInvoice": "创建账单",
     "payInvoice": "支付账单",
     "manageLiquidity": "管理流动性",
@@ -434,6 +441,28 @@
     "channelsCount": "通道数",
     "copyNodeId": "复制节点ID"
   },
+  "node": {
+    "title": "节点",
+    "subtitle": "节点信息、日志和终端访问",
+    "info": "信息",
+    "logs": "日志",
+    "terminal": "终端",
+    "nodeId": "节点ID",
+    "nodeIdDescription": "您的Lightning节点的公共标识符",
+    "network": "网络",
+    "networkDescription": "当前网络和节点详情",
+    "chain": "链",
+    "version": "版本",
+    "channels": "通道",
+    "quickActions": "快捷操作",
+    "quickActionsDescription": "访问日志和终端",
+    "viewLogs": "查看容器日志",
+    "viewLogsDescription": "Docker容器的实时日志",
+    "openTerminal": "打开终端",
+    "openTerminalDescription": "容器的交互式Shell访问",
+    "resources": "资源",
+    "resourcesDescription": "文档和源代码"
+  },
   "notifications": {
     "title": "通知",
     "noNotifications": "暂无通知",
@@ -536,5 +565,29 @@
     "fixTheMoney": "修复货币，修复世界",
     "proofOfWork": "工作量证明 > 权益证明",
     "runningBitcoin": "运行比特币...从现在开始！"
+  },
+  "docker": {
+    "terminal": "终端",
+    "logs": "日志",
+    "interactiveShell": "交互式Shell访问",
+    "realTimeLogs": "实时容器日志",
+    "selectContainer": "选择容器",
+    "noContainers": "未找到容器",
+    "noRunningContainers": "没有正在运行的容器",
+    "failedToLoadContainers": "加载容器失败",
+    "connectingTo": "正在连接",
+    "connectedTo": "已连接到",
+    "connectionClosed": "连接已关闭",
+    "connectionError": "连接错误",
+    "failedToConnect": "连接失败",
+    "reconnect": "重新连接",
+    "error": "错误",
+    "pause": "暂停",
+    "resume": "继续",
+    "paused": "已暂停",
+    "clearLogs": "清除日志",
+    "noLogs": "暂无日志",
+    "logLines": "日志行",
+    "pausedHint": "日志流暂停中 - 点击播放以继续"
   }
 }

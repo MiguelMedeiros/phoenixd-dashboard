@@ -67,7 +67,11 @@
     "phoenixdDocs": "Phoenixdドキュメント",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "ノード情報を読み込めません",
-    "fees": "手数料"
+    "fees": "手数料",
+    "terminal": "ターミナル",
+    "logs": "ログ",
+    "node": "ノード",
+    "disconnected": "切断済み"
   },
   "navigation": {
     "overview": "概要",
@@ -97,6 +101,9 @@
     "nodeId": "ノードID",
     "network": "ネットワーク",
     "version": "バージョン",
+    "details": "詳細",
+    "logs": "ログ",
+    "terminal": "ターミナル",
     "createInvoice": "請求書作成",
     "payInvoice": "請求書支払い",
     "manageLiquidity": "流動性管理",
@@ -434,6 +441,28 @@
     "channelsCount": "チャネル",
     "copyNodeId": "ノードIDをコピー"
   },
+  "node": {
+    "title": "ノード",
+    "subtitle": "ノード情報、ログ、ターミナルアクセス",
+    "info": "情報",
+    "logs": "ログ",
+    "terminal": "ターミナル",
+    "nodeId": "ノードID",
+    "nodeIdDescription": "Lightningノードの公開識別子",
+    "network": "ネットワーク",
+    "networkDescription": "現在のネットワークとノードの詳細",
+    "chain": "チェーン",
+    "version": "バージョン",
+    "channels": "チャネル",
+    "quickActions": "クイックアクション",
+    "quickActionsDescription": "ログとターミナルにアクセス",
+    "viewLogs": "コンテナログを表示",
+    "viewLogsDescription": "Dockerコンテナのリアルタイムログ",
+    "openTerminal": "ターミナルを開く",
+    "openTerminalDescription": "コンテナへのインタラクティブシェルアクセス",
+    "resources": "リソース",
+    "resourcesDescription": "ドキュメントとソースコード"
+  },
   "notifications": {
     "title": "通知",
     "noNotifications": "通知がありません",
@@ -536,5 +565,29 @@
     "fixTheMoney": "お金を直せば、世界が直る",
     "proofOfWork": "Proof of Work > Proof of Stake",
     "runningBitcoin": "ビットコイン実行中...今から！"
+  },
+  "docker": {
+    "terminal": "ターミナル",
+    "logs": "ログ",
+    "interactiveShell": "インタラクティブシェルアクセス",
+    "realTimeLogs": "リアルタイムコンテナログ",
+    "selectContainer": "コンテナを選択",
+    "noContainers": "コンテナが見つかりません",
+    "noRunningContainers": "実行中のコンテナがありません",
+    "failedToLoadContainers": "コンテナの読み込みに失敗しました",
+    "connectingTo": "接続中",
+    "connectedTo": "接続済み",
+    "connectionClosed": "接続が閉じられました",
+    "connectionError": "接続エラー",
+    "failedToConnect": "接続に失敗しました",
+    "reconnect": "再接続",
+    "error": "エラー",
+    "pause": "一時停止",
+    "resume": "再開",
+    "paused": "一時停止中",
+    "clearLogs": "ログをクリア",
+    "noLogs": "ログがありません",
+    "logLines": "ログ行",
+    "pausedHint": "ログストリーミングが一時停止中です - 再開するにはプレイをクリック"
   }
 }

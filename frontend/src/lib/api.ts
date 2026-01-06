@@ -569,3 +569,17 @@ export async function detectAccessType(): Promise<{
     tailscaleDnsName: string | null;
   }>('/api/config/detect-access');
 }
+
+// Docker
+export interface ContainerInfo {
+  id: string;
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+  created: number;
+}
+
+export async function getContainers(): Promise<ContainerInfo[]> {
+  return request<ContainerInfo[]>('/api/docker/containers');
+}

@@ -77,3 +77,47 @@ export async function cleanupExpiredSessions() {
     console.error('Error cleaning up sessions:', error);
   }
 }
+
+/**
+ * Validate session from cookie value (for WebSocket auth)
+ * Returns true if session is valid, false otherwise
+ */
+export async function validateSessionFromCookie(sessionId: string): Promise<boolean> {
+  try {
+    // Check if password is configured
+    const settings = await prisma.settings.findUnique({
+      where: { id: 'singleton' },
+    });
+
+    // No password configured - allow access
+    if (!settings?.passwordHash) {
+      return true;
+    }
+
+    // Validate session
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session) {
+      return false;
+    }
+
+    // Check if session is expired
+    if (session.expiresAt < new Date()) {
+      await prisma.session.delete({ where: { id: sessionId } });
+      return false;
+    }
+
+    // Update last used timestamp
+    await prisma.session.update({
+      where: { id: sessionId },
+      data: { lastUsed: new Date() },
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Session validation error:', error);
+    return false;
+  }
+}
