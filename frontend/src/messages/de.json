@@ -37,6 +37,7 @@
     "networkError": "Netzwerkfehler",
     "connected": "Verbunden",
     "connecting": "Verbindet...",
+    "disconnected": "Getrennt",
     "disabled": "Deaktiviert",
     "manageNetwork": "Netzwerkeinstellungen verwalten →",
     "dashboard": "Dashboard",
@@ -67,7 +68,11 @@
     "phoenixdDocs": "Phoenixd-Docs",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "Node-Informationen konnten nicht geladen werden",
-    "fees": "Gebühren"
+    "fees": "Gebühren",
+    "terminal": "Terminal",
+    "logs": "Logs",
+    "node": "Knoten",
+    "disconnected": "Getrennt"
   },
   "navigation": {
     "overview": "Übersicht",
@@ -97,6 +102,9 @@
     "nodeId": "Node-ID",
     "network": "Netzwerk",
     "version": "Version",
+    "details": "Details",
+    "logs": "Protokolle",
+    "terminal": "Terminal",
     "createInvoice": "Rechnung erstellen",
     "payInvoice": "Rechnung bezahlen",
     "manageLiquidity": "Liquidität verwalten",
@@ -434,6 +442,26 @@
     "channelsCount": "Kanäle",
     "copyNodeId": "Node-ID kopieren"
   },
+  "node": {
+    "title": "Knoten",
+    "subtitle": "Knoteninformationen, Protokolle und Terminal-Zugriff",
+    "info": "Info",
+    "logs": "Protokolle",
+    "terminal": "Terminal",
+    "nodeId": "Knoten-ID",
+    "nodeIdDescription": "Öffentliche Kennung Ihres Lightning-Knotens",
+    "network": "Netzwerk",
+    "networkDescription": "Aktuelles Netzwerk und Knotendetails",
+    "chain": "Chain",
+    "version": "Version",
+    "channels": "Kanäle",
+    "quickActions": "Schnellaktionen",
+    "quickActionsDescription": "Zugriff auf Protokolle und Terminal",
+    "viewLogs": "Container-Protokolle anzeigen",
+    "viewLogsDescription": "Echtzeit-Protokolle von Docker-Containern",
+    "openTerminal": "Terminal öffnen",
+    "openTerminalDescription": "Interaktiver Shell-Zugriff auf Container"
+  },
   "notifications": {
     "title": "Benachrichtigungen",
     "noNotifications": "Keine Benachrichtigungen",
@@ -536,5 +564,29 @@
     "fixTheMoney": "Repariere das Geld, repariere die Welt",
     "proofOfWork": "Proof of Work > Proof of Stake",
     "runningBitcoin": "Läuft Bitcoin seit... jetzt!"
+  },
+  "docker": {
+    "terminal": "Terminal",
+    "logs": "Logs",
+    "interactiveShell": "Interaktiver Shell-Zugang",
+    "realTimeLogs": "Echtzeit-Container-Logs",
+    "selectContainer": "Container auswählen",
+    "noContainers": "Keine Container gefunden",
+    "noRunningContainers": "Keine laufenden Container",
+    "failedToLoadContainers": "Container konnten nicht geladen werden",
+    "connectingTo": "Verbinde mit",
+    "connectedTo": "Verbunden mit",
+    "connectionClosed": "Verbindung geschlossen",
+    "connectionError": "Verbindungsfehler",
+    "failedToConnect": "Verbindung fehlgeschlagen",
+    "reconnect": "Neu verbinden",
+    "error": "Fehler",
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "paused": "Pausiert",
+    "clearLogs": "Logs löschen",
+    "noLogs": "Keine Logs verfügbar",
+    "logLines": "Log-Zeilen",
+    "pausedHint": "Log-Streaming pausiert - Play klicken zum Fortsetzen"
   }
 }

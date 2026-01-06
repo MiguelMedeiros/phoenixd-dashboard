@@ -67,7 +67,11 @@
     "phoenixdDocs": "وثائق Phoenixd",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "تعذر تحميل معلومات العقدة",
-    "fees": "الرسوم"
+    "fees": "الرسوم",
+    "terminal": "المحطة الطرفية",
+    "logs": "السجلات",
+    "node": "العقدة",
+    "disconnected": "غير متصل"
   },
   "navigation": {
     "overview": "نظرة عامة",
@@ -97,6 +101,9 @@
     "nodeId": "معرف العقدة",
     "network": "الشبكة",
     "version": "الإصدار",
+    "details": "التفاصيل",
+    "logs": "السجلات",
+    "terminal": "المحطة الطرفية",
     "createInvoice": "إنشاء فاتورة",
     "payInvoice": "دفع فاتورة",
     "manageLiquidity": "إدارة السيولة",
@@ -434,6 +441,26 @@
     "channelsCount": "القنوات",
     "copyNodeId": "نسخ معرف العقدة"
   },
+  "node": {
+    "title": "العقدة",
+    "subtitle": "معلومات العقدة والسجلات والوصول إلى المحطة الطرفية",
+    "info": "معلومات",
+    "logs": "السجلات",
+    "terminal": "المحطة الطرفية",
+    "nodeId": "معرف العقدة",
+    "nodeIdDescription": "المعرف العام لعقدة Lightning الخاصة بك",
+    "network": "الشبكة",
+    "networkDescription": "الشبكة الحالية وتفاصيل العقدة",
+    "chain": "السلسلة",
+    "version": "الإصدار",
+    "channels": "القنوات",
+    "quickActions": "إجراءات سريعة",
+    "quickActionsDescription": "الوصول إلى السجلات والمحطة الطرفية",
+    "viewLogs": "عرض سجلات الحاوية",
+    "viewLogsDescription": "سجلات في الوقت الفعلي من حاويات Docker",
+    "openTerminal": "فتح المحطة الطرفية",
+    "openTerminalDescription": "وصول تفاعلي إلى شل الحاويات"
+  },
   "notifications": {
     "title": "الإشعارات",
     "noNotifications": "لا توجد إشعارات",
@@ -536,5 +563,29 @@
     "fixTheMoney": "أصلح المال، أصلح العالم",
     "proofOfWork": "إثبات العمل > إثبات الحصة",
     "runningBitcoin": "تشغيل البيتكوين منذ... الآن!"
+  },
+  "docker": {
+    "terminal": "المحطة الطرفية",
+    "logs": "السجلات",
+    "interactiveShell": "وصول تفاعلي للشل",
+    "realTimeLogs": "سجلات الحاوية في الوقت الفعلي",
+    "selectContainer": "اختر الحاوية",
+    "noContainers": "لم يتم العثور على حاويات",
+    "noRunningContainers": "لا توجد حاويات قيد التشغيل",
+    "failedToLoadContainers": "فشل في تحميل الحاويات",
+    "connectingTo": "جاري الاتصال بـ",
+    "connectedTo": "متصل بـ",
+    "connectionClosed": "تم إغلاق الاتصال",
+    "connectionError": "خطأ في الاتصال",
+    "failedToConnect": "فشل الاتصال",
+    "reconnect": "إعادة الاتصال",
+    "error": "خطأ",
+    "pause": "إيقاف مؤقت",
+    "resume": "استئناف",
+    "paused": "متوقف مؤقتًا",
+    "clearLogs": "مسح السجلات",
+    "noLogs": "لا توجد سجلات متاحة",
+    "logLines": "سطور السجل",
+    "pausedHint": "بث السجلات متوقف - انقر على تشغيل للاستئناف"
   }
 }

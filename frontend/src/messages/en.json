@@ -37,6 +37,7 @@
     "networkError": "Network error",
     "connected": "Connected",
     "connecting": "Connecting...",
+    "disconnected": "Disconnected",
     "disabled": "Disabled",
     "manageNetwork": "Manage network settings →",
     "dashboard": "Dashboard",
@@ -67,7 +68,10 @@
     "phoenixdDocs": "Docs",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "Unable to load node info",
-    "fees": "Fees"
+    "fees": "Fees",
+    "terminal": "Terminal",
+    "logs": "Logs",
+    "node": "Node"
   },
   "navigation": {
     "overview": "Overview",
@@ -97,6 +101,9 @@
     "nodeId": "Node ID",
     "network": "Network",
     "version": "Version",
+    "details": "Details",
+    "logs": "Logs",
+    "terminal": "Terminal",
     "createInvoice": "Create invoice",
     "payInvoice": "Pay invoice",
     "manageLiquidity": "Manage liquidity",
@@ -434,6 +441,26 @@
     "channelsCount": "Channels",
     "copyNodeId": "Copy Node ID"
   },
+  "node": {
+    "title": "Node",
+    "subtitle": "Node information, logs, and terminal access",
+    "info": "Info",
+    "logs": "Logs",
+    "terminal": "Terminal",
+    "nodeId": "Node ID",
+    "nodeIdDescription": "Your Lightning node's public identifier",
+    "network": "Network",
+    "networkDescription": "Current network and node details",
+    "chain": "Chain",
+    "version": "Version",
+    "channels": "Channels",
+    "quickActions": "Quick Actions",
+    "quickActionsDescription": "Access logs and terminal",
+    "viewLogs": "View Container Logs",
+    "viewLogsDescription": "Real-time logs from Docker containers",
+    "openTerminal": "Open Terminal",
+    "openTerminalDescription": "Interactive shell access to containers"
+  },
   "notifications": {
     "title": "Notifications",
     "noNotifications": "No notifications",
@@ -536,5 +563,29 @@
     "fixTheMoney": "Fix the money, fix the world",
     "proofOfWork": "Proof of work > Proof of stake",
     "runningBitcoin": "Running Bitcoin since... now!"
+  },
+  "docker": {
+    "terminal": "Terminal",
+    "logs": "Logs",
+    "interactiveShell": "Interactive shell access",
+    "realTimeLogs": "Real-time container logs",
+    "selectContainer": "Select container",
+    "noContainers": "No containers found",
+    "noRunningContainers": "No running containers",
+    "failedToLoadContainers": "Failed to load containers",
+    "connectingTo": "Connecting to",
+    "connectedTo": "Connected to",
+    "connectionClosed": "Connection closed",
+    "connectionError": "Connection error",
+    "failedToConnect": "Failed to connect",
+    "reconnect": "Reconnect",
+    "error": "Error",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused": "Paused",
+    "clearLogs": "Clear logs",
+    "noLogs": "No logs available",
+    "logLines": "log lines",
+    "pausedHint": "Log streaming paused - click play to resume"
   }
 }

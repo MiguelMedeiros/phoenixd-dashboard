@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { WebSocketServer, WebSocket } from 'ws';
-import { createServer } from 'http';
+import { createServer, IncomingMessage } from 'http';
 import { PrismaClient } from '@prisma/client';
 import { phoenixdRouter } from './routes/phoenixd.js';
 import { paymentsRouter } from './routes/payments.js';
@@ -12,12 +12,21 @@ import { authRouter } from './routes/auth.js';
 import { torRouter } from './routes/tor.js';
 import { tailscaleRouter } from './routes/tailscale.js';
 import { configRouter } from './routes/config.js';
+import { dockerRouter, isProjectContainer, getDockerClient, execInContainer, getContainerLogs } from './routes/docker.js';
 import { PhoenixdService } from './services/phoenixd.js';
-import { cleanupExpiredSessions } from './middleware/auth.js';
+import { cleanupExpiredSessions, validateSessionFromCookie } from './middleware/auth.js';
 
 const app = express();
 const server = createServer(app);
-const wss = new WebSocketServer({ server, path: '/ws' });
+
+// Main WebSocket server for payment notifications
+const wss = new WebSocketServer({ noServer: true });
+
+// WebSocket server for Docker logs
+const wssLogs = new WebSocketServer({ noServer: true });
+
+// WebSocket server for Docker terminal
+const wssTerminal = new WebSocketServer({ noServer: true });
 
 export const prisma = new PrismaClient();
 export const phoenixd = new PhoenixdService();
@@ -75,6 +84,7 @@ app.use('/api/lnurl', lnurlRouter);
 app.use('/api/tor', torRouter);
 app.use('/api/tailscale', tailscaleRouter);
 app.use('/api/config', configRouter);
+app.use('/api/docker', dockerRouter);
 
 // WebSocket clients
 const clients = new Set<WebSocket>();
@@ -103,6 +113,252 @@ export function broadcastPayment(event: object) {
     }
   });
 }
+
+// Parse cookies from request
+function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) return cookies;
+  
+  cookieHeader.split(';').forEach(cookie => {
+    const [name, ...rest] = cookie.trim().split('=');
+    if (name && rest.length > 0) {
+      cookies[name] = rest.join('=');
+    }
+  });
+  return cookies;
+}
+
+// Handle WebSocket upgrade requests
+server.on('upgrade', async (request: IncomingMessage, socket, head) => {
+  const url = new URL(request.url || '', `http://${request.headers.host}`);
+  const pathname = url.pathname;
+
+  // Main WebSocket for payment notifications (no auth required for now)
+  if (pathname === '/ws') {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+    return;
+  }
+
+  // Docker logs WebSocket - requires auth
+  if (pathname.startsWith('/ws/docker/logs/')) {
+    const containerName = pathname.replace('/ws/docker/logs/', '');
+    
+    // Validate container name
+    if (!isProjectContainer(containerName)) {
+      socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    // Validate session from cookie
+    const cookies = parseCookies(request.headers.cookie);
+    const sessionId = cookies['session'];
+    
+    const isValid = await validateSessionFromCookie(sessionId || '');
+    if (!isValid) {
+      console.log('Docker logs WebSocket auth failed for container:', containerName);
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    wssLogs.handleUpgrade(request, socket, head, (ws) => {
+      wssLogs.emit('connection', ws, request, containerName);
+    });
+    return;
+  }
+
+  // Docker terminal WebSocket - requires auth
+  if (pathname.startsWith('/ws/docker/exec/')) {
+    const containerName = pathname.replace('/ws/docker/exec/', '');
+    
+    // Validate container name
+    if (!isProjectContainer(containerName)) {
+      socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    // Validate session from cookie
+    const cookies = parseCookies(request.headers.cookie);
+    const sessionId = cookies['session'];
+    
+    const isValid = await validateSessionFromCookie(sessionId || '');
+    if (!isValid) {
+      console.log('Docker terminal WebSocket auth failed for container:', containerName);
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    wssTerminal.handleUpgrade(request, socket, head, (ws) => {
+      wssTerminal.emit('connection', ws, request, containerName);
+    });
+    return;
+  }
+
+  // Unknown path
+  socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+  socket.destroy();
+});
+
+// Parse Docker multiplexed stream
+// Docker logs use 8-byte headers when not using TTY:
+// - Byte 0: stream type (0=stdin, 1=stdout, 2=stderr)
+// - Bytes 1-3: reserved
+// - Bytes 4-7: payload size (big-endian)
+function parseDockerLogChunk(buffer: Buffer): string {
+  let result = '';
+  let offset = 0;
+  
+  while (offset < buffer.length) {
+    // Need at least 8 bytes for header
+    if (offset + 8 > buffer.length) {
+      // If we have remaining data without proper header, return it as-is
+      result += buffer.slice(offset).toString('utf8');
+      break;
+    }
+    
+    // Read header
+    const streamType = buffer.readUInt8(offset);
+    const payloadSize = buffer.readUInt32BE(offset + 4);
+    
+    // Validate stream type (0, 1, or 2)
+    if (streamType > 2) {
+      // Invalid stream type, probably not multiplexed - return as-is
+      result += buffer.slice(offset).toString('utf8');
+      break;
+    }
+    
+    // Skip header
+    offset += 8;
+    
+    // Read payload
+    if (offset + payloadSize <= buffer.length) {
+      result += buffer.slice(offset, offset + payloadSize).toString('utf8');
+      offset += payloadSize;
+    } else {
+      // Incomplete payload
+      result += buffer.slice(offset).toString('utf8');
+      break;
+    }
+  }
+  
+  return result;
+}
+
+// Handle Docker logs WebSocket connections
+wssLogs.on('connection', async (ws: WebSocket, _request: IncomingMessage, containerName: string) => {
+  console.log(`Docker logs WebSocket connected for container: ${containerName}`);
+  
+  try {
+    const logStream = await getContainerLogs(containerName);
+    
+    // Stream logs to WebSocket
+    logStream.on('data', (chunk: Buffer) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        // Parse Docker multiplexed stream format
+        const data = parseDockerLogChunk(chunk);
+        if (data) {
+          ws.send(JSON.stringify({ type: 'log', data }));
+        }
+      }
+    });
+
+    logStream.on('end', () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'end' }));
+      }
+    });
+
+    logStream.on('error', (error: Error) => {
+      console.error('Log stream error:', error);
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'error', message: error.message }));
+      }
+    });
+
+    ws.on('close', () => {
+      console.log(`Docker logs WebSocket disconnected for container: ${containerName}`);
+      if (typeof (logStream as NodeJS.ReadableStream & { destroy?: () => void }).destroy === 'function') {
+        (logStream as NodeJS.ReadableStream & { destroy: () => void }).destroy();
+      }
+    });
+
+    ws.on('error', (error) => {
+      console.error('Logs WebSocket error:', error);
+      if (typeof (logStream as NodeJS.ReadableStream & { destroy?: () => void }).destroy === 'function') {
+        (logStream as NodeJS.ReadableStream & { destroy: () => void }).destroy();
+      }
+    });
+  } catch (error) {
+    console.error('Error setting up log stream:', error);
+    ws.send(JSON.stringify({ type: 'error', message: 'Failed to connect to container logs' }));
+    ws.close();
+  }
+});
+
+// Handle Docker terminal WebSocket connections
+wssTerminal.on('connection', async (ws: WebSocket, _request: IncomingMessage, containerName: string) => {
+  console.log(`Docker terminal WebSocket connected for container: ${containerName}`);
+  
+  try {
+    const execStream = await execInContainer(containerName);
+    
+    // Send container output to WebSocket
+    execStream.on('data', (chunk: Buffer) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'output', data: chunk.toString('utf8') }));
+      }
+    });
+
+    execStream.on('end', () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'end' }));
+        ws.close();
+      }
+    });
+
+    execStream.on('error', (error: Error) => {
+      console.error('Exec stream error:', error);
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'error', message: error.message }));
+      }
+    });
+
+    // Handle input from WebSocket
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === 'input' && data.data) {
+          execStream.write(data.data);
+        } else if (data.type === 'resize' && data.cols && data.rows) {
+          // Handle terminal resize if needed
+          // Note: Docker exec resize is complex and may need additional implementation
+        }
+      } catch (error) {
+        console.error('Error processing terminal input:', error);
+      }
+    });
+
+    ws.on('close', () => {
+      console.log(`Docker terminal WebSocket disconnected for container: ${containerName}`);
+      execStream.end();
+    });
+
+    ws.on('error', (error) => {
+      console.error('Terminal WebSocket error:', error);
+      execStream.end();
+    });
+  } catch (error) {
+    console.error('Error setting up exec stream:', error);
+    ws.send(JSON.stringify({ type: 'error', message: 'Failed to connect to container terminal' }));
+    ws.close();
+  }
+});
 
 // Connect to phoenixd WebSocket for payment notifications
 async function connectPhoenixdWebSocket() {

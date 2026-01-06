@@ -67,7 +67,11 @@
     "phoenixdDocs": "Документация Phoenixd",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "Не удалось загрузить информацию об узле",
-    "fees": "Комиссии"
+    "fees": "Комиссии",
+    "terminal": "Терминал",
+    "logs": "Логи",
+    "node": "Узел",
+    "disconnected": "Отключено"
   },
   "navigation": {
     "overview": "Обзор",
@@ -97,6 +101,9 @@
     "nodeId": "ID ноды",
     "network": "Сеть",
     "version": "Версия",
+    "details": "Детали",
+    "logs": "Логи",
+    "terminal": "Терминал",
     "createInvoice": "Создать счёт",
     "payInvoice": "Оплатить счёт",
     "manageLiquidity": "Управление ликвидностью",
@@ -434,6 +441,26 @@
     "channelsCount": "Каналы",
     "copyNodeId": "Копировать ID ноды"
   },
+  "node": {
+    "title": "Узел",
+    "subtitle": "Информация об узле, логи и доступ к терминалу",
+    "info": "Информация",
+    "logs": "Логи",
+    "terminal": "Терминал",
+    "nodeId": "ID узла",
+    "nodeIdDescription": "Публичный идентификатор вашего Lightning-узла",
+    "network": "Сеть",
+    "networkDescription": "Текущая сеть и детали узла",
+    "chain": "Цепочка",
+    "version": "Версия",
+    "channels": "Каналы",
+    "quickActions": "Быстрые действия",
+    "quickActionsDescription": "Доступ к логам и терминалу",
+    "viewLogs": "Просмотр логов контейнера",
+    "viewLogsDescription": "Логи контейнеров Docker в реальном времени",
+    "openTerminal": "Открыть терминал",
+    "openTerminalDescription": "Интерактивный доступ к оболочке контейнеров"
+  },
   "notifications": {
     "title": "Уведомления",
     "noNotifications": "Нет уведомлений",
@@ -536,5 +563,29 @@
     "fixTheMoney": "Почини деньги — почини мир",
     "proofOfWork": "Proof of Work > Proof of Stake",
     "runningBitcoin": "Запуск биткоина с... этого момента!"
+  },
+  "docker": {
+    "terminal": "Терминал",
+    "logs": "Логи",
+    "interactiveShell": "Интерактивный доступ к оболочке",
+    "realTimeLogs": "Логи контейнера в реальном времени",
+    "selectContainer": "Выберите контейнер",
+    "noContainers": "Контейнеры не найдены",
+    "noRunningContainers": "Нет запущенных контейнеров",
+    "failedToLoadContainers": "Не удалось загрузить контейнеры",
+    "connectingTo": "Подключение к",
+    "connectedTo": "Подключено к",
+    "connectionClosed": "Соединение закрыто",
+    "connectionError": "Ошибка подключения",
+    "failedToConnect": "Не удалось подключиться",
+    "reconnect": "Переподключиться",
+    "error": "Ошибка",
+    "pause": "Пауза",
+    "resume": "Продолжить",
+    "paused": "Приостановлено",
+    "clearLogs": "Очистить логи",
+    "noLogs": "Логи недоступны",
+    "logLines": "строк логов",
+    "pausedHint": "Потоковая передача логов приостановлена - нажмите play для продолжения"
   }
 }

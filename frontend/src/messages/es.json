@@ -37,6 +37,7 @@
     "networkError": "Error de red",
     "connected": "Conectado",
     "connecting": "Conectando...",
+    "disconnected": "Desconectado",
     "disabled": "Deshabilitado",
     "manageNetwork": "Gestionar configuración de red →",
     "dashboard": "Panel",
@@ -67,7 +68,11 @@
     "phoenixdDocs": "Docs Phoenixd",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "No se pudo cargar la información del nodo",
-    "fees": "Tarifas"
+    "fees": "Tarifas",
+    "terminal": "Terminal",
+    "logs": "Logs",
+    "node": "Nodo",
+    "disconnected": "Desconectado"
   },
   "navigation": {
     "overview": "Resumen",
@@ -97,6 +102,9 @@
     "nodeId": "ID del Nodo",
     "network": "Red",
     "version": "Versión",
+    "details": "Detalles",
+    "logs": "Registros",
+    "terminal": "Terminal",
     "createInvoice": "Crear factura",
     "payInvoice": "Pagar factura",
     "manageLiquidity": "Gestionar liquidez",
@@ -434,6 +442,26 @@
     "channelsCount": "Canales",
     "copyNodeId": "Copiar ID del Nodo"
   },
+  "node": {
+    "title": "Nodo",
+    "subtitle": "Información del nodo, registros y acceso al terminal",
+    "info": "Info",
+    "logs": "Registros",
+    "terminal": "Terminal",
+    "nodeId": "ID del Nodo",
+    "nodeIdDescription": "Identificador público de tu nodo Lightning",
+    "network": "Red",
+    "networkDescription": "Red actual y detalles del nodo",
+    "chain": "Cadena",
+    "version": "Versión",
+    "channels": "Canales",
+    "quickActions": "Acciones Rápidas",
+    "quickActionsDescription": "Acceder a registros y terminal",
+    "viewLogs": "Ver Registros del Contenedor",
+    "viewLogsDescription": "Registros en tiempo real de contenedores Docker",
+    "openTerminal": "Abrir Terminal",
+    "openTerminalDescription": "Acceso interactivo al shell de contenedores"
+  },
   "notifications": {
     "title": "Notificaciones",
     "noNotifications": "Sin notificaciones",
@@ -536,5 +564,29 @@
     "fixTheMoney": "Arregla el dinero, arregla el mundo",
     "proofOfWork": "Prueba de trabajo > Prueba de participación",
     "runningBitcoin": "Ejecutando Bitcoin desde... ¡ahora!"
+  },
+  "docker": {
+    "terminal": "Terminal",
+    "logs": "Logs",
+    "interactiveShell": "Acceso interactivo al shell",
+    "realTimeLogs": "Logs del contenedor en tiempo real",
+    "selectContainer": "Seleccionar contenedor",
+    "noContainers": "No se encontraron contenedores",
+    "noRunningContainers": "No hay contenedores en ejecución",
+    "failedToLoadContainers": "Error al cargar contenedores",
+    "connectingTo": "Conectando a",
+    "connectedTo": "Conectado a",
+    "connectionClosed": "Conexión cerrada",
+    "connectionError": "Error de conexión",
+    "failedToConnect": "Error al conectar",
+    "reconnect": "Reconectar",
+    "error": "Error",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "paused": "Pausado",
+    "clearLogs": "Limpiar logs",
+    "noLogs": "No hay logs disponibles",
+    "logLines": "líneas de log",
+    "pausedHint": "Streaming de logs pausado - clic en play para reanudar"
   }
 }

@@ -67,7 +67,11 @@
     "phoenixdDocs": "Phoenixd 문서",
     "phoenixd": "Phoenixd",
     "unableToLoadNodeInfo": "노드 정보를 불러올 수 없습니다",
-    "fees": "수수료"
+    "fees": "수수료",
+    "terminal": "터미널",
+    "logs": "로그",
+    "node": "노드",
+    "disconnected": "연결 끊김"
   },
   "navigation": {
     "overview": "개요",
@@ -97,6 +101,9 @@
     "nodeId": "노드 ID",
     "network": "네트워크",
     "version": "버전",
+    "details": "세부 정보",
+    "logs": "로그",
+    "terminal": "터미널",
     "createInvoice": "인보이스 생성",
     "payInvoice": "인보이스 결제",
     "manageLiquidity": "유동성 관리",
@@ -434,6 +441,26 @@
     "channelsCount": "채널",
     "copyNodeId": "노드 ID 복사"
   },
+  "node": {
+    "title": "노드",
+    "subtitle": "노드 정보, 로그 및 터미널 접근",
+    "info": "정보",
+    "logs": "로그",
+    "terminal": "터미널",
+    "nodeId": "노드 ID",
+    "nodeIdDescription": "Lightning 노드의 공개 식별자",
+    "network": "네트워크",
+    "networkDescription": "현재 네트워크 및 노드 세부 정보",
+    "chain": "체인",
+    "version": "버전",
+    "channels": "채널",
+    "quickActions": "빠른 작업",
+    "quickActionsDescription": "로그 및 터미널 접근",
+    "viewLogs": "컨테이너 로그 보기",
+    "viewLogsDescription": "Docker 컨테이너의 실시간 로그",
+    "openTerminal": "터미널 열기",
+    "openTerminalDescription": "컨테이너에 대한 대화형 셸 접근"
+  },
   "notifications": {
     "title": "알림",
     "noNotifications": "알림 없음",
@@ -536,5 +563,29 @@
     "fixTheMoney": "돈을 고치면, 세상을 고친다",
     "proofOfWork": "작업 증명 > 지분 증명",
     "runningBitcoin": "비트코인 실행 중... 지금부터!"
+  },
+  "docker": {
+    "terminal": "터미널",
+    "logs": "로그",
+    "interactiveShell": "대화형 셸 접근",
+    "realTimeLogs": "실시간 컨테이너 로그",
+    "selectContainer": "컨테이너 선택",
+    "noContainers": "컨테이너를 찾을 수 없음",
+    "noRunningContainers": "실행 중인 컨테이너 없음",
+    "failedToLoadContainers": "컨테이너 로드 실패",
+    "connectingTo": "연결 중",
+    "connectedTo": "연결됨",
+    "connectionClosed": "연결 종료됨",
+    "connectionError": "연결 오류",
+    "failedToConnect": "연결 실패",
+    "reconnect": "다시 연결",
+    "error": "오류",
+    "pause": "일시정지",
+    "resume": "재개",
+    "paused": "일시정지됨",
+    "clearLogs": "로그 지우기",
+    "noLogs": "로그 없음",
+    "logLines": "로그 라인",
+    "pausedHint": "로그 스트리밍이 일시정지됨 - 재개하려면 재생 클릭"
   }
 }

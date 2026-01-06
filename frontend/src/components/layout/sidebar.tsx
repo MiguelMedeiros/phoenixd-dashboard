@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getNodeInfo } from '@/lib/api';
-import { NodeInfoDialog } from '@/components/node-info-dialog';
 import { useTranslations } from 'next-intl';
 import { useAuthContext } from '@/components/auth-provider';
 
@@ -67,7 +66,6 @@ export function Sidebar() {
   const { hasPassword, lock } = useAuthContext();
   const [expanded, setExpanded] = useState(false);
   const [chain, setChain] = useState<string>('mainnet');
-  const [nodeInfoOpen, setNodeInfoOpen] = useState(false);
 
   // Persist state in localStorage
   useEffect(() => {
@@ -97,166 +95,189 @@ export function Sidebar() {
     localStorage.setItem('sidebar-expanded', String(newValue));
   };
 
+  // Check if current path starts with /node
+  const isNodeActive = pathname === '/node' || pathname.startsWith('/node');
+
   return (
-    <>
-      <aside
-        className={cn(
-          'warm-sidebar relative flex h-full flex-col py-6 transition-all duration-300 ease-out',
-          expanded ? 'w-[220px] px-4' : 'w-[88px] items-center'
-        )}
-      >
-        {/* Logo & Brand */}
-        <div className={cn('mb-8', expanded ? 'px-2' : '')}>
-          <div className={cn('flex items-center gap-3', expanded ? '' : 'flex-col justify-center')}>
-            <div className="relative flex-shrink-0">
-              <div className="icon-circle !w-12 !h-12 !bg-gradient-to-br !from-primary/20 !to-accent/20">
-                <Zap className="h-6 w-6 text-primary" />
-              </div>
-              <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl -z-10" />
+    <aside
+      className={cn(
+        'warm-sidebar relative flex h-full flex-col py-6 transition-all duration-300 ease-out',
+        expanded ? 'w-[220px] px-4' : 'w-[88px] items-center'
+      )}
+    >
+      {/* Logo & Brand */}
+      <Link href="/" className={cn('mb-8 block', expanded ? 'px-2' : '')}>
+        <div
+          className={cn(
+            'flex items-center gap-3 group cursor-pointer',
+            expanded ? '' : 'flex-col justify-center'
+          )}
+        >
+          <div className="relative flex-shrink-0">
+            <div className="icon-circle !w-12 !h-12 !bg-gradient-to-br !from-primary/20 !to-accent/20 group-hover:!from-primary/30 group-hover:!to-accent/30 transition-all">
+              <Zap className="h-6 w-6 text-primary" />
             </div>
-            {expanded ? (
-              <div className="overflow-hidden flex-1">
-                <h1 className="font-bold text-lg tracking-tight whitespace-nowrap">Phoenixd</h1>
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className={cn(
-                      'h-2 w-2 rounded-full',
-                      chain === 'mainnet'
-                        ? 'bg-bitcoin shadow-[0_0_6px_hsl(var(--bitcoin))]'
-                        : 'bg-yellow-500 shadow-[0_0_6px_hsl(45,100%,50%)]'
-                    )}
-                  />
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {chain === 'mainnet' ? t('mainnet') : t('testnet')}
-                  </span>
-                </div>
+            <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl -z-10" />
+          </div>
+          {expanded ? (
+            <div className="overflow-hidden flex-1">
+              <h1 className="font-bold text-lg tracking-tight whitespace-nowrap group-hover:text-primary transition-colors">
+                Phoenixd
+              </h1>
+              <div className="flex items-center gap-1.5">
+                <div
+                  className={cn(
+                    'h-2 w-2 rounded-full',
+                    chain === 'mainnet'
+                      ? 'bg-bitcoin shadow-[0_0_6px_hsl(var(--bitcoin))]'
+                      : 'bg-yellow-500 shadow-[0_0_6px_hsl(45,100%,50%)]'
+                  )}
+                />
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {chain === 'mainnet' ? t('mainnet') : t('testnet')}
+                </span>
               </div>
-            ) : (
-              <span
+            </div>
+          ) : (
+            <span
+              className={cn(
+                'px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider',
+                chain === 'mainnet'
+                  ? 'bg-bitcoin/20 text-bitcoin'
+                  : 'bg-yellow-500/20 text-yellow-500'
+              )}
+            >
+              {chain === 'mainnet' ? t('mainnetShort') : t('testnetShort')}
+            </span>
+          )}
+        </div>
+      </Link>
+
+      {/* Navigation */}
+      <nav className={cn('flex flex-1 flex-col gap-1.5', expanded ? '' : 'items-center')}>
+        {sidebarNavItems.map((item) => {
+          const isActive = pathname === item.href;
+          const title = t(item.key);
+
+          return (
+            <Link key={item.href} href={item.href} title={expanded ? undefined : title}>
+              <div
                 className={cn(
-                  'px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider',
-                  chain === 'mainnet'
-                    ? 'bg-bitcoin/20 text-bitcoin'
-                    : 'bg-yellow-500/20 text-yellow-500'
+                  'group flex items-center gap-3 transition-all duration-200',
+                  expanded
+                    ? cn(
+                        'px-3 py-2.5 rounded-xl',
+                        isActive
+                          ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                          : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
+                      )
+                    : cn('icon-circle', isActive && 'active')
                 )}
               >
-                {chain === 'mainnet' ? t('mainnetShort') : t('testnetShort')}
+                <item.icon
+                  className={cn(
+                    'h-5 w-5 flex-shrink-0 transition-all duration-200',
+                    isActive ? 'text-white' : 'text-muted-foreground group-hover:text-foreground'
+                  )}
+                />
+                {expanded && (
+                  <span
+                    className={cn(
+                      'text-sm font-medium whitespace-nowrap transition-colors',
+                      isActive ? 'text-white' : ''
+                    )}
+                  >
+                    {title}
+                  </span>
+                )}
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Bottom Actions */}
+      <div
+        className={cn(
+          'flex flex-col gap-2 pt-6 border-t border-black/5 dark:border-white/5',
+          expanded ? '' : 'items-center'
+        )}
+      >
+        {/* Node Link */}
+        <Link href="/node" title={expanded ? undefined : t('node')}>
+          <div
+            className={cn(
+              'group flex items-center gap-3 transition-all duration-200',
+              expanded
+                ? cn(
+                    'px-3 py-2.5 rounded-xl',
+                    isNodeActive
+                      ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                      : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
+                  )
+                : cn('icon-circle', isNodeActive && 'active')
+            )}
+          >
+            <Server
+              className={cn(
+                'h-5 w-5 flex-shrink-0 transition-colors',
+                isNodeActive ? 'text-white' : 'text-muted-foreground group-hover:text-foreground'
+              )}
+            />
+            {expanded && (
+              <span
+                className={cn(
+                  'text-sm font-medium whitespace-nowrap transition-colors',
+                  isNodeActive ? 'text-white' : ''
+                )}
+              >
+                {t('node')}
               </span>
             )}
           </div>
-        </div>
+        </Link>
 
-        {/* Navigation */}
-        <nav className={cn('flex flex-1 flex-col gap-1.5', expanded ? '' : 'items-center')}>
-          {sidebarNavItems.map((item) => {
-            const isActive = pathname === item.href;
-            const title = t(item.key);
-
-            return (
-              <Link key={item.href} href={item.href} title={expanded ? undefined : title}>
-                <div
-                  className={cn(
-                    'group flex items-center gap-3 transition-all duration-200',
-                    expanded
-                      ? cn(
-                          'px-3 py-2.5 rounded-xl',
-                          isActive
-                            ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                            : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
-                        )
-                      : cn('icon-circle', isActive && 'active')
-                  )}
-                >
-                  <item.icon
-                    className={cn(
-                      'h-5 w-5 flex-shrink-0 transition-all duration-200',
-                      isActive ? 'text-white' : 'text-muted-foreground group-hover:text-foreground'
-                    )}
-                  />
-                  {expanded && (
-                    <span
-                      className={cn(
-                        'text-sm font-medium whitespace-nowrap transition-colors',
-                        isActive ? 'text-white' : ''
-                      )}
-                    >
-                      {title}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Bottom Actions */}
-        <div
-          className={cn(
-            'flex flex-col gap-2 pt-6 border-t border-black/5 dark:border-white/5',
-            expanded ? '' : 'items-center'
-          )}
-        >
-          {/* Settings Link */}
-          <Link href="/settings" title={expanded ? undefined : t('settings')}>
-            <div
+        {/* Settings Link */}
+        <Link href="/settings" title={expanded ? undefined : t('settings')}>
+          <div
+            className={cn(
+              'group flex items-center gap-3 transition-all duration-200',
+              expanded
+                ? cn(
+                    'px-3 py-2.5 rounded-xl',
+                    pathname === '/settings'
+                      ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                      : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
+                  )
+                : cn('icon-circle', pathname === '/settings' && 'active')
+            )}
+          >
+            <Settings
               className={cn(
-                'group flex items-center gap-3 transition-all duration-200',
-                expanded
-                  ? cn(
-                      'px-3 py-2.5 rounded-xl',
-                      pathname === '/settings'
-                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                        : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
-                    )
-                  : cn('icon-circle', pathname === '/settings' && 'active')
+                'h-5 w-5 flex-shrink-0 transition-colors',
+                pathname === '/settings'
+                  ? 'text-white'
+                  : 'text-muted-foreground group-hover:text-foreground'
               )}
-            >
-              <Settings
+            />
+            {expanded && (
+              <span
                 className={cn(
-                  'h-5 w-5 flex-shrink-0 transition-colors',
-                  pathname === '/settings'
-                    ? 'text-white'
-                    : 'text-muted-foreground group-hover:text-foreground'
+                  'text-sm font-medium whitespace-nowrap transition-colors',
+                  pathname === '/settings' ? 'text-white' : ''
                 )}
-              />
-              {expanded && (
-                <span
-                  className={cn(
-                    'text-sm font-medium whitespace-nowrap transition-colors',
-                    pathname === '/settings' ? 'text-white' : ''
-                  )}
-                >
-                  {t('settings')}
-                </span>
-              )}
-            </div>
-          </Link>
+              >
+                {t('settings')}
+              </span>
+            )}
+          </div>
+        </Link>
 
-          {/* Lock Button - Only visible if password is configured */}
-          {hasPassword && (
-            <button
-              onClick={lock}
-              title={expanded ? undefined : t('lock')}
-              className={cn(
-                'group flex items-center gap-3 transition-all duration-200 w-full',
-                expanded
-                  ? 'px-3 py-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
-                  : 'icon-circle'
-              )}
-            >
-              <Lock className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
-              {expanded && (
-                <span className="text-sm font-medium whitespace-nowrap transition-colors">
-                  {t('lock')}
-                </span>
-              )}
-            </button>
-          )}
-
-          {/* Node Info Button */}
+        {/* Lock Button - Only visible if password is configured */}
+        {hasPassword && (
           <button
-            onClick={() => setNodeInfoOpen(true)}
-            title={expanded ? undefined : t('nodeInfo')}
+            onClick={lock}
+            title={expanded ? undefined : t('lock')}
             className={cn(
               'group flex items-center gap-3 transition-all duration-200 w-full',
               expanded
@@ -264,39 +285,36 @@ export function Sidebar() {
                 : 'icon-circle'
             )}
           >
-            <Server className="h-5 w-5 flex-shrink-0 transition-colors text-muted-foreground group-hover:text-foreground" />
+            <Lock className="h-5 w-5 flex-shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
             {expanded && (
               <span className="text-sm font-medium whitespace-nowrap transition-colors">
-                {t('nodeInfo')}
+                {t('lock')}
               </span>
             )}
           </button>
+        )}
 
-          {/* Expand/Collapse Button */}
-          <button
-            onClick={toggleExpanded}
-            className={cn(
-              'mt-2 flex items-center justify-center gap-2 transition-all duration-200',
-              expanded
-                ? 'px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground w-full'
-                : 'icon-circle !w-10 !h-10'
-            )}
-            title={expanded ? t('collapseSidebar') : t('expandSidebar')}
-          >
-            {expanded ? (
-              <>
-                <ChevronLeft className="h-4 w-4" />
-                <span className="text-xs font-medium">{t('collapse')}</span>
-              </>
-            ) : (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
-        </div>
-      </aside>
-
-      {/* Node Info Dialog */}
-      <NodeInfoDialog open={nodeInfoOpen} onClose={() => setNodeInfoOpen(false)} />
-    </>
+        {/* Expand/Collapse Button */}
+        <button
+          onClick={toggleExpanded}
+          className={cn(
+            'mt-2 flex items-center justify-center gap-2 transition-all duration-200',
+            expanded
+              ? 'px-3 py-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground w-full'
+              : 'icon-circle !w-10 !h-10'
+          )}
+          title={expanded ? t('collapseSidebar') : t('expandSidebar')}
+        >
+          {expanded ? (
+            <>
+              <ChevronLeft className="h-4 w-4" />
+              <span className="text-xs font-medium">{t('collapse')}</span>
+            </>
+          ) : (
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          )}
+        </button>
+      </div>
+    </aside>
   );
 }
