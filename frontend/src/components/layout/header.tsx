@@ -73,7 +73,8 @@ export function Header({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   useAuthContext(); // Keep auth context active for session management
-  const { formatValueParts, bitcoinDisplayMode, currency } = useCurrencyContext();
+  const { formatValueParts, bitcoinDisplayMode, setBitcoinDisplayMode, currency } =
+    useCurrencyContext();
 
   const displayTitle = title || t('dashboard');
 
@@ -264,14 +265,25 @@ export function Header({
             />
           </div>
 
-          {/* Balance Pill - Click to refresh */}
+          {/* Balance Pill - Click to toggle display mode (BTC) or refresh (fiat) */}
           {balance &&
             (() => {
               const parts = formatValueParts(balance.balanceSat);
               const isBip177 = currency === 'BTC' && bitcoinDisplayMode === 'bip177';
+
+              const handleBalanceClick = () => {
+                if (currency === 'BTC') {
+                  // Toggle between sats and bip177 display modes
+                  setBitcoinDisplayMode(bitcoinDisplayMode === 'sats' ? 'bip177' : 'sats');
+                } else {
+                  // For fiat currencies, refresh the balance
+                  handleRefresh();
+                }
+              };
+
               return (
                 <button
-                  onClick={handleRefresh}
+                  onClick={handleBalanceClick}
                   disabled={loading}
                   className="flex items-center gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-full glass-card hover:scale-[1.02] active:scale-[0.98] transition-transform cursor-pointer disabled:opacity-70 border border-primary/20"
                 >

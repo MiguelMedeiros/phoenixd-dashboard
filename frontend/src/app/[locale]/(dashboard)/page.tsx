@@ -43,7 +43,7 @@ type RecentPayment = IncomingPayment | OutgoingPayment;
 export default function OverviewPage() {
   const t = useTranslations('overview');
   const tc = useTranslations('common');
-  const { formatValue, currency, bitcoinDisplayMode } = useCurrencyContext();
+  const { formatValue } = useCurrencyContext();
   const [nodeInfo, setNodeInfo] = useState<NodeInfo | null>(null);
   const [balance, setBalance] = useState<{ balanceSat: number; feeCreditSat: number } | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -131,10 +131,6 @@ export default function OverviewPage() {
               <span className="text-4xl font-bold text-white tabular-nums">
                 {formatValue(balance?.balanceSat || 0)}
               </span>
-              {/* Only show "sats" label for classic mode, not for BIP-177 */}
-              {currency === 'BTC' && bitcoinDisplayMode === 'sats' && (
-                <span className="text-base text-white/40">{tc('sats')}</span>
-              )}
             </div>
           </div>
         </div>
@@ -231,10 +227,6 @@ export default function OverviewPage() {
                 <span className="text-4xl font-bold text-white">
                   {formatValue(balance?.balanceSat || 0)}
                 </span>
-                {/* Only show "sats" label for classic mode, not for BIP-177 */}
-                {currency === 'BTC' && bitcoinDisplayMode === 'sats' && (
-                  <span className="text-lg text-white/50">{tc('sats')}</span>
-                )}
               </div>
 
               <div className="flex gap-2 pt-2">
