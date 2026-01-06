@@ -34,7 +34,7 @@ interface LiquidityFees {
 export default function ToolsPage() {
   const t = useTranslations('tools');
   const tc = useTranslations('common');
-  const { formatValue } = useCurrencyContext();
+  const { formatValue, currency } = useCurrencyContext();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer' | 'fees'>('invoice');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -207,7 +207,9 @@ export default function ToolsPage() {
                     <p className="text-4xl font-bold value-highlight mt-1">
                       {formatValue(Math.floor(decodedInvoice.amountMsat / 1000))}
                     </p>
-                    <p className="text-sm text-muted-foreground">{tc('sats')}</p>
+                    {currency === 'BTC' && (
+                      <p className="text-sm text-muted-foreground">{tc('sats')}</p>
+                    )}
                   </div>
                 )}
 

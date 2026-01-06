@@ -164,7 +164,7 @@ export default function PaymentsPage() {
         {/* Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-xl md:text-3xl font-bold tracking-tight gradient-text">
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight gradient-text">
               {t('title')}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground hidden md:block">{t('subtitle')}</p>

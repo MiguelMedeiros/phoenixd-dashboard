@@ -1086,7 +1086,7 @@ export default function SettingsPage() {
       )}
 
       {/* Network Section - Tor */}
-      <section className="space-y-4">
+      <section id="network" className="space-y-4 scroll-mt-24">
         <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
           <Globe className="h-4 w-4" />
           {t('network')}

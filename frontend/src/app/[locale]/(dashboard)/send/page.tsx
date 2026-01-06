@@ -363,7 +363,7 @@ export default function SendPage() {
             <form onSubmit={handlePayInvoice} className="space-y-5">
               <div className="space-y-2">
                 <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  {t('invoice')} *
+                  {t('invoiceLabel')} *
                 </label>
                 <textarea
                   placeholder={t('invoicePlaceholder')}
@@ -487,7 +487,7 @@ export default function SendPage() {
             <form onSubmit={handlePayOffer} className="space-y-5">
               <div className="space-y-2">
                 <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  {t('offer')} *
+                  {t('offerLabel')} *
                 </label>
                 <textarea
                   placeholder={t('offerPlaceholder')}
