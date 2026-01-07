@@ -247,10 +247,10 @@ export function TerminalDialog({ open, onClose }: TerminalDialogProps) {
       />
 
       {/* Dialog */}
-      <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-5xl h-[700px] -translate-x-1/2 -translate-y-1/2 animate-in fade-in-0 zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%]">
-        <div className="glass-card rounded-2xl shadow-2xl border border-white/10 h-full flex flex-col overflow-hidden">
+      <div className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] sm:w-[calc(100%-4rem)] max-w-5xl h-[80vh] sm:h-[700px] -translate-x-1/2 -translate-y-1/2 animate-in fade-in-0 zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%]">
+        <div className="rounded-2xl shadow-2xl border border-border bg-card h-full flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <div className="flex items-center justify-between p-5 border-b border-border">
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
                 <TerminalIcon className="h-6 w-6 text-green-400" />
@@ -268,18 +268,18 @@ export function TerminalDialog({ open, onClose }: TerminalDialogProps) {
           </div>
 
           {/* Toolbar */}
-          <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/[0.02]">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 border-b border-border bg-muted/30">
+            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               {/* Container Selector */}
               <Select
                 value={selectedContainer}
                 onValueChange={handleContainerChange}
                 disabled={loading}
               >
-                <SelectTrigger className="w-[280px] h-10 bg-black/20 border-white/10 rounded-xl">
+                <SelectTrigger className="w-full sm:w-[280px] h-10 bg-background border-border rounded-xl">
                   <SelectValue placeholder={loading ? tc('loading') : t('selectContainer')} />
                 </SelectTrigger>
-                <SelectContent className="bg-background/95 backdrop-blur-xl border-white/10">
+                <SelectContent className="bg-background border-border">
                   {containers.length === 0 && !loading && (
                     <SelectItem value="none" disabled>
                       {t('noRunningContainers')}
@@ -297,7 +297,7 @@ export function TerminalDialog({ open, onClose }: TerminalDialogProps) {
               </Select>
 
               {/* Status Indicator */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/20 border border-white/5">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
                 <div
                   className={cn(
                     'h-2 w-2 rounded-full transition-all',
@@ -312,25 +312,25 @@ export function TerminalDialog({ open, onClose }: TerminalDialogProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               {/* Reconnect Button */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleReconnect}
                 disabled={!selectedContainer || loading}
-                className="h-9 px-4 rounded-xl"
+                className="h-9 px-3 sm:px-4 rounded-xl flex-1 sm:flex-none"
               >
-                <RefreshCw className={cn('h-4 w-4 mr-2', loading && 'animate-spin')} />
-                {t('reconnect')}
+                <RefreshCw className={cn('h-4 w-4 sm:mr-2', loading && 'animate-spin')} />
+                <span className="hidden sm:inline">{t('reconnect')}</span>
               </Button>
             </div>
           </div>
 
           {/* Terminal */}
-          <div className="flex-1 p-4 bg-[#0a0a0a] relative">
+          <div className="flex-1 p-4 bg-zinc-900 relative">
             {loading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]/80 z-10">
+              <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/80 z-10">
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
               </div>
             )}

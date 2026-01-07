@@ -19,7 +19,7 @@ export default defineConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 0,
     retries: {
-      runMode: 1,
+      runMode: 0,
       openMode: 0,
     },
     setupNodeEvents(on, config) {

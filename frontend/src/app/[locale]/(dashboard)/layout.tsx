@@ -143,6 +143,46 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       refreshBalance();
     },
+    onServiceEvent: (event) => {
+      // Handle service connection/disconnection events
+      if (event.type === 'cloudflared:connected') {
+        toast({
+          title: `☁️ ${tt('cloudflareConnected')}`,
+          description: tt('tunnelConnected'),
+          variant: 'default',
+        });
+        addNotification({
+          type: 'info',
+          title: t('cloudflareConnected'),
+          message: t('tunnelNowActive'),
+          timestamp: Date.now(),
+        });
+      } else if (event.type === 'cloudflared:disconnected') {
+        toast({
+          title: `☁️ ${tt('cloudflareDisconnected')}`,
+          description: tt('tunnelDisconnected'),
+          variant: 'default',
+        });
+        addNotification({
+          type: 'warning',
+          title: t('cloudflareDisconnected'),
+          message: t('tunnelStopped'),
+          timestamp: Date.now(),
+        });
+      } else if (event.type === 'cloudflared:error') {
+        toast({
+          title: `☁️ ${tt('cloudflareError')}`,
+          description: event.message || tt('tunnelError'),
+          variant: 'destructive',
+        });
+        addNotification({
+          type: 'error',
+          title: t('cloudflareError'),
+          message: event.message || t('tunnelFailed'),
+          timestamp: Date.now(),
+        });
+      }
+    },
     onConnect: () => {
       console.log('WebSocket connected');
       addNotification({

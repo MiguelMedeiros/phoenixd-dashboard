@@ -10,7 +10,6 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY = 'pwa_install_dismissed';
-const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export function PWAInstallPrompt() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -28,9 +27,9 @@ export function PWAInstallPrompt() {
 
     if (standalone) return;
 
-    // Check if dismissed recently
-    const dismissedAt = localStorage.getItem(DISMISS_KEY);
-    if (dismissedAt && Date.now() - parseInt(dismissedAt) < DISMISS_DURATION) {
+    // Check if user has dismissed the prompt before
+    const dismissed = localStorage.getItem(DISMISS_KEY);
+    if (dismissed) {
       return;
     }
 
@@ -83,7 +82,7 @@ export function PWAInstallPrompt() {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    localStorage.setItem(DISMISS_KEY, 'true');
   };
 
   if (!isVisible || isStandalone) return null;

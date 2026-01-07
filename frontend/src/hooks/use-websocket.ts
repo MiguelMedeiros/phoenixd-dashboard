@@ -11,8 +11,21 @@ interface PaymentEvent {
   externalId?: string;
 }
 
+interface ServiceEvent {
+  type:
+    | 'cloudflared:connected'
+    | 'cloudflared:disconnected'
+    | 'cloudflared:error'
+    | 'tor:connected'
+    | 'tor:disconnected'
+    | 'tailscale:connected'
+    | 'tailscale:disconnected';
+  message?: string;
+}
+
 interface UseWebSocketOptions {
   onPaymentReceived?: (event: PaymentEvent) => void;
+  onServiceEvent?: (event: ServiceEvent) => void;
   onConnect?: () => void;
   onDisconnect?: () => void;
 }
@@ -93,9 +106,20 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         ws.onmessage = (event) => {
           if (!mountedRef.current) return;
           try {
-            const data = JSON.parse(event.data) as PaymentEvent;
+            const data = JSON.parse(event.data);
+
+            // Handle payment events
             if (data.type === 'payment_received') {
-              options.onPaymentReceived?.(data);
+              options.onPaymentReceived?.(data as PaymentEvent);
+            }
+
+            // Handle service events (cloudflared, tor, tailscale)
+            if (
+              data.type?.startsWith('cloudflared:') ||
+              data.type?.startsWith('tor:') ||
+              data.type?.startsWith('tailscale:')
+            ) {
+              options.onServiceEvent?.(data as ServiceEvent);
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);

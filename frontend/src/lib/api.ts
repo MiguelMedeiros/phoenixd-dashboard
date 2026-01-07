@@ -20,6 +20,7 @@ function getApiUrl(): string {
   // - localhost (development)
   // - Local IP (e.g., 192.168.1.100)
   // - Tailscale Magic DNS (*.ts.net)
+  // - Cloudflare Tunnel (custom domain)
   // - Custom domain
 
   // For Tailscale, we may need to use port 4001
@@ -32,8 +33,24 @@ function getApiUrl(): string {
     return 'http://localhost:4001';
   }
 
-  // For any other hostname (IP address, domain, etc.),
-  // auto-detect using the same hostname with backend port
+  // For local IP addresses (192.168.x.x, 10.x.x.x, 172.16-31.x.x), use port 4001
+  const localIpPattern = /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
+  if (localIpPattern.test(hostname)) {
+    return `${protocol}//${hostname}:4001`;
+  }
+
+  // For Cloudflare Tunnel or custom domains (not localhost, not local IP, not .ts.net),
+  // use the API subdomain pattern: phoenixd.domain.com -> phoenixd-api.domain.com
+  // This assumes the API is hosted on a subdomain with "-api" suffix
+  const parts = hostname.split('.');
+  if (parts.length >= 2) {
+    // Replace the first subdomain with subdomain-api
+    // e.g., phoenixd.miguelmedeiros.dev -> phoenixd-api.miguelmedeiros.dev
+    parts[0] = `${parts[0]}-api`;
+    return `${protocol}//${parts.join('.')}`;
+  }
+
+  // Fallback: use same hostname with port 4001
   return `${protocol}//${hostname}:4001`;
 }
 
@@ -538,6 +555,72 @@ export async function refreshTailscaleDns() {
 
 export async function removeTailscaleImage() {
   return request<{ success: boolean; message: string }>('/api/tailscale/image', {
+    method: 'DELETE',
+  });
+}
+
+// Cloudflared
+export interface CloudflaredIngressRule {
+  hostname: string;
+  service: string;
+  path?: string;
+}
+
+export interface CloudflaredStatus {
+  enabled: boolean;
+  running: boolean;
+  healthy: boolean;
+  containerExists: boolean;
+  imageExists: boolean;
+  hasToken: boolean;
+  ingress: CloudflaredIngressRule[];
+}
+
+export async function getCloudflaredStatus(): Promise<CloudflaredStatus> {
+  return request<CloudflaredStatus>('/api/cloudflared/status');
+}
+
+export async function saveCloudflaredToken(token: string) {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/token', {
+    method: 'PUT',
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function removeCloudflaredToken() {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/token', {
+    method: 'DELETE',
+  });
+}
+
+export async function updateCloudflaredIngress(ingress: CloudflaredIngressRule[]) {
+  return request<{ success: boolean; message: string; ingress: CloudflaredIngressRule[] }>(
+    '/api/cloudflared/ingress',
+    {
+      method: 'PUT',
+      body: JSON.stringify({ ingress }),
+    }
+  );
+}
+
+export async function enableCloudflared() {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/enable', {
+    method: 'POST',
+  });
+}
+
+export async function disableCloudflared() {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/disable', {
+    method: 'POST',
+  });
+}
+
+export async function getCloudflaredLogs() {
+  return request<{ logs: string }>('/api/cloudflared/logs');
+}
+
+export async function removeCloudflaredImage() {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/image', {
     method: 'DELETE',
   });
 }

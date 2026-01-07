@@ -68,6 +68,10 @@ model Settings {
   tailscaleAuthKey   String?  // Tailscale auth key (encrypted)
   tailscaleHostname  String?  // Machine name for Magic DNS
   tailscaleDnsName   String?  // Full Magic DNS name (e.g., phoenixd-dashboard.tailnet.ts.net)
+  // Cloudflared settings
+  cloudflaredEnabled Boolean  @default(false) // Cloudflare Tunnel enabled
+  cloudflaredToken   String?  // Tunnel token from Cloudflare
+  cloudflaredIngress Json?    // Array of ingress rules [{hostname, service, path?}]
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
