@@ -64,6 +64,16 @@ app.use(
         return callback(null, true);
       }
 
+      // Allow "null" origin (Tor Browser sends this for privacy)
+      if (origin === 'null') {
+        return callback(null, true);
+      }
+
+      // Allow any Tor Hidden Service (.onion)
+      if (origin.includes('.onion')) {
+        return callback(null, true);
+      }
+
       // Allow any Tailscale Magic DNS domain (.ts.net)
       if (origin.includes('.ts.net')) {
         return callback(null, true);

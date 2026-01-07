@@ -85,9 +85,47 @@ The preference is saved locally and prices are cached for 60 seconds to avoid ra
 - **Auto-lock** - Automatically lock after inactivity
 - **Lock Screen Background** - Choose from 6 animated backgrounds
 - **Push Notifications** - Get notified when you receive payments
-- **Tor Proxy** - Route traffic through Tor network
-- **Tailscale VPN** - Remote access from anywhere
 - **Theme** - Dark, Light, or Auto mode
+
+---
+
+## Remote Access Options
+
+The dashboard supports three methods for secure remote access. Configure them in **Settings → Remote Access**.
+
+### Tailscale VPN
+
+Private access via Tailscale's zero-config VPN:
+- **Best for**: Personal/family use, fast private access
+- **Requires**: Tailscale account and app on devices
+- **Setup**: Enter auth key in Settings, enable
+- 📖 [Full Tailscale Guide](mobile-wallet-setup.md)
+
+### Cloudflare Tunnel
+
+Public access with custom domain:
+- **Best for**: Custom domains, public-facing dashboards
+- **Requires**: Cloudflare account and domain
+- **Features**: Free HTTPS, DDoS protection, global edge
+- 📖 [Full Cloudflare Guide](cloudflare-tunnel.md)
+
+### Tor Hidden Service
+
+Anonymous access via .onion address:
+- **Best for**: Maximum privacy, no accounts needed
+- **Requires**: Tor Browser on accessing device
+- **Trade-off**: Slower but completely anonymous
+- 📖 [Full Tor Guide](tor-hidden-service.md)
+
+| Feature | Tailscale | Cloudflare | Tor |
+|---------|-----------|------------|-----|
+| Speed | ✅ Fast | ✅ Fast | ⚠️ Slow |
+| Privacy | ⚠️ Medium | ⚠️ Medium | ✅ High |
+| Custom domain | ❌ | ✅ | ❌ |
+| Account required | ✅ | ✅ | ❌ |
+| Public access | ❌ | ✅ | ⚠️ Tor only |
+
+> 💡 **Tip:** You can enable multiple methods simultaneously for different use cases.
 
 ---
 

@@ -528,6 +528,8 @@ function NetworkTab() {
   const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
   const [torLoading, setTorLoading] = useState(false);
   const [torError, setTorError] = useState<string | null>(null);
+  const [showTorQR, setShowTorQR] = useState(false);
+  const { copied: torUrlCopied, copy: copyTorUrl } = useCopyToClipboard();
 
   // Tailscale state
   const [tailscaleStatus, setTailscaleStatus] = useState<TailscaleStatus | null>(null);
@@ -824,6 +826,52 @@ function NetworkTab() {
             {torError}
           </div>
         )}
+
+        {/* Hidden Service / Onion Address */}
+        {torStatus?.enabled && torStatus?.onionAddress && (
+          <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-3">
+            <p className="text-sm font-medium">{t('torHiddenService')}</p>
+
+            {/* Onion Address Display */}
+            <div className="p-3 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-mono text-sm break-all flex-1">
+                  {torStatus.hiddenService?.frontend}
+                </p>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => setShowTorQR(!showTorQR)}
+                    className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    title={t('showQrCode')}
+                  >
+                    <QrCode className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                  <button
+                    onClick={() => copyTorUrl(torStatus.hiddenService?.frontend || '')}
+                    className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                    title={t('copyUrl')}
+                  >
+                    {torUrlCopied ? (
+                      <Check className="h-4 w-4 text-success" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* QR Code */}
+            {showTorQR && torStatus.hiddenService?.frontend && (
+              <div className="flex justify-center p-4 bg-white rounded-lg">
+                <QRCodeSVG value={torStatus.hiddenService.frontend} size={180} />
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground">{t('torOnionNote')}</p>
+          </div>
+        )}
+
         <p className="text-xs text-muted-foreground pt-2 border-t border-black/5 dark:border-white/5">
           {t('torDescription')}
         </p>
@@ -1169,47 +1217,56 @@ function NetworkTab() {
             </div>
 
             {/* Cloudflare URL Display */}
-            {cloudflaredStatus?.enabled && cloudflaredStatus?.healthy && cloudflaredStatus?.ingress && cloudflaredStatus.ingress.length > 0 && (
-              <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t('publicUrl')}</span>
-                  <button
-                    onClick={() => setShowCloudflaredQR(!showCloudflaredQR)}
-                    className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                    title={showCloudflaredQR ? t('hideQrCode') : t('showQrCode')}
-                  >
-                    <QrCode className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                </div>
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20">
-                  <Globe className="h-4 w-4 text-success flex-shrink-0" />
-                  <a
-                    href={`https://${cloudflaredStatus.ingress[0].hostname}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-success font-mono break-all hover:underline"
-                  >
-                    https://{cloudflaredStatus.ingress[0].hostname}
-                  </a>
-                  <button
-                    onClick={() => copyCloudflaredUrl(`https://${cloudflaredStatus.ingress[0].hostname}`)}
-                    className="ml-auto p-1.5 rounded-lg hover:bg-success/20 transition-colors flex-shrink-0"
-                  >
-                    {cloudflaredUrlCopied ? (
-                      <Check className="h-4 w-4 text-success" />
-                    ) : (
-                      <Copy className="h-4 w-4 text-success" />
-                    )}
-                  </button>
-                </div>
-                {showCloudflaredQR && (
-                  <div className="flex flex-col items-center gap-3 p-4 rounded-lg bg-white">
-                    <QRCodeSVG value={`https://${cloudflaredStatus.ingress[0].hostname}`} size={200} level="M" />
-                    <p className="text-xs text-gray-600 text-center">{t('scanQrToAccess')}</p>
+            {cloudflaredStatus?.enabled &&
+              cloudflaredStatus?.healthy &&
+              cloudflaredStatus?.ingress &&
+              cloudflaredStatus.ingress.length > 0 && (
+                <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">{t('publicUrl')}</span>
+                    <button
+                      onClick={() => setShowCloudflaredQR(!showCloudflaredQR)}
+                      className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                      title={showCloudflaredQR ? t('hideQrCode') : t('showQrCode')}
+                    >
+                      <QrCode className="h-4 w-4 text-muted-foreground" />
+                    </button>
                   </div>
-                )}
-              </div>
-            )}
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20">
+                    <Globe className="h-4 w-4 text-success flex-shrink-0" />
+                    <a
+                      href={`https://${cloudflaredStatus.ingress[0].hostname}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-success font-mono break-all hover:underline"
+                    >
+                      https://{cloudflaredStatus.ingress[0].hostname}
+                    </a>
+                    <button
+                      onClick={() =>
+                        copyCloudflaredUrl(`https://${cloudflaredStatus.ingress[0].hostname}`)
+                      }
+                      className="ml-auto p-1.5 rounded-lg hover:bg-success/20 transition-colors flex-shrink-0"
+                    >
+                      {cloudflaredUrlCopied ? (
+                        <Check className="h-4 w-4 text-success" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-success" />
+                      )}
+                    </button>
+                  </div>
+                  {showCloudflaredQR && (
+                    <div className="flex flex-col items-center gap-3 p-4 rounded-lg bg-white">
+                      <QRCodeSVG
+                        value={`https://${cloudflaredStatus.ingress[0].hostname}`}
+                        size={200}
+                        level="M"
+                      />
+                      <p className="text-xs text-gray-600 text-center">{t('scanQrToAccess')}</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
             {/* Configure in Cloudflare */}
             {cloudflaredStatus?.enabled && (

@@ -46,9 +46,7 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **PWA** — Install as native app on any device
 
-✅ **Remote Access** — Secure access via Tailscale VPN
-
-✅ **Tor Support** — Optional hidden service for privacy
+✅ **Remote Access** — Tailscale VPN, Cloudflare Tunnel, or Tor Hidden Service
 
 <br>
 
@@ -80,7 +78,9 @@ open http://localhost:3000
 ### Mobile & Remote Access
 
 - 📱 [**PWA Installation**](docs/pwa-install.md) — Install on iOS/Android without app stores
-- 🌐 [**Remote Access**](docs/mobile-wallet-setup.md) — Secure remote access with Tailscale VPN
+- 🔗 [**Tailscale VPN**](docs/mobile-wallet-setup.md) — Private remote access via Tailscale
+- ☁️ [**Cloudflare Tunnel**](docs/cloudflare-tunnel.md) — Public access with custom domain
+- 🧅 [**Tor Hidden Service**](docs/tor-hidden-service.md) — Anonymous access via .onion address
 
 ### Security & API
 

@@ -28,7 +28,13 @@ function isTailscaleAccess(): boolean {
   return window.location.hostname.endsWith('.ts.net');
 }
 
-// Helper to detect external access (not localhost, not local IP)
+// Helper to detect Tor Hidden Service access (.onion)
+function isOnionAccess(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.location.hostname.endsWith('.onion');
+}
+
+// Helper to detect external access (not localhost, not local IP, not .ts.net, not .onion)
 function isExternalAccess(): boolean {
   if (typeof window === 'undefined') return false;
   const hostname = window.location.hostname;
@@ -38,7 +44,8 @@ function isExternalAccess(): boolean {
     !hostname.startsWith('192.168.') &&
     !hostname.startsWith('10.') &&
     !hostname.startsWith('172.') &&
-    !hostname.endsWith('.ts.net')
+    !hostname.endsWith('.ts.net') &&
+    !hostname.endsWith('.onion')
   );
 }
 
@@ -70,6 +77,15 @@ function getExternalApiWsUrl(): string {
   }
 
   return `${wsProtocol}//${hostname}`;
+}
+
+// Get WebSocket URL for Tor Hidden Service (.onion) access
+// Uses the same .onion hostname with port 4000
+function getOnionWsUrl(): string {
+  if (typeof window === 'undefined') return DEFAULT_WS_URL;
+  const { hostname } = window.location;
+  // .onion uses ws:// (no TLS)
+  return `ws://${hostname}:4000`;
 }
 
 // Cache for URLs to avoid repeated fetches
@@ -205,6 +221,11 @@ export function getWsUrl(): string {
   // For Tailscale access, use relative WebSocket URLs
   if (isTailscaleAccess()) {
     return getRelativeWsUrl();
+  }
+
+  // For Tor Hidden Service (.onion) access, use port 4000
+  if (isOnionAccess()) {
+    return getOnionWsUrl();
   }
 
   // For Cloudflare/custom domain access, use the API subdomain

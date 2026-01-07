@@ -28,6 +28,11 @@ function getApiUrl(): string {
     return `${protocol}//${hostname}:4001`;
   }
 
+  // For Tor Hidden Service (.onion), use port 4000 for the backend API
+  if (hostname.endsWith('.onion')) {
+    return `${protocol}//${hostname}:4000`;
+  }
+
   // For localhost, use the default port mapping
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:4001';
@@ -477,11 +482,19 @@ export async function getSeed(password: string) {
 }
 
 // Tor
+export interface TorHiddenService {
+  frontend: string;
+  backend: string;
+}
+
 export interface TorStatus {
   enabled: boolean;
   running: boolean;
   healthy: boolean;
   containerExists: boolean;
+  imageExists?: boolean;
+  onionAddress?: string;
+  hiddenService?: TorHiddenService | null;
 }
 
 export async function getTorStatus(): Promise<TorStatus> {

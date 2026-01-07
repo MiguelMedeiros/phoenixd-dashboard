@@ -12,6 +12,7 @@ const CLOUDFLARED_CONTAINER_NAME = 'phoenixd-cloudflared';
 // Official cloudflared image from Cloudflare
 const CLOUDFLARED_IMAGE_NAME = 'cloudflare/cloudflared:latest';
 const CLOUDFLARED_NETWORK = 'phoenixd-dashboard_phoenixd-network';
+const COMPOSE_PROJECT_NAME = 'phoenixd-dashboard';
 
 interface IngressRule {
   hostname: string;
@@ -295,6 +296,10 @@ cloudflaredRouter.post(
         name: CLOUDFLARED_CONTAINER_NAME,
         Image: CLOUDFLARED_IMAGE_NAME,
         Cmd: ['tunnel', '--no-autoupdate', 'run', '--token', settings.cloudflaredToken],
+        Labels: {
+          'com.docker.compose.project': COMPOSE_PROJECT_NAME,
+          'com.docker.compose.service': 'cloudflared',
+        },
         HostConfig: {
           NetworkMode: CLOUDFLARED_NETWORK,
           RestartPolicy: { Name: 'unless-stopped' },
