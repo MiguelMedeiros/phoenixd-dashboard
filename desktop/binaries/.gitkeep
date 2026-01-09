@@ -1,0 +1,8 @@
+# Phoenixd binaries folder
+# Run `../scripts/download-phoenixd.sh` to download binaries for all platforms
+#
+# Expected files:
+# - phoenixd-aarch64-apple-darwin (macOS ARM64)
+# - phoenixd-x86_64-apple-darwin (macOS Intel)
+# - phoenixd-x86_64-pc-windows-msvc.exe (Windows)
+# - phoenixd-x86_64-unknown-linux-gnu (Linux)

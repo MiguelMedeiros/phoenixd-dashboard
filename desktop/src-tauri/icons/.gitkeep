@@ -1,0 +1,2 @@
+# Icons folder
+# Run `npm run tauri icon ../../../frontend/public/icon.svg` to generate icons from SVG
