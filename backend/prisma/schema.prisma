@@ -15,7 +15,7 @@ model PaymentLog {
   amountSat   Int
   description String?
   status      String   // pending, completed, failed
-  rawData     Json
+  rawData     String   // JSON stored as string for SQLite compatibility
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -54,7 +54,7 @@ model NodeInfo {
   nodeId    String
   chain     String
   version   String?
-  rawData   Json
+  rawData   String   // JSON stored as string for SQLite compatibility
   updatedAt DateTime @updatedAt
 }
 
@@ -71,7 +71,7 @@ model Settings {
   // Cloudflared settings
   cloudflaredEnabled Boolean  @default(false) // Cloudflare Tunnel enabled
   cloudflaredToken   String?  // Tunnel token from Cloudflare
-  cloudflaredIngress Json?    // Array of ingress rules [{hostname, service, path?}]
+  cloudflaredIngress String?  // JSON array stored as string for SQLite compatibility
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
