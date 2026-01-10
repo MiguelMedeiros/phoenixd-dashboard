@@ -349,15 +349,18 @@ jobs:
           sha256sum * > SHA256SUMS.txt || echo "No files to checksum"
           cat SHA256SUMS.txt
 
-      - name: Import GPG key
-        if: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+      - name: Import GPG key and sign
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
-          echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback --armor --detach-sign assets/SHA256SUMS.txt
-          mv SHA256SUMS.txt.asc assets/
+          if [ -n "$GPG_PRIVATE_KEY" ]; then
+            echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
+            echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback --armor --detach-sign assets/SHA256SUMS.txt
+            mv SHA256SUMS.txt.asc assets/
+          else
+            echo "GPG_PRIVATE_KEY not set, skipping signing"
+          fi
 
       - name: Upload SHA256SUMS.txt
         uses: actions/upload-release-asset@v1
@@ -370,7 +373,7 @@ jobs:
           asset_content_type: text/plain
 
       - name: Upload SHA256SUMS.txt.asc (GPG signature)
-        if: ${{ hashFiles('assets/SHA256SUMS.txt.asc') != '' }}
+        if: hashFiles('assets/SHA256SUMS.txt.asc') != ''
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
