@@ -14,6 +14,9 @@ on:
 env:
   PHOENIXD_VERSION: '0.3.4'
 
+permissions:
+  contents: write
+
 jobs:
   create-release:
     runs-on: ubuntu-latest
