@@ -4,12 +4,12 @@ Native desktop application for Phoenixd Dashboard built with [Tauri](https://tau
 
 ## Platform Support
 
-| Platform | Status | Download |
-|----------|--------|----------|
-| 🍎 macOS (Apple Silicon) | ✅ Supported | `.dmg` |
-| 🍎 macOS (Intel) | ✅ Supported | `.dmg` |
-| 🐧 Linux (x64) | ✅ Supported | `.AppImage`, `.deb` |
-| 🪟 Windows | ❌ Not available | — |
+| Platform                 | Status           | Download            |
+| ------------------------ | ---------------- | ------------------- |
+| 🍎 macOS (Apple Silicon) | ✅ Supported     | `.dmg`              |
+| 🍎 macOS (Intel)         | ✅ Supported     | `.dmg`              |
+| 🐧 Linux (x64)           | ✅ Supported     | `.AppImage`, `.deb` |
+| 🪟 Windows               | ❌ Not available | —                   |
 
 > **Why no Windows?** The desktop app bundles [phoenixd](https://github.com/ACINQ/phoenixd), which does not provide official Windows binaries. Windows users can use the [Docker version](../docs/installation.md) via WSL2.
 
@@ -29,11 +29,13 @@ Native desktop application for Phoenixd Dashboard built with [Tauri](https://tau
 - Platform-specific dependencies (see below)
 
 ### macOS
+
 ```bash
 xcode-select --install
 ```
 
 ### Linux (Ubuntu/Debian)
+
 ```bash
 sudo apt update
 sudo apt install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev
@@ -42,6 +44,7 @@ sudo apt install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev
 ## Development Setup
 
 1. **Install dependencies**
+
    ```bash
    # From project root
    npm run install:all
@@ -49,11 +52,13 @@ sudo apt install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev
    ```
 
 2. **Download phoenixd binaries**
+
    ```bash
    npm run desktop:download-phoenixd
    ```
 
 3. **Generate icons** (optional, if you want custom icons)
+
    ```bash
    npm run desktop:icons
    ```
@@ -66,6 +71,7 @@ sudo apt install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev
 ## Building for Production
 
 1. **Prepare resources**
+
    ```bash
    npm run desktop:prepare
    ```
@@ -118,19 +124,24 @@ The desktop app uses Tauri as a lightweight wrapper that:
 4. **System Tray** — Minimal tray icon for quick access
 
 All services run locally on the user's machine. Data is stored in:
+
 - **macOS**: `~/Library/Application Support/com.phoenixd.dashboard/`
 - **Linux**: `~/.local/share/com.phoenixd.dashboard/`
 
 ## Troubleshooting
 
 ### Node.js not found
+
 The app looks for Node.js in the system PATH. Make sure Node.js is installed and accessible.
 
 ### phoenixd fails to start
+
 Check that the phoenixd binary is in `desktop/binaries/` and is executable.
 
 ### Build fails on Linux
+
 Make sure you have all WebKit dependencies installed:
+
 ```bash
 sudo apt install libwebkit2gtk-4.1-dev libgtk-3-0 libappindicator3-dev
 ```

@@ -21,8 +21,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     outputs:
-      release_id: ${{ steps.create-release.outputs.id }}
-      release_upload_url: ${{ steps.create-release.outputs.upload_url }}
+      version: ${{ steps.get-version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,13 +36,10 @@ jobs:
           fi
 
       - name: Create Release
-        id: create-release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.get-version.outputs.version }}
-          release_name: Phoenixd Dashboard v${{ steps.get-version.outputs.version }}
+          name: Phoenixd Dashboard v${{ steps.get-version.outputs.version }}
           body: |
             ## Phoenixd Dashboard Desktop v${{ steps.get-version.outputs.version }}
 
@@ -51,11 +47,17 @@ jobs:
 
             | Platform | Download |
             |----------|----------|
-            | macOS (Apple Silicon) | `Phoenixd-Dashboard_${{ steps.get-version.outputs.version }}_aarch64.dmg` |
-            | macOS (Intel) | `Phoenixd-Dashboard_${{ steps.get-version.outputs.version }}_x64.dmg` |
-            | Windows | `Phoenixd-Dashboard_${{ steps.get-version.outputs.version }}_x64-setup.exe` |
-            | Linux (AppImage) | `Phoenixd-Dashboard_${{ steps.get-version.outputs.version }}_amd64.AppImage` |
-            | Linux (deb) | `Phoenixd-Dashboard_${{ steps.get-version.outputs.version }}_amd64.deb` |
+            | macOS (Apple Silicon) | `Phoenixd-Dashboard_aarch64-apple-darwin.dmg` |
+            | macOS (Intel) | `Phoenixd-Dashboard_x86_64-apple-darwin.dmg` |
+            | Linux (AppImage) | `Phoenixd-Dashboard_amd64.AppImage` |
+            | Linux (deb) | `Phoenixd-Dashboard_amd64.deb` |
+
+            ### Verify Downloads
+
+            Download `SHA256SUMS.txt` and verify:
+            ```bash
+            sha256sum -c SHA256SUMS.txt --ignore-missing
+            ```
 
             ### Installation
 
@@ -64,9 +66,7 @@ jobs:
             3. Launch Phoenixd Dashboard
             4. The app will automatically set up phoenixd and all required services
 
-            ### What's New
-
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+            > **Note:** Windows is not supported. See [Platform Support](https://github.com/${{ github.repository }}/blob/main/desktop/README.md#platform-support) for details.
           draft: true
           prerelease: ${{ contains(steps.get-version.outputs.version, 'alpha') || contains(steps.get-version.outputs.version, 'beta') || contains(steps.get-version.outputs.version, 'rc') }}
 
@@ -138,15 +138,11 @@ jobs:
           tauriScript: npm run tauri
           args: --target ${{ matrix.target }}
 
-      - name: Upload artifacts
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload DMG to release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
-          asset_name: Phoenixd-Dashboard_${{ matrix.target }}.dmg
-          asset_content_type: application/octet-stream
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
 
   # NOTE: Windows build disabled - phoenixd does not provide Windows binaries
   # build-windows:
@@ -213,25 +209,13 @@ jobs:
           projectPath: desktop
           tauriScript: npm run tauri
 
-      - name: Upload AppImage
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Linux packages to release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: desktop/src-tauri/target/release/bundle/appimage/*.AppImage
-          asset_name: Phoenixd-Dashboard_amd64.AppImage
-          asset_content_type: application/octet-stream
-
-      - name: Upload deb
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: desktop/src-tauri/target/release/bundle/deb/*.deb
-          asset_name: Phoenixd-Dashboard_amd64.deb
-          asset_content_type: application/octet-stream
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: |
+            desktop/src-tauri/target/release/bundle/appimage/*.AppImage
+            desktop/src-tauri/target/release/bundle/deb/*.deb
 
   generate-checksums:
     needs: [create-release, build-macos, build-linux]
@@ -256,11 +240,8 @@ jobs:
           mkdir -p assets
           cd assets
           
-          # Get release assets
-          RELEASE_ID=${{ needs.create-release.outputs.release_id }}
-          
-          # Download all assets using GitHub API
-          gh release download "v${{ steps.get-version.outputs.version }}" --repo ${{ github.repository }} --pattern "*.dmg" --pattern "*.exe" --pattern "*.AppImage" --pattern "*.deb" || true
+          # Download all assets using GitHub CLI
+          gh release download "v${{ needs.create-release.outputs.version }}" --repo ${{ github.repository }} --pattern "*.dmg" --pattern "*.AppImage" --pattern "*.deb" || true
           
           ls -la
 
@@ -283,38 +264,20 @@ jobs:
             echo "GPG_PRIVATE_KEY not set, skipping signing"
           fi
 
-      - name: Upload SHA256SUMS.txt
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload checksums to release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: assets/SHA256SUMS.txt
-          asset_name: SHA256SUMS.txt
-          asset_content_type: text/plain
-
-      - name: Upload SHA256SUMS.txt.asc (GPG signature)
-        if: hashFiles('assets/SHA256SUMS.txt.asc') != ''
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: assets/SHA256SUMS.txt.asc
-          asset_name: SHA256SUMS.txt.asc
-          asset_content_type: text/plain
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: |
+            assets/SHA256SUMS.txt
+            assets/SHA256SUMS.txt.asc
 
   publish-release:
     needs: [create-release, build-macos, build-linux, generate-checksums]
     runs-on: ubuntu-latest
     steps:
       - name: Publish release
-        uses: actions/github-script@v7
+        uses: softprops/action-gh-release@v2
         with:
-          script: |
-            await github.rest.repos.updateRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: ${{ needs.create-release.outputs.release_id }},
-              draft: false
-            });
+          tag_name: v${{ needs.create-release.outputs.version }}
+          draft: false
