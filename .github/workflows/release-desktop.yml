@@ -148,91 +148,9 @@ jobs:
           asset_name: Phoenixd-Dashboard_${{ matrix.target }}.dmg
           asset_content_type: application/octet-stream
 
-  build-windows:
-    needs: create-release
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install dependencies
-        run: |
-          npm ci
-          npm ci --prefix frontend
-          npm ci --prefix backend
-          npm ci --prefix desktop
-
-      - name: Download phoenixd binary
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path desktop/binaries
-          Invoke-WebRequest -Uri "https://github.com/ACINQ/phoenixd/releases/download/v$env:PHOENIXD_VERSION/phoenix-$env:PHOENIXD_VERSION-windows-x64.zip" -OutFile phoenix.zip
-          Expand-Archive -Path phoenix.zip -DestinationPath phoenix-extracted
-          Get-ChildItem -Recurse -Filter "phoenixd.exe" | Copy-Item -Destination "desktop/binaries/phoenixd-x86_64-pc-windows-msvc.exe"
-
-      - name: Prepare SQLite schema
-        run: |
-          cd backend
-          copy prisma\schema.sqlite.prisma prisma\schema.prisma
-          npx prisma generate
-
-      - name: Build frontend
-        run: npm run build:frontend
-
-      - name: Build backend
-        run: npm run build:backend
-
-      - name: Prepare resources (Windows)
-        shell: pwsh
-        run: |
-          # Create resources directory
-          New-Item -ItemType Directory -Force -Path desktop/resources/binaries
-          New-Item -ItemType Directory -Force -Path desktop/resources/backend
-          New-Item -ItemType Directory -Force -Path desktop/resources/frontend
-          
-          # Copy phoenixd
-          Copy-Item "desktop/binaries/phoenixd-x86_64-pc-windows-msvc.exe" "desktop/resources/binaries/phoenixd.exe"
-          
-          # Copy backend
-          Copy-Item -Recurse "backend/dist" "desktop/resources/backend/"
-          Copy-Item -Recurse "backend/node_modules" "desktop/resources/backend/"
-          Copy-Item "backend/package.json" "desktop/resources/backend/"
-          New-Item -ItemType Directory -Force -Path desktop/resources/backend/prisma
-          Copy-Item "backend/prisma/schema.prisma" "desktop/resources/backend/prisma/"
-          
-          # Copy frontend standalone
-          Copy-Item -Recurse "frontend/.next/standalone/*" "desktop/resources/frontend/"
-          New-Item -ItemType Directory -Force -Path desktop/resources/frontend/.next/static
-          Copy-Item -Recurse "frontend/.next/static/*" "desktop/resources/frontend/.next/static/"
-          New-Item -ItemType Directory -Force -Path desktop/resources/frontend/public
-          Copy-Item -Recurse "frontend/public/*" "desktop/resources/frontend/public/"
-
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: desktop
-          tauriScript: npm run tauri
-
-      - name: Upload NSIS installer
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: desktop/src-tauri/target/release/bundle/nsis/*.exe
-          asset_name: Phoenixd-Dashboard_x64-setup.exe
-          asset_content_type: application/octet-stream
+  # NOTE: Windows build disabled - phoenixd does not provide Windows binaries
+  # build-windows:
+  #   See: https://github.com/ACINQ/phoenixd/releases
 
   build-linux:
     needs: create-release
@@ -316,7 +234,7 @@ jobs:
           asset_content_type: application/octet-stream
 
   generate-checksums:
-    needs: [create-release, build-macos, build-windows, build-linux]
+    needs: [create-release, build-macos, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -387,7 +305,7 @@ jobs:
           asset_content_type: text/plain
 
   publish-release:
-    needs: [create-release, build-macos, build-windows, build-linux, generate-checksums]
+    needs: [create-release, build-macos, build-linux, generate-checksums]
     runs-on: ubuntu-latest
     steps:
       - name: Publish release

@@ -10,11 +10,8 @@ binaries/*.exe
 binaries/phoenixd-*
 !binaries/.gitkeep
 
-# Generated icons (can be regenerated)
-src-tauri/icons/*.png
-src-tauri/icons/*.ico
-src-tauri/icons/*.icns
-!src-tauri/icons/.gitkeep
+# Keep icons tracked (needed for build)
+# src-tauri/icons/ - icons are tracked in git
 
 # Tauri dev artifacts
 .tauri/
