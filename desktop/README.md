@@ -130,6 +130,18 @@ All services run locally on the user's machine. Data is stored in:
 
 ## Troubleshooting
 
+### macOS: "App is damaged and can't be opened"
+
+This happens because the app is not signed with an Apple Developer certificate. macOS Gatekeeper blocks unsigned apps by default.
+
+**Solution:** Remove the quarantine attribute:
+
+```bash
+xattr -cr /Applications/Phoenixd\ Dashboard.app
+```
+
+Or right-click the app → Open → Open (bypass Gatekeeper).
+
 ### Node.js not found
 
 The app looks for Node.js in the system PATH. Make sure Node.js is installed and accessible.
