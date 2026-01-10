@@ -141,6 +141,7 @@ jobs:
 
       - name: Upload DMG to release
         uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
           files: desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
@@ -212,6 +213,7 @@ jobs:
 
       - name: Upload Linux deb to release
         uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
           files: desktop/src-tauri/target/release/bundle/deb/*.deb
@@ -236,11 +238,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Wait for GitHub to process uploads
+          sleep 10
+          
           mkdir -p assets
           cd assets
           
-          # Download all assets using GitHub CLI
-          gh release download "v${{ needs.create-release.outputs.version }}" --repo ${{ github.repository }} --pattern "*.dmg" --pattern "*.deb" || true
+          # Download all assets using GitHub CLI (retry up to 3 times)
+          for i in 1 2 3; do
+            gh release download "v${{ needs.create-release.outputs.version }}" --repo ${{ github.repository }} --pattern "*.dmg" --pattern "*.deb" && break
+            echo "Retry $i..."
+            sleep 5
+          done
           
           ls -la
 
@@ -265,6 +274,7 @@ jobs:
 
       - name: Upload checksums to release
         uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
           files: |
