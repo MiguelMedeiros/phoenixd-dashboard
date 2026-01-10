@@ -266,8 +266,9 @@ jobs:
         run: |
           if [ -n "$GPG_PRIVATE_KEY" ]; then
             echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
-            echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback --armor --detach-sign assets/SHA256SUMS.txt
-            mv SHA256SUMS.txt.asc assets/
+            cd assets
+            echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback --armor --detach-sign SHA256SUMS.txt
+            ls -la
           else
             echo "GPG_PRIVATE_KEY not set, skipping signing"
           fi
