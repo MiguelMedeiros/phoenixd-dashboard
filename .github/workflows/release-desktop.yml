@@ -72,6 +72,8 @@ jobs:
   build-macos:
     needs: create-release
     strategy:
+      fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - target: aarch64-apple-darwin
