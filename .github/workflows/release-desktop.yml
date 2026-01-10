@@ -12,7 +12,7 @@ on:
         type: string
 
 env:
-  PHOENIXD_VERSION: '0.3.4'
+  PHOENIXD_VERSION: '0.7.1'
 
 permissions:
   contents: write
@@ -108,7 +108,7 @@ jobs:
       - name: Download phoenixd binary
         run: |
           mkdir -p desktop/binaries
-          curl -L -o phoenix.zip "https://github.com/ACINQ/phoenixd/releases/download/v${PHOENIXD_VERSION}/phoenix-${PHOENIXD_VERSION}-macos-$([ '${{ matrix.target }}' = 'aarch64-apple-darwin' ] && echo 'arm64' || echo 'x64').zip"
+          curl -L -o phoenix.zip "https://github.com/ACINQ/phoenixd/releases/download/v${PHOENIXD_VERSION}/phoenixd-${PHOENIXD_VERSION}-macos-$([ '${{ matrix.target }}' = 'aarch64-apple-darwin' ] && echo 'arm64' || echo 'x64').zip"
           unzip phoenix.zip
           find . -name "phoenixd" -type f -exec cp {} desktop/binaries/${{ matrix.phoenixd_binary }} \;
           chmod +x desktop/binaries/${{ matrix.phoenixd_binary }}
@@ -181,7 +181,7 @@ jobs:
       - name: Download phoenixd binary
         run: |
           mkdir -p desktop/binaries
-          curl -L -o phoenix.zip "https://github.com/ACINQ/phoenixd/releases/download/v${PHOENIXD_VERSION}/phoenix-${PHOENIXD_VERSION}-linux-x64.zip"
+          curl -L -o phoenix.zip "https://github.com/ACINQ/phoenixd/releases/download/v${PHOENIXD_VERSION}/phoenixd-${PHOENIXD_VERSION}-linux-x64.zip"
           unzip phoenix.zip
           find . -name "phoenixd" -type f -exec cp {} desktop/binaries/phoenixd-x86_64-unknown-linux-gnu \;
           chmod +x desktop/binaries/phoenixd-x86_64-unknown-linux-gnu
