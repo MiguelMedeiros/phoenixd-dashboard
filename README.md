@@ -53,16 +53,11 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 <br>
 
-## Supported Platforms
+## Download
 
-| Platform | Desktop App | Docker |
-|----------|-------------|--------|
-| 🍎 macOS (Apple Silicon) | ✅ | ✅ |
-| 🍎 macOS (Intel) | ✅ | ✅ |
-| 🐧 Linux (x64) | ✅ | ✅ |
-| 🪟 Windows | ❌ | ✅ via WSL2 |
+**[📥 Download Latest Release](https://github.com/MiguelMedeiros/phoenixd-dashboard/releases/latest)**
 
-> **Why no Windows desktop app?** The app bundles [phoenixd](https://github.com/ACINQ/phoenixd), which currently only provides official binaries for macOS and Linux. Windows users can run the Docker version using WSL2.
+Available for macOS and Linux. See [Desktop App](desktop/README.md) for details.
 
 <br>
 
