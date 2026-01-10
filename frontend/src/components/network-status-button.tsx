@@ -65,7 +65,7 @@ export function NetworkStatusButton() {
   // Fetch network status (skip in desktop mode)
   useEffect(() => {
     if (isDesktopMode) return;
-    
+
     const fetchStatus = async () => {
       try {
         const [tor, tailscale, cloudflared] = await Promise.all([

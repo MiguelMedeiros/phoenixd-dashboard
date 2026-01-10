@@ -780,9 +780,12 @@ function NetworkTab() {
             <Monitor className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold mb-2">{t('desktopModeTitle') || 'Desktop Edition'}</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              {t('desktopModeTitle') || 'Desktop Edition'}
+            </h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              {t('desktopModeDescription') || 'Network features (Tor, Tailscale, Cloudflare) are not available in the desktop version. These features require Docker and are available in the server/self-hosted version.'}
+              {t('desktopModeDescription') ||
+                'Network features (Tor, Tailscale, Cloudflare) are not available in the desktop version. These features require Docker and are available in the server/self-hosted version.'}
             </p>
           </div>
         </div>
@@ -796,7 +799,9 @@ function NetworkTab() {
               </div>
               <div>
                 <p className="font-medium">{t('torProxy')}</p>
-                <p className="text-sm text-muted-foreground">{t('notAvailableDesktop') || 'Not available in desktop version'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('notAvailableDesktop') || 'Not available in desktop version'}
+                </p>
               </div>
             </div>
           </div>
@@ -808,7 +813,9 @@ function NetworkTab() {
               </div>
               <div>
                 <p className="font-medium">{t('tailscaleVpn')}</p>
-                <p className="text-sm text-muted-foreground">{t('notAvailableDesktop') || 'Not available in desktop version'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('notAvailableDesktop') || 'Not available in desktop version'}
+                </p>
               </div>
             </div>
           </div>
@@ -820,7 +827,9 @@ function NetworkTab() {
               </div>
               <div>
                 <p className="font-medium">{t('cloudflareTunnel')}</p>
-                <p className="text-sm text-muted-foreground">{t('notAvailableDesktop') || 'Not available in desktop version'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t('notAvailableDesktop') || 'Not available in desktop version'}
+                </p>
               </div>
             </div>
           </div>
@@ -830,9 +839,12 @@ function NetworkTab() {
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div className="text-sm">
-              <p className="font-medium text-primary mb-1">{t('wantNetworkFeatures') || 'Want network features?'}</p>
+              <p className="font-medium text-primary mb-1">
+                {t('wantNetworkFeatures') || 'Want network features?'}
+              </p>
               <p className="text-muted-foreground mb-3">
-                {t('useDockerVersion') || 'Use the Docker version of Phoenixd Dashboard for full network connectivity options including Tor hidden services, Tailscale VPN, and Cloudflare Tunnels.'}
+                {t('useDockerVersion') ||
+                  'Use the Docker version of Phoenixd Dashboard for full network connectivity options including Tor hidden services, Tailscale VPN, and Cloudflare Tunnels.'}
               </p>
               <a
                 href="https://github.com/MiguelMedeiros/phoenixd-dashboard/blob/main/docs/installation.md"

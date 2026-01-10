@@ -121,9 +121,10 @@ cloudflaredRouter.get('/status', requireAuth, async (_req: AuthenticatedRequest,
     let ingress: IngressRule[] = [];
     if (settings?.cloudflaredIngress) {
       try {
-        const parsed = typeof settings.cloudflaredIngress === 'string' 
-          ? JSON.parse(settings.cloudflaredIngress) 
-          : settings.cloudflaredIngress;
+        const parsed =
+          typeof settings.cloudflaredIngress === 'string'
+            ? JSON.parse(settings.cloudflaredIngress)
+            : settings.cloudflaredIngress;
         ingress = Array.isArray(parsed) ? parsed : [];
       } catch {
         ingress = [];
