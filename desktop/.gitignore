@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+src-tauri/target/
+resources/
+
+# Binaries (downloaded separately)
+binaries/*.exe
+binaries/phoenixd-*
+!binaries/.gitkeep
+
+# Generated icons (can be regenerated)
+src-tauri/icons/*.png
+src-tauri/icons/*.ico
+src-tauri/icons/*.icns
+!src-tauri/icons/.gitkeep
+
+# Tauri dev artifacts
+.tauri/
+
+# OS files
+.DS_Store
+Thumbs.db

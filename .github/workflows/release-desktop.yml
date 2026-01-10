@@ -65,7 +65,7 @@ jobs:
 
             See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
           draft: true
-          prerelease: false
+          prerelease: ${{ contains(steps.get-version.outputs.version, 'alpha') || contains(steps.get-version.outputs.version, 'beta') || contains(steps.get-version.outputs.version, 'rc') }}
 
   build-macos:
     needs: create-release
@@ -312,8 +312,76 @@ jobs:
           asset_name: Phoenixd-Dashboard_amd64.deb
           asset_content_type: application/octet-stream
 
-  publish-release:
+  generate-checksums:
     needs: [create-release, build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p assets
+          cd assets
+          
+          # Get release assets
+          RELEASE_ID=${{ needs.create-release.outputs.release_id }}
+          
+          # Download all assets using GitHub API
+          gh release download "v${{ steps.get-version.outputs.version }}" --repo ${{ github.repository }} --pattern "*.dmg" --pattern "*.exe" --pattern "*.AppImage" --pattern "*.deb" || true
+          
+          ls -la
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd assets
+          sha256sum * > SHA256SUMS.txt || echo "No files to checksum"
+          cat SHA256SUMS.txt
+
+      - name: Import GPG key
+        if: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
+          echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback --armor --detach-sign assets/SHA256SUMS.txt
+          mv SHA256SUMS.txt.asc assets/
+
+      - name: Upload SHA256SUMS.txt
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+          asset_path: assets/SHA256SUMS.txt
+          asset_name: SHA256SUMS.txt
+          asset_content_type: text/plain
+
+      - name: Upload SHA256SUMS.txt.asc (GPG signature)
+        if: ${{ hashFiles('assets/SHA256SUMS.txt.asc') != '' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+          asset_path: assets/SHA256SUMS.txt.asc
+          asset_name: SHA256SUMS.txt.asc
+          asset_content_type: text/plain
+
+  publish-release:
+    needs: [create-release, build-macos, build-windows, build-linux, generate-checksums]
     runs-on: ubuntu-latest
     steps:
       - name: Publish release

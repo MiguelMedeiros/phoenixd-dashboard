@@ -1,17 +1,13 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Phoenixd Dashboard",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "identifier": "com.phoenixd.dashboard",
   "build": {
     "beforeBuildCommand": "chmod +x scripts/prepare-resources.sh && scripts/prepare-resources.sh"
   },
   "app": {
     "withGlobalTauri": false,
-    "trayIcon": {
-      "iconPath": "icons/icon.png",
-      "iconAsTemplate": true
-    },
     "windows": [],
     "security": {
       "csp": null

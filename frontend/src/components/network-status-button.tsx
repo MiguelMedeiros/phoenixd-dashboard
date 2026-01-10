@@ -13,6 +13,7 @@ import {
 } from '@/lib/api';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { useDesktopMode } from '@/hooks/use-desktop-mode';
 
 type ServiceStatus = 'healthy' | 'starting' | 'disabled' | 'error';
 
@@ -42,6 +43,7 @@ function getStatusColor(status: ServiceStatus): string {
 
 export function NetworkStatusButton() {
   const t = useTranslations('common');
+  const { isDesktopMode } = useDesktopMode();
   const [isOpen, setIsOpen] = useState(false);
   const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
   const [tailscaleStatus, setTailscaleStatus] = useState<TailscaleStatus | null>(null);
@@ -60,8 +62,10 @@ export function NetworkStatusButton() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch network status
+  // Fetch network status (skip in desktop mode)
   useEffect(() => {
+    if (isDesktopMode) return;
+    
     const fetchStatus = async () => {
       try {
         const [tor, tailscale, cloudflared] = await Promise.all([
@@ -80,7 +84,12 @@ export function NetworkStatusButton() {
     fetchStatus();
     const interval = setInterval(fetchStatus, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isDesktopMode]);
+
+  // Hide network status button in desktop mode
+  if (isDesktopMode) {
+    return null;
+  }
 
   const torServiceStatus = getServiceStatus(
     torStatus?.enabled,

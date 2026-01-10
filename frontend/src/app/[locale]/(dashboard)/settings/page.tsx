@@ -72,6 +72,7 @@ import {
   BITCOIN_DISPLAY_MODES,
 } from '@/components/currency-provider';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useDesktopMode } from '@/hooks/use-desktop-mode';
 import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/page-header';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
@@ -523,6 +524,7 @@ function SecurityTab() {
 // ============= NETWORK TAB =============
 function NetworkTab() {
   const t = useTranslations('settings');
+  const { isDesktopMode, loading: desktopLoading } = useDesktopMode();
 
   // Tor state
   const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
@@ -758,6 +760,95 @@ function NetworkTab() {
       setCloudflaredLoading(false);
     }
   };
+
+  // Desktop mode: show simplified message
+  if (desktopLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="glass-card rounded-xl p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isDesktopMode) {
+    return (
+      <div className="space-y-6">
+        <div className="glass-card rounded-xl p-8 text-center space-y-4">
+          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+            <Monitor className="h-8 w-8 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">{t('desktopModeTitle') || 'Desktop Edition'}</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              {t('desktopModeDescription') || 'Network features (Tor, Tailscale, Cloudflare) are not available in the desktop version. These features require Docker and are available in the server/self-hosted version.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Disabled services preview */}
+        <div className="grid gap-4 opacity-50 pointer-events-none">
+          <div className="glass-card rounded-xl p-5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                <Shield className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="font-medium">{t('torProxy')}</p>
+                <p className="text-sm text-muted-foreground">{t('notAvailableDesktop') || 'Not available in desktop version'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-xl p-5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                <Wifi className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="font-medium">{t('tailscaleVpn')}</p>
+                <p className="text-sm text-muted-foreground">{t('notAvailableDesktop') || 'Not available in desktop version'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-xl p-5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                <Cloud className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="font-medium">{t('cloudflareTunnel')}</p>
+                <p className="text-sm text-muted-foreground">{t('notAvailableDesktop') || 'Not available in desktop version'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-card rounded-xl p-5 bg-primary/5 border border-primary/10">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <div className="text-sm">
+              <p className="font-medium text-primary mb-1">{t('wantNetworkFeatures') || 'Want network features?'}</p>
+              <p className="text-muted-foreground mb-3">
+                {t('useDockerVersion') || 'Use the Docker version of Phoenixd Dashboard for full network connectivity options including Tor hidden services, Tailscale VPN, and Cloudflare Tunnels.'}
+              </p>
+              <a
+                href="https://github.com/MiguelMedeiros/phoenixd-dashboard/blob/main/docs/installation.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-primary hover:underline font-medium"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                {t('viewDockerInstallation') || 'View Docker Installation Guide'}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

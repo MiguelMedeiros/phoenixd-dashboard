@@ -29,7 +29,13 @@
     "test:e2e": "npm run test --prefix e2e",
     "test:e2e:open": "npm run cypress:open --prefix e2e",
     "test:all": "npm run test && npm run test:e2e",
-    "install:all": "npm install && npm install --prefix frontend && npm install --prefix backend && npm install --prefix e2e"
+    "install:all": "npm install && npm install --prefix frontend && npm install --prefix backend && npm install --prefix e2e",
+    "desktop:install": "npm install --prefix desktop",
+    "desktop:dev": "cd desktop && npm run tauri:dev",
+    "desktop:build": "npm run desktop:prepare && cd desktop && npm run tauri:build",
+    "desktop:prepare": "chmod +x desktop/scripts/*.sh && desktop/scripts/prepare-resources.sh",
+    "desktop:download-phoenixd": "chmod +x desktop/scripts/*.sh && desktop/scripts/download-phoenixd.sh",
+    "desktop:icons": "chmod +x desktop/scripts/*.sh && desktop/scripts/generate-icons.sh"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

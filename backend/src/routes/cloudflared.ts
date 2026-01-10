@@ -117,7 +117,18 @@ cloudflaredRouter.get('/status', requireAuth, async (_req: AuthenticatedRequest,
       where: { id: 'singleton' },
     });
 
-    const ingress = (settings?.cloudflaredIngress as IngressRule[] | null) || [];
+    // Parse ingress from JSON string (SQLite stores as string)
+    let ingress: IngressRule[] = [];
+    if (settings?.cloudflaredIngress) {
+      try {
+        const parsed = typeof settings.cloudflaredIngress === 'string' 
+          ? JSON.parse(settings.cloudflaredIngress) 
+          : settings.cloudflaredIngress;
+        ingress = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        ingress = [];
+      }
+    }
 
     res.json({
       enabled: settings?.cloudflaredEnabled ?? false,
@@ -212,14 +223,16 @@ cloudflaredRouter.put('/ingress', requireAuth, async (req: AuthenticatedRequest,
     }
 
     // Save ingress rules to database
+    // For SQLite compatibility, we serialize to JSON string
+    const ingressData = JSON.stringify(ingress);
     await prisma.settings.upsert({
       where: { id: 'singleton' },
       update: {
-        cloudflaredIngress: ingress,
+        cloudflaredIngress: ingressData,
       },
       create: {
         id: 'singleton',
-        cloudflaredIngress: ingress,
+        cloudflaredIngress: ingressData,
       },
     });
 

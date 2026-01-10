@@ -190,3 +190,98 @@ npm run test:e2e
 # Or from e2e folder
 cd e2e && npm test
 ```
+
+---
+
+## Release & Versioning Rules
+
+### Semantic Versioning (SemVer)
+
+Format: `MAJOR.MINOR.PATCH[-PRERELEASE]`
+
+| Part      | When to Increment                  | Example           |
+| --------- | ---------------------------------- | ----------------- |
+| **MAJOR** | Breaking changes, incompatible API | `1.0.0` → `2.0.0` |
+| **MINOR** | New features, backwards compatible | `1.0.0` → `1.1.0` |
+| **PATCH** | Bug fixes, backwards compatible    | `1.0.0` → `1.0.1` |
+
+### Pre-release Tags
+
+| Tag     | Meaning                          | Stability     | Example         |
+| ------- | -------------------------------- | ------------- | --------------- |
+| `alpha` | Experimental, may break anything | Very unstable | `0.0.1-alpha.1` |
+| `beta`  | Feature complete, in testing     | Unstable      | `0.0.1-beta.1`  |
+| `rc`    | Release candidate, final testing | Almost stable | `0.0.1-rc.1`    |
+| (none)  | Stable release                   | Stable        | `0.0.1`         |
+
+### Release Lifecycle
+
+```
+alpha.1 → alpha.2 → ... → beta.1 → beta.2 → ... → rc.1 → rc.2 → stable
+```
+
+Example progression:
+
+```
+0.0.1-alpha.1  # First experimental release
+0.0.1-alpha.2  # Bug fixes in alpha
+0.0.1-beta.1   # Ready for wider testing
+0.0.1-rc.1     # Release candidate
+0.0.1          # Stable release
+0.0.2-alpha.1  # Next patch cycle
+0.1.0-alpha.1  # New feature cycle
+```
+
+### How to Create a Release
+
+**Option 1: Git Tag (Recommended)**
+
+```bash
+# 1. Update version in desktop/src-tauri/tauri.conf.json
+# 2. Commit the change
+git commit -am "chore: bump version to 0.0.1-alpha.1"
+
+# 3. Create and push tag
+git tag v0.0.1-alpha.1
+git push origin v0.0.1-alpha.1
+
+# 4. GitHub Actions automatically:
+#    - Builds for macOS, Windows, Linux
+#    - Creates draft release
+#    - Uploads installers
+#    - Publishes when all builds complete
+```
+
+**Option 2: Manual Workflow Dispatch**
+
+1. Go to GitHub → Actions → "Release Desktop App"
+2. Click "Run workflow"
+3. Enter version (e.g., `0.0.1-alpha.1`)
+4. Click "Run workflow"
+
+### Version Files to Update
+
+When releasing, update version in:
+
+- `desktop/src-tauri/tauri.conf.json` → `version` field
+- `desktop/package.json` → `version` field (keep in sync)
+
+### GitHub Release Behavior
+
+- Tags with `-alpha`, `-beta`, `-rc` → Marked as **Pre-release**
+- Tags without pre-release suffix → Marked as **Latest Release**
+- All releases start as **Draft** until all builds complete
+
+### Current Project Status
+
+- **Starting version**: `0.0.1-alpha.1`
+- **Current phase**: Alpha (experimental)
+- **Target for v1.0.0**: When core features are stable
+
+### Checklist Before Release
+
+- [ ] All tests passing (`npm run check` or `/check`)
+- [ ] Version updated in `desktop/src-tauri/tauri.conf.json`
+- [ ] CHANGELOG.md updated (if exists)
+- [ ] No console errors in app
+- [ ] Tested on at least one platform locally

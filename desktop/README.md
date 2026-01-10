@@ -1,6 +1,15 @@
 # Phoenixd Dashboard - Desktop App
 
-Desktop application for Phoenixd Dashboard built with [Tauri](https://tauri.app/).
+Native desktop application for Phoenixd Dashboard built with [Tauri](https://tauri.app/).
+
+## Features
+
+- **System Tray** — Runs quietly in the background with quick access menu
+- **Auto-Start Services** — Phoenixd, backend, and frontend start automatically
+- **One-Click Access** — Open the dashboard directly from the tray menu
+- **Service Control** — Restart services without leaving the tray
+- **Cross-Platform** — Works on macOS, Windows, and Linux
+- **Lightweight** — Small footprint compared to Electron-based apps
 
 ## Prerequisites
 
@@ -81,14 +90,25 @@ desktop/
 └── package.json
 ```
 
+## System Tray Menu
+
+The app lives in your system tray with a simple menu:
+
+```
+Open Dashboard    → Opens http://localhost:3000 in browser
+───────────────
+Restart           → Restarts all services
+Quit              → Stops services and exits
+```
+
 ## How It Works
 
 The desktop app uses Tauri as a lightweight wrapper that:
 
-1. **Starts phoenixd** - The Lightning Network node daemon
-2. **Starts the backend** - Node.js API server with SQLite database
-3. **Starts the frontend** - Next.js standalone server
-4. **Opens a WebView** - Points to `http://localhost:3000`
+1. **Starts phoenixd** — The Lightning Network node daemon
+2. **Starts the backend** — Node.js API server with SQLite database
+3. **Starts the frontend** — Next.js standalone server
+4. **System Tray** — Minimal tray icon for quick access
 
 All services run locally on the user's machine. Data is stored in:
 - **macOS**: `~/Library/Application Support/com.phoenixd.dashboard/`

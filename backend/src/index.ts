@@ -84,6 +84,11 @@ app.use(
         return callback(null, true);
       }
 
+      // Allow Tauri desktop app origins
+      if (origin.startsWith('tauri://') || origin.startsWith('http://tauri.')) {
+        return callback(null, true);
+      }
+
       // Allow configured origins
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
@@ -141,7 +146,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check
 app.get('/health', (_, res) => {
-  res.json({ status: 'ok', timestamp: Date.now() });
+  res.json({
+    status: 'ok',
+    timestamp: Date.now(),
+    desktopMode: process.env.DESKTOP_MODE === 'true',
+  });
 });
 
 // Routes

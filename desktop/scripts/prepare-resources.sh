@@ -78,23 +78,22 @@ cp -r dist "$RESOURCES_DIR/backend/"
 cp -r node_modules "$RESOURCES_DIR/backend/"
 cp package.json "$RESOURCES_DIR/backend/"
 
-# Copy prisma files for migrations
+# Copy prisma files for migrations (using the SQLite schema)
 mkdir -p "$RESOURCES_DIR/backend/prisma"
 cp prisma/schema.prisma "$RESOURCES_DIR/backend/prisma/"
 
-# Restore original schema
+echo "Backend built and copied"
+
+# Create template database (while SQLite schema is still active)
+echo ""
+echo "=== Creating template database ==="
+DATABASE_URL="file:./template.db" npx prisma db push --accept-data-loss --skip-generate
+
+# Restore original PostgreSQL schema
 if [ -f "prisma/schema.prisma.bak" ]; then
     mv "prisma/schema.prisma.bak" "prisma/schema.prisma"
     npx prisma generate
 fi
-
-echo "Backend built and copied"
-
-# Create template database
-echo ""
-echo "=== Creating template database ==="
-cd "$PROJECT_ROOT/backend"
-DATABASE_URL="file:./template.db" npx prisma db push --accept-data-loss --skip-generate
 if [ -f "template.db" ]; then
     cp template.db "$RESOURCES_DIR/template.db"
     rm template.db
@@ -146,140 +145,6 @@ else
     echo "Error: Standalone build not found. Make sure next.config.ts has 'output: standalone'"
     exit 1
 fi
-
-# Docker compose for desktop (uses pre-built images from ghcr.io)
-echo ""
-echo "=== Creating Docker configuration ==="
-cat > "$RESOURCES_DIR/docker-compose.yml" << 'EOF'
-# Docker Compose for Phoenixd Dashboard Desktop
-# Uses pre-built images from GitHub Container Registry
-
-services:
-  phoenixd:
-    image: acinq/phoenixd:latest
-    container_name: phoenixd-desktop
-    restart: unless-stopped
-    networks:
-      - phoenixd-network
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
-    command: '--agree-to-terms-of-service --http-bind-ip 0.0.0.0'
-    ports:
-      - '9740:9740'
-    volumes:
-      - phoenixd_data:/phoenix/.phoenix
-    healthcheck:
-      test: ['CMD-SHELL', "echo 'healthcheck'"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: phoenixd-postgres-desktop
-    restart: unless-stopped
-    networks:
-      - phoenixd-network
-    environment:
-      POSTGRES_USER: phoenixd
-      POSTGRES_PASSWORD: phoenixd_desktop_secret
-      POSTGRES_DB: phoenixd_dashboard
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U phoenixd -d phoenixd_dashboard']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  backend:
-    image: ghcr.io/miguelmedeiros/phoenixd-dashboard/backend:latest
-    container_name: phoenixd-backend-desktop
-    restart: unless-stopped
-    networks:
-      - phoenixd-network
-    user: root
-    environment:
-      NODE_ENV: production
-      PORT: 4000
-      DATABASE_URL: postgresql://phoenixd:phoenixd_desktop_secret@postgres:5432/phoenixd_dashboard?schema=public
-      PHOENIXD_URL: http://phoenixd:9740
-      DOCKER_HOST: unix:///var/run/docker.sock
-      FRONTEND_URL: http://localhost:3000
-    ports:
-      - '4000:4000'
-    depends_on:
-      postgres:
-        condition: service_healthy
-      phoenixd:
-        condition: service_started
-    volumes:
-      - phoenixd_data:/phoenix-data:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - tor_data:/tor-data:ro
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  frontend:
-    image: ghcr.io/miguelmedeiros/phoenixd-dashboard/frontend:latest
-    container_name: phoenixd-frontend-desktop
-    restart: unless-stopped
-    networks:
-      - phoenixd-network
-    environment:
-      NODE_ENV: production
-      NEXT_PUBLIC_API_URL: http://localhost:4000
-      NEXT_PUBLIC_WS_URL: ws://localhost:4000
-    ports:
-      - '3000:3000'
-    depends_on:
-      - backend
-
-  # Tor Hidden Service
-  tor:
-    image: dperson/torproxy:latest
-    container_name: phoenixd-tor-desktop
-    restart: unless-stopped
-    networks:
-      - phoenixd-network
-    volumes:
-      - tor_data:/var/lib/tor
-    ports:
-      - '9050:9050'
-    profiles:
-      - tor
-
-  # Cloudflare Tunnel
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: phoenixd-cloudflared-desktop
-    restart: unless-stopped
-    networks:
-      - phoenixd-network
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
-    profiles:
-      - cloudflare
-
-networks:
-  phoenixd-network:
-    driver: bridge
-
-volumes:
-  phoenixd_data:
-    name: phoenixd_desktop_data
-  postgres_data:
-    name: phoenixd_desktop_postgres
-  tor_data:
-    name: phoenixd_desktop_tor
-EOF
-echo "docker-compose.yml created (uses ghcr.io images)"
 
 echo ""
 echo "=== Resources prepared successfully! ==="

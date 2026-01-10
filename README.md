@@ -19,6 +19,7 @@
   <img src="https://img.shields.io/badge/Bitcoin-Lightning-F7931A?style=flat-square&logo=bitcoin&logoColor=white" alt="Bitcoin Lightning">
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready">
   <img src="https://img.shields.io/badge/PWA-Installable-5A0FC8?style=flat-square&logo=pwa&logoColor=white" alt="PWA Ready">
+  <img src="https://img.shields.io/badge/Desktop-Tauri-FFC131?style=flat-square&logo=tauri&logoColor=white" alt="Desktop App">
   <img src="https://img.shields.io/github/license/MiguelMedeiros/phoenixd-dashboard?style=flat-square" alt="License">
 </p>
 
@@ -45,6 +46,8 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 ✅ **Multi-Currency** — Display in 10+ fiat currencies
 
 ✅ **PWA** — Install as native app on any device
+
+✅ **Desktop App** — Native macOS/Windows/Linux app with system tray
 
 ✅ **Remote Access** — Tailscale VPN, Cloudflare Tunnel, or Tor Hidden Service
 
@@ -74,6 +77,7 @@ open http://localhost:3000
 
 - 📦 [**Installation**](docs/installation.md) — Docker setup, local development, and requirements
 - ⚙️ [**Configuration**](docs/configuration.md) — Environment variables, network modes, and options
+- 🖥️ [**Desktop App**](desktop/README.md) — Native app for macOS, Windows, and Linux
 
 ### Mobile & Remote Access
 
@@ -85,6 +89,7 @@ open http://localhost:3000
 ### Security & API
 
 - 💾 [**Backup & Recovery**](docs/backup-recovery.md) — Protect your funds with proper backups
+- 🔐 [**Verify Downloads**](docs/verify-downloads.md) — Verify checksums and GPG signatures
 - 🔌 [**API Reference**](docs/api.md) — REST endpoints and WebSocket events
 
 <br>

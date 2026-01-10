@@ -457,7 +457,13 @@
     "configureInCloudflare": "Configure Public Hostnames",
     "configureInCloudflareDescription": "Public hostnames and ingress rules are configured in the Cloudflare Zero Trust dashboard. Add your hostnames there to route traffic to this dashboard.",
     "openCloudflarePanel": "Open Cloudflare Dashboard",
-    "cloudflaredDescription": "Cloudflare Tunnel allows you to expose your dashboard and API to the internet securely without opening ports. Configure your tunnel in the Cloudflare Zero Trust dashboard."
+    "cloudflaredDescription": "Cloudflare Tunnel allows you to expose your dashboard and API to the internet securely without opening ports. Configure your tunnel in the Cloudflare Zero Trust dashboard.",
+    "desktopModeTitle": "Desktop Edition",
+    "desktopModeDescription": "Network features (Tor, Tailscale, Cloudflare) are not available in the desktop version. These features require Docker and are available in the server/self-hosted version.",
+    "notAvailableDesktop": "Not available in desktop version",
+    "wantNetworkFeatures": "Want network features?",
+    "useDockerVersion": "Use the Docker version of Phoenixd Dashboard for full network connectivity options including Tor hidden services, Tailscale VPN, and Cloudflare Tunnels.",
+    "viewDockerInstallation": "View Docker Installation Guide"
   },
   "nodeInfo": {
     "title": "Node Information",

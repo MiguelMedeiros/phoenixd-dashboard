@@ -458,7 +458,13 @@
     "configureInCloudflare": "Configurar Hostnames Públicos",
     "configureInCloudflareDescription": "Os hostnames públicos e regras de ingresso são configurados no painel Cloudflare Zero Trust. Adicione seus hostnames lá para rotear o tráfego para este dashboard.",
     "openCloudflarePanel": "Abrir Painel Cloudflare",
-    "cloudflaredDescription": "O Cloudflare Tunnel permite expor seu dashboard e API na internet de forma segura sem abrir portas. Configure seu túnel no painel Cloudflare Zero Trust."
+    "cloudflaredDescription": "O Cloudflare Tunnel permite expor seu dashboard e API na internet de forma segura sem abrir portas. Configure seu túnel no painel Cloudflare Zero Trust.",
+    "desktopModeTitle": "Versão Desktop",
+    "desktopModeDescription": "Recursos de rede (Tor, Tailscale, Cloudflare) não estão disponíveis na versão desktop. Esses recursos requerem Docker e estão disponíveis na versão servidor/auto-hospedada.",
+    "notAvailableDesktop": "Não disponível na versão desktop",
+    "wantNetworkFeatures": "Quer recursos de rede?",
+    "useDockerVersion": "Use a versão Docker do Phoenixd Dashboard para ter acesso completo às opções de conectividade incluindo Tor hidden services, Tailscale VPN e Cloudflare Tunnels.",
+    "viewDockerInstallation": "Ver Guia de Instalação Docker"
   },
   "nodeInfo": {
     "title": "Informações do Nó",
