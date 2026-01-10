@@ -2,13 +2,24 @@
 
 Native desktop application for Phoenixd Dashboard built with [Tauri](https://tauri.app/).
 
+## Platform Support
+
+| Platform | Status | Download |
+|----------|--------|----------|
+| 🍎 macOS (Apple Silicon) | ✅ Supported | `.dmg` |
+| 🍎 macOS (Intel) | ✅ Supported | `.dmg` |
+| 🐧 Linux (x64) | ✅ Supported | `.AppImage`, `.deb` |
+| 🪟 Windows | ❌ Not available | — |
+
+> **Why no Windows?** The desktop app bundles [phoenixd](https://github.com/ACINQ/phoenixd), which does not provide official Windows binaries. Windows users can use the [Docker version](../docs/installation.md) via WSL2.
+
 ## Features
 
 - **System Tray** — Runs quietly in the background with quick access menu
 - **Auto-Start Services** — Phoenixd, backend, and frontend start automatically
 - **One-Click Access** — Open the dashboard directly from the tray menu
 - **Service Control** — Restart services without leaving the tray
-- **Cross-Platform** — Works on macOS, Windows, and Linux
+- **Cross-Platform** — Works on macOS and Linux
 - **Lightweight** — Small footprint compared to Electron-based apps
 
 ## Prerequisites
@@ -21,10 +32,6 @@ Native desktop application for Phoenixd Dashboard built with [Tauri](https://tau
 ```bash
 xcode-select --install
 ```
-
-### Windows
-- [Microsoft Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-- [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) (usually pre-installed on Windows 10/11)
 
 ### Linux (Ubuntu/Debian)
 ```bash
@@ -112,7 +119,6 @@ The desktop app uses Tauri as a lightweight wrapper that:
 
 All services run locally on the user's machine. Data is stored in:
 - **macOS**: `~/Library/Application Support/com.phoenixd.dashboard/`
-- **Windows**: `%APPDATA%\com.phoenixd.dashboard\`
 - **Linux**: `~/.local/share/com.phoenixd.dashboard/`
 
 ## Troubleshooting

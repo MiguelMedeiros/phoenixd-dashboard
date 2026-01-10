@@ -47,9 +47,22 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **PWA** — Install as native app on any device
 
-✅ **Desktop App** — Native macOS/Windows/Linux app with system tray
+✅ **Desktop App** — Native macOS/Linux app with system tray
 
 ✅ **Remote Access** — Tailscale VPN, Cloudflare Tunnel, or Tor Hidden Service
+
+<br>
+
+## Supported Platforms
+
+| Platform | Desktop App | Docker |
+|----------|-------------|--------|
+| 🍎 macOS (Apple Silicon) | ✅ | ✅ |
+| 🍎 macOS (Intel) | ✅ | ✅ |
+| 🐧 Linux (x64) | ✅ | ✅ |
+| 🪟 Windows | ❌ | ✅ via WSL2 |
+
+> **Why no Windows desktop app?** The app bundles [phoenixd](https://github.com/ACINQ/phoenixd), which currently only provides official binaries for macOS and Linux. Windows users can run the Docker version using WSL2.
 
 <br>
 
@@ -77,7 +90,7 @@ open http://localhost:3000
 
 - 📦 [**Installation**](docs/installation.md) — Docker setup, local development, and requirements
 - ⚙️ [**Configuration**](docs/configuration.md) — Environment variables, network modes, and options
-- 🖥️ [**Desktop App**](desktop/README.md) — Native app for macOS, Windows, and Linux
+- 🖥️ [**Desktop App**](desktop/README.md) — Native app for macOS and Linux
 
 ### Mobile & Remote Access
 
