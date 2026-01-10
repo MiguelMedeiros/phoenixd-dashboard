@@ -47,10 +47,9 @@ jobs:
 
             | Platform | Download |
             |----------|----------|
-            | macOS (Apple Silicon) | `Phoenixd-Dashboard_aarch64-apple-darwin.dmg` |
-            | macOS (Intel) | `Phoenixd-Dashboard_x86_64-apple-darwin.dmg` |
-            | Linux (AppImage) | `Phoenixd-Dashboard_amd64.AppImage` |
-            | Linux (deb) | `Phoenixd-Dashboard_amd64.deb` |
+            | macOS (Apple Silicon) | `.dmg` |
+            | macOS (Intel) | `.dmg` |
+            | Linux (Debian/Ubuntu) | `.deb` |
 
             ### Verify Downloads
 
@@ -209,13 +208,11 @@ jobs:
           projectPath: desktop
           tauriScript: npm run tauri
 
-      - name: Upload Linux packages to release
+      - name: Upload Linux deb to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: |
-            desktop/src-tauri/target/release/bundle/appimage/*.AppImage
-            desktop/src-tauri/target/release/bundle/deb/*.deb
+          files: desktop/src-tauri/target/release/bundle/deb/*.deb
 
   generate-checksums:
     needs: [create-release, build-macos, build-linux]
@@ -241,7 +238,7 @@ jobs:
           cd assets
           
           # Download all assets using GitHub CLI
-          gh release download "v${{ needs.create-release.outputs.version }}" --repo ${{ github.repository }} --pattern "*.dmg" --pattern "*.AppImage" --pattern "*.deb" || true
+          gh release download "v${{ needs.create-release.outputs.version }}" --repo ${{ github.repository }} --pattern "*.dmg" --pattern "*.deb" || true
           
           ls -la
 

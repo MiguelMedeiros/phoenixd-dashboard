@@ -4,12 +4,12 @@ Native desktop application for Phoenixd Dashboard built with [Tauri](https://tau
 
 ## Platform Support
 
-| Platform                 | Status           | Download            |
-| ------------------------ | ---------------- | ------------------- |
-| 🍎 macOS (Apple Silicon) | ✅ Supported     | `.dmg`              |
-| 🍎 macOS (Intel)         | ✅ Supported     | `.dmg`              |
-| 🐧 Linux (x64)           | ✅ Supported     | `.AppImage`, `.deb` |
-| 🪟 Windows               | ❌ Not available | —                   |
+| Platform                 | Status           | Download |
+| ------------------------ | ---------------- | -------- |
+| 🍎 macOS (Apple Silicon) | ✅ Supported     | `.dmg`   |
+| 🍎 macOS (Intel)         | ✅ Supported     | `.dmg`   |
+| 🐧 Linux (x64)           | ✅ Supported     | `.deb`   |
+| 🪟 Windows               | ❌ Not available | —        |
 
 > **Why no Windows?** The desktop app bundles [phoenixd](https://github.com/ACINQ/phoenixd), which does not provide official Windows binaries. Windows users can use the [Docker version](../docs/installation.md) via WSL2.
 
