@@ -14,10 +14,17 @@ import {
   PartyPopper,
   X,
   Share2,
+  Tag,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import confetti from 'canvas-confetti';
-import { createInvoice, createOffer } from '@/lib/api';
+import {
+  createInvoice,
+  createOffer,
+  getCategories,
+  updatePaymentMetadata,
+  type PaymentCategory,
+} from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useCurrencyContext } from '@/components/currency-provider';
@@ -119,6 +126,7 @@ const fireConfetti = () => {
 export default function ReceivePage() {
   const t = useTranslations('receive');
   const _tc = useTranslations('common'); // Prefixed with _ for future use
+  const tcat = useTranslations('paymentLabels');
   const { formatValue } = useCurrencyContext();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer'>('invoice');
   const [loading, setLoading] = useState(false);
@@ -136,9 +144,20 @@ export default function ReceivePage() {
   // Invoice form state
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [invoiceDescription, setInvoiceDescription] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   // Offer form state
   const [offerDescription, setOfferDescription] = useState('');
+
+  // Category state
+  const [categories, setCategories] = useState<PaymentCategory[]>([]);
+
+  // Fetch categories
+  useEffect(() => {
+    getCategories()
+      .then((data) => setCategories(data))
+      .catch((err) => console.error('Failed to load categories:', err));
+  }, []);
 
   // Portal mounting state
   const [mounted, setMounted] = useState(false);
@@ -209,6 +228,19 @@ export default function ReceivePage() {
         description: invoiceDescription || undefined,
       });
       setInvoiceResult(result);
+
+      // Save category metadata if selected
+      if (selectedCategory && result.paymentHash) {
+        try {
+          await updatePaymentMetadata(result.paymentHash, {
+            categoryIds: [selectedCategory],
+            isIncoming: true,
+          });
+        } catch (err) {
+          console.error('Failed to save payment category:', err);
+        }
+      }
+
       toast({ title: 'Invoice Created!', description: 'Ready to receive payment' });
     } catch {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to create invoice' });
@@ -235,6 +267,7 @@ export default function ReceivePage() {
     setInvoiceResult(null);
     setInvoiceAmount('');
     setInvoiceDescription('');
+    setSelectedCategory('');
     setIsPaid(false);
     setPaidAmount(0);
   };
@@ -461,6 +494,30 @@ export default function ReceivePage() {
                     className="glass-input w-full px-3 md:px-4 py-2.5 md:py-3 min-h-[60px] md:min-h-[80px] resize-none text-xs md:text-sm"
                   />
                 </div>
+
+                {/* Category Selector */}
+                {categories.length > 0 && (
+                  <div className="space-y-1 md:space-y-1.5">
+                    <label className="text-[10px] md:text-xs font-medium text-muted-foreground">
+                      {tcat('category')}
+                    </label>
+                    <div className="relative">
+                      <Tag className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="glass-input w-full pl-9 md:pl-11 pr-4 py-2.5 md:py-3 text-xs md:text-sm appearance-none cursor-pointer"
+                      >
+                        <option value="">{tcat('selectCategory')}</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.icon} {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
 
                 <button
                   type="submit"

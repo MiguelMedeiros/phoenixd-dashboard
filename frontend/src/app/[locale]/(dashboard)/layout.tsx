@@ -143,6 +143,43 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       refreshBalance();
     },
+    onRecurringPaymentExecuted: (event) => {
+      const amount = event.amountSat || 0;
+
+      // Show toast for recurring payment
+      toast({
+        title: `🔄 ${tt('recurringPaymentSent')}`,
+        description: `${formatValue(amount)} ${tt('sentTo')} ${event.contactName}`,
+        variant: 'default',
+      });
+
+      // Add in-app notification
+      addNotification({
+        type: 'payment_sent',
+        title: t('recurringPaymentExecuted'),
+        message: `${t('sentTo')} ${event.contactName}`,
+        amount: amount,
+        timestamp: Date.now(),
+      });
+
+      // Fire confetti celebration for recurring payments! 🎉
+      firePaymentConfetti();
+
+      // Send push notification if enabled
+      if (pushNotificationsEnabled) {
+        sendNotification({
+          title: `🔄 ${tt('recurringPaymentSent')}`,
+          body: `${formatSatsForNotification(amount)} ${tt('sentTo')} ${event.contactName}`,
+          tag: `recurring-${event.recurringPaymentId}-${Date.now()}`,
+          data: { recurringPaymentId: event.recurringPaymentId, amount },
+        });
+
+        // Play notification sound
+        playNotificationSound();
+      }
+
+      refreshBalance();
+    },
     onServiceEvent: (event) => {
       // Handle service connection/disconnection events
       if (event.type === 'cloudflared:connected') {

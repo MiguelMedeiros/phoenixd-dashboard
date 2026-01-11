@@ -19,7 +19,12 @@ import {
   execInContainer,
   getContainerLogs,
 } from './routes/docker.js';
+import { contactsRouter } from './routes/contacts.js';
+import { categoriesRouter } from './routes/categories.js';
+import { paymentMetadataRouter } from './routes/payment-metadata.js';
+import { recurringPaymentsRouter } from './routes/recurring-payments.js';
 import { PhoenixdService } from './services/phoenixd.js';
+import { startRecurringPaymentScheduler } from './services/recurring-scheduler.js';
 import { cleanupExpiredSessions, validateSessionFromCookie } from './middleware/auth.js';
 
 const app = express();
@@ -157,6 +162,7 @@ app.get('/health', (_, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/phoenixd', phoenixdRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/api/payments/metadata', paymentMetadataRouter);
 app.use('/api/node', nodeRouter);
 app.use('/api/lnurl', lnurlRouter);
 app.use('/api/tor', torRouter);
@@ -164,6 +170,9 @@ app.use('/api/tailscale', tailscaleRouter);
 app.use('/api/cloudflared', cloudflaredRouter);
 app.use('/api/config', configRouter);
 app.use('/api/docker', dockerRouter);
+app.use('/api/contacts', contactsRouter);
+app.use('/api/categories', categoriesRouter);
+app.use('/api/recurring-payments', recurringPaymentsRouter);
 
 // WebSocket clients
 const clients = new Set<WebSocket>();
@@ -508,7 +517,7 @@ async function connectPhoenixdWebSocket() {
                 paymentHash: event.paymentHash || 'unknown',
                 amountSat: event.amountSat || 0,
                 status: 'completed',
-                rawData: event,
+                rawData: JSON.stringify(event),
               },
             });
           } catch (dbError) {
@@ -547,6 +556,9 @@ server.listen(PORT, () => {
   setInterval(cleanupExpiredSessions, 60 * 60 * 1000);
   // Also run cleanup on startup
   cleanupExpiredSessions();
+
+  // Start recurring payments scheduler (check every minute)
+  startRecurringPaymentScheduler(60000);
 });
 
 // Graceful shutdown

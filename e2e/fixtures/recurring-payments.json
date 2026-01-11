@@ -1,0 +1,64 @@
+[
+  {
+    "id": "recurring-001",
+    "contactId": "contact-001",
+    "addressId": "addr-001",
+    "amountSat": 1000,
+    "note": "Weekly allowance",
+    "frequency": "weekly",
+    "dayOfWeek": 1,
+    "status": "active",
+    "nextRunAt": "2024-01-08T12:00:00.000Z",
+    "lastRunAt": "2024-01-01T12:00:00.000Z",
+    "paymentCount": 5,
+    "totalPaidSat": 5000,
+    "lastError": null,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T12:00:00.000Z",
+    "contact": {
+      "id": "contact-001",
+      "name": "Alice Lightning"
+    }
+  },
+  {
+    "id": "recurring-002",
+    "contactId": "contact-002",
+    "addressId": "addr-002",
+    "amountSat": 100,
+    "note": "Daily coffee fund",
+    "frequency": "daily",
+    "status": "active",
+    "nextRunAt": "2024-01-05T08:00:00.000Z",
+    "lastRunAt": "2024-01-04T08:00:00.000Z",
+    "paymentCount": 30,
+    "totalPaidSat": 3000,
+    "lastError": null,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-04T08:00:00.000Z",
+    "contact": {
+      "id": "contact-002",
+      "name": "Bob Bitcoin"
+    }
+  },
+  {
+    "id": "recurring-003",
+    "contactId": "contact-001",
+    "addressId": "addr-001",
+    "amountSat": 50000,
+    "note": "Monthly subscription",
+    "frequency": "monthly",
+    "dayOfMonth": 1,
+    "status": "paused",
+    "nextRunAt": null,
+    "lastRunAt": "2024-01-01T00:00:00.000Z",
+    "paymentCount": 1,
+    "totalPaidSat": 50000,
+    "lastError": null,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "contact": {
+      "id": "contact-001",
+      "name": "Alice Lightning"
+    }
+  }
+]

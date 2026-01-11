@@ -11,6 +11,17 @@ interface PaymentEvent {
   externalId?: string;
 }
 
+interface RecurringPaymentEvent {
+  type: 'recurring_payment_executed';
+  recurringPaymentId: string;
+  contactId: string;
+  contactName: string;
+  amountSat: number;
+  paymentId: string;
+  paymentHash: string;
+  timestamp: number;
+}
+
 interface ServiceEvent {
   type:
     | 'cloudflared:connected'
@@ -25,6 +36,7 @@ interface ServiceEvent {
 
 interface UseWebSocketOptions {
   onPaymentReceived?: (event: PaymentEvent) => void;
+  onRecurringPaymentExecuted?: (event: RecurringPaymentEvent) => void;
   onServiceEvent?: (event: ServiceEvent) => void;
   onConnect?: () => void;
   onDisconnect?: () => void;
@@ -111,6 +123,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
             // Handle payment events
             if (data.type === 'payment_received') {
               options.onPaymentReceived?.(data as PaymentEvent);
+            }
+
+            // Handle recurring payment execution events
+            if (data.type === 'recurring_payment_executed') {
+              options.onRecurringPaymentExecuted?.(data as RecurringPaymentEvent);
             }
 
             // Handle service events (cloudflared, tor, tailscale)

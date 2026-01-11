@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -25,8 +25,13 @@ import {
   getOutgoingPayments,
   exportPayments,
   getNodeInfo,
+  getCategories,
+  batchGetPaymentMetadata,
+  updatePaymentMetadata,
   type IncomingPayment,
   type OutgoingPayment,
+  type PaymentCategory,
+  type PaymentMetadata,
 } from '@/lib/api';
 import { cn, getMempoolUrl } from '@/lib/utils';
 import { useCurrencyContext } from '@/components/currency-provider';
@@ -37,14 +42,30 @@ import { PageHeader } from '@/components/page-header';
 import { StatCard, StatCardGrid } from '@/components/stat-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslations } from 'next-intl';
+import { CategoryBadge } from '@/components/category-badge';
+import { CategoryManager } from '@/components/category-manager';
+import { PaymentNoteEditor } from '@/components/payment-note-editor';
 
 type Payment = IncomingPayment | OutgoingPayment;
+
+const PAGE_SIZE = 20;
+
+// Sort payments by timestamp (newest first)
+function sortByNewest<T extends { completedAt?: number; createdAt: number }>(payments: T[]): T[] {
+  return [...payments].sort((a, b) => {
+    const aTime = a.completedAt || a.createdAt;
+    const bTime = b.completedAt || b.createdAt;
+    return bTime - aTime; // Descending order (newest first)
+  });
+}
 
 export default function PaymentsPage() {
   const t = useTranslations('payments');
   const tc = useTranslations('common');
   const tt = useTranslations('toast');
   const te = useTranslations('errors');
+  const tl = useTranslations('paymentLabels');
+  const tcat = useTranslations('categories');
   const { formatValue } = useCurrencyContext();
   const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing'>('incoming');
   const [incomingPayments, setIncomingPayments] = useState<IncomingPayment[]>([]);
@@ -56,17 +77,58 @@ export default function PaymentsPage() {
   const { toast } = useToast();
   const { copiedField, copy: copyToClipboard } = useCopyToClipboard();
 
+  // Infinite scroll state
+  const [loadingMoreIncoming, setLoadingMoreIncoming] = useState(false);
+  const [loadingMoreOutgoing, setLoadingMoreOutgoing] = useState(false);
+  const [hasMoreIncoming, setHasMoreIncoming] = useState(true);
+  const [hasMoreOutgoing, setHasMoreOutgoing] = useState(true);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // Category and metadata state
+  const [categories, setCategories] = useState<PaymentCategory[]>([]);
+  const [paymentMetadataMap, setPaymentMetadataMap] = useState<Record<string, PaymentMetadata>>({});
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [selectedPaymentMetadata, setSelectedPaymentMetadata] = useState<PaymentMetadata | null>(
+    null
+  );
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [incoming, outgoing, nodeInfo] = await Promise.all([
-          getIncomingPayments({ limit: 50 }),
-          getOutgoingPayments({ limit: 50 }),
+        const [incoming, outgoing, nodeInfo, cats] = await Promise.all([
+          getIncomingPayments({ limit: PAGE_SIZE }),
+          getOutgoingPayments({ limit: PAGE_SIZE }),
           getNodeInfo(),
+          getCategories(),
         ]);
-        setIncomingPayments(incoming || []);
-        setOutgoingPayments(outgoing || []);
+
+        // Sort by newest first
+        const sortedIncoming = sortByNewest(incoming || []);
+        const sortedOutgoing = sortByNewest(outgoing || []);
+
+        setIncomingPayments(sortedIncoming);
+        setOutgoingPayments(sortedOutgoing);
         setChain(nodeInfo.chain || 'mainnet');
+        setCategories(cats || []);
+
+        // Set hasMore flags
+        setHasMoreIncoming((incoming || []).length >= PAGE_SIZE);
+        setHasMoreOutgoing((outgoing || []).length >= PAGE_SIZE);
+
+        // Fetch metadata for all payments
+        const paymentHashes = (incoming || []).map((p) => p.paymentHash).filter(Boolean);
+        const paymentIds = (outgoing || []).map((p) => p.paymentId).filter(Boolean);
+
+        if (paymentHashes.length > 0 || paymentIds.length > 0) {
+          try {
+            const metadata = await batchGetPaymentMetadata({ paymentHashes, paymentIds });
+            setPaymentMetadataMap(metadata);
+          } catch {
+            // Ignore metadata fetch errors - it's optional
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch data:', error);
         toast({
@@ -82,6 +144,203 @@ export default function PaymentsPage() {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
+
+  // Load more incoming payments
+  const loadMoreIncoming = useCallback(async () => {
+    if (loadingMoreIncoming || !hasMoreIncoming) return;
+
+    setLoadingMoreIncoming(true);
+    try {
+      const newPayments = await getIncomingPayments({
+        limit: PAGE_SIZE,
+        offset: incomingPayments.length,
+      });
+
+      if (newPayments && newPayments.length > 0) {
+        const sortedNew = sortByNewest(newPayments);
+        // Merge and sort all payments together
+        setIncomingPayments((prev) => {
+          const combined = [...prev, ...sortedNew];
+          // Remove duplicates by paymentHash
+          const unique = combined.filter(
+            (payment, index, self) =>
+              index === self.findIndex((p) => p.paymentHash === payment.paymentHash)
+          );
+          return sortByNewest(unique);
+        });
+
+        // Fetch metadata for new payments
+        const paymentHashes = newPayments.map((p) => p.paymentHash).filter(Boolean);
+        if (paymentHashes.length > 0) {
+          try {
+            const metadata = await batchGetPaymentMetadata({ paymentHashes, paymentIds: [] });
+            setPaymentMetadataMap((prev) => ({ ...prev, ...metadata }));
+          } catch {
+            // Ignore metadata fetch errors
+          }
+        }
+
+        setHasMoreIncoming(newPayments.length >= PAGE_SIZE);
+      } else {
+        setHasMoreIncoming(false);
+      }
+    } catch (error) {
+      console.error('Failed to load more incoming payments:', error);
+    } finally {
+      setLoadingMoreIncoming(false);
+    }
+  }, [loadingMoreIncoming, hasMoreIncoming, incomingPayments.length]);
+
+  // Load more outgoing payments
+  const loadMoreOutgoing = useCallback(async () => {
+    if (loadingMoreOutgoing || !hasMoreOutgoing) return;
+
+    setLoadingMoreOutgoing(true);
+    try {
+      const newPayments = await getOutgoingPayments({
+        limit: PAGE_SIZE,
+        offset: outgoingPayments.length,
+      });
+
+      if (newPayments && newPayments.length > 0) {
+        const sortedNew = sortByNewest(newPayments);
+        // Merge and sort all payments together
+        setOutgoingPayments((prev) => {
+          const combined = [...prev, ...sortedNew];
+          // Remove duplicates by paymentId
+          const unique = combined.filter(
+            (payment, index, self) =>
+              index === self.findIndex((p) => p.paymentId === payment.paymentId)
+          );
+          return sortByNewest(unique);
+        });
+
+        // Fetch metadata for new payments
+        const paymentIds = newPayments.map((p) => p.paymentId).filter(Boolean);
+        if (paymentIds.length > 0) {
+          try {
+            const metadata = await batchGetPaymentMetadata({ paymentHashes: [], paymentIds });
+            setPaymentMetadataMap((prev) => ({ ...prev, ...metadata }));
+          } catch {
+            // Ignore metadata fetch errors
+          }
+        }
+
+        setHasMoreOutgoing(newPayments.length >= PAGE_SIZE);
+      } else {
+        setHasMoreOutgoing(false);
+      }
+    } catch (error) {
+      console.error('Failed to load more outgoing payments:', error);
+    } finally {
+      setLoadingMoreOutgoing(false);
+    }
+  }, [loadingMoreOutgoing, hasMoreOutgoing, outgoingPayments.length]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const loadMore = activeTab === 'incoming' ? loadMoreIncoming : loadMoreOutgoing;
+    const hasMore = activeTab === 'incoming' ? hasMoreIncoming : hasMoreOutgoing;
+    const isLoading = activeTab === 'incoming' ? loadingMoreIncoming : loadingMoreOutgoing;
+
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    if (!hasMore || isLoading) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [
+    activeTab,
+    loadMoreIncoming,
+    loadMoreOutgoing,
+    hasMoreIncoming,
+    hasMoreOutgoing,
+    loadingMoreIncoming,
+    loadingMoreOutgoing,
+  ]);
+
+  // Update selected payment metadata when payment changes
+  useEffect(() => {
+    if (selectedPayment) {
+      // Use 'receivedSat' to determine if it's incoming (only IncomingPayment has receivedSat)
+      const isIncoming = 'receivedSat' in selectedPayment;
+      if (isIncoming) {
+        const paymentHash = (selectedPayment as IncomingPayment).paymentHash;
+        setSelectedPaymentMetadata(paymentMetadataMap[paymentHash] || null);
+      } else {
+        // For outgoing payments, check both paymentId and paymentHash for backwards compatibility
+        // (old data was saved with paymentHash instead of paymentId)
+        const outgoing = selectedPayment as OutgoingPayment;
+        const metadata =
+          paymentMetadataMap[outgoing.paymentId] ||
+          (outgoing.paymentHash ? paymentMetadataMap[outgoing.paymentHash] : null);
+        setSelectedPaymentMetadata(metadata || null);
+      }
+    } else {
+      setSelectedPaymentMetadata(null);
+    }
+  }, [selectedPayment, paymentMetadataMap]);
+
+  const handleUpdateMetadata = async (
+    identifier: string,
+    isIncoming: boolean,
+    updates: { note?: string | null; categoryIds?: string[] }
+  ) => {
+    try {
+      const updated = await updatePaymentMetadata(identifier, { ...updates, isIncoming });
+      setPaymentMetadataMap((prev) => ({
+        ...prev,
+        [identifier]: updated,
+      }));
+      setSelectedPaymentMetadata(updated);
+    } catch (error) {
+      console.error('Failed to update payment metadata:', error);
+      toast({
+        variant: 'destructive',
+        title: tc('error'),
+        description: 'Failed to update payment',
+      });
+    }
+  };
+
+  // Toggle a category for the selected payment
+  const handleToggleCategory = async (categoryId: string) => {
+    if (!selectedPayment) return;
+
+    const isIncoming = 'receivedSat' in selectedPayment;
+    const identifier = isIncoming
+      ? (selectedPayment as IncomingPayment).paymentHash
+      : (selectedPayment as OutgoingPayment).paymentId;
+
+    if (!identifier) return;
+
+    const currentCategoryIds = selectedPaymentMetadata?.categories?.map((c) => c.id) || [];
+    const isSelected = currentCategoryIds.includes(categoryId);
+
+    const newCategoryIds = isSelected
+      ? currentCategoryIds.filter((id) => id !== categoryId)
+      : [...currentCategoryIds, categoryId];
+
+    await handleUpdateMetadata(identifier, isIncoming, { categoryIds: newCategoryIds });
+  };
 
   const handleExport = async () => {
     setExporting(true);
@@ -158,7 +417,24 @@ export default function PaymentsPage() {
     );
   }
 
-  const currentPayments = activeTab === 'incoming' ? incomingPayments : outgoingPayments;
+  // Filter payments by category if selected
+  const getFilteredPayments = () => {
+    const payments = activeTab === 'incoming' ? incomingPayments : outgoingPayments;
+    if (!selectedCategoryFilter) return payments;
+
+    return payments.filter((payment) => {
+      // For incoming payments, use paymentHash. For outgoing, use paymentId.
+      const identifier =
+        activeTab === 'incoming'
+          ? (payment as IncomingPayment).paymentHash
+          : (payment as OutgoingPayment).paymentId;
+      if (!identifier) return false;
+      const metadata = paymentMetadataMap[identifier];
+      return metadata?.categories?.some((c) => c.id === selectedCategoryFilter) || false;
+    });
+  };
+
+  const currentPayments = getFilteredPayments();
 
   return (
     <>
@@ -221,6 +497,52 @@ export default function PaymentsPage() {
           onTabChange={(tab) => setActiveTab(tab as 'incoming' | 'outgoing')}
         />
 
+        {/* Category Filter */}
+        {categories.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-muted-foreground">{tl('category')}:</span>
+            <button
+              onClick={() => setSelectedCategoryFilter(null)}
+              className={cn(
+                'px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
+                !selectedCategoryFilter
+                  ? 'bg-primary text-white'
+                  : 'bg-white/5 text-muted-foreground hover:bg-white/10'
+              )}
+            >
+              {tc('viewAll')}
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() =>
+                  setSelectedCategoryFilter(cat.id === selectedCategoryFilter ? null : cat.id)
+                }
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5',
+                  selectedCategoryFilter === cat.id
+                    ? 'ring-2 ring-offset-2 ring-offset-background'
+                    : 'hover:opacity-80'
+                )}
+                style={{
+                  backgroundColor: `${cat.color}20`,
+                  color: cat.color,
+                  ...(selectedCategoryFilter === cat.id && { ringColor: cat.color }),
+                }}
+              >
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
+                {cat.name}
+              </button>
+            ))}
+            <button
+              onClick={() => setShowCategoryManager(true)}
+              className="text-xs text-primary hover:text-primary/80 transition-colors"
+            >
+              {tcat('manageCategories')}
+            </button>
+          </div>
+        )}
+
         {/* Payment List */}
         <div>
           {currentPayments.length === 0 ? (
@@ -241,116 +563,155 @@ export default function PaymentsPage() {
           ) : (
             <div className="space-y-3">
               {activeTab === 'incoming'
-                ? incomingPayments.map((payment, index) => (
-                    <button
-                      key={payment.paymentHash}
-                      onClick={() => setSelectedPayment(payment)}
-                      className="w-full glass-card rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center gap-3 md:gap-4 hover:bg-white/[0.08] transition-all text-left group"
-                      style={{ animationDelay: `${index * 30}ms` }}
-                    >
-                      {/* Icon */}
-                      <div
-                        className={cn(
-                          'flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl md:rounded-2xl shrink-0 transition-transform group-hover:scale-110',
-                          payment.isPaid
-                            ? 'bg-gradient-to-br from-success/20 to-emerald-600/20'
-                            : 'bg-yellow-500/10'
-                        )}
+                ? (currentPayments as IncomingPayment[]).map((payment, index) => {
+                    const metadata = paymentMetadataMap[payment.paymentHash];
+                    return (
+                      <button
+                        key={payment.paymentHash}
+                        onClick={() => setSelectedPayment(payment)}
+                        className="w-full glass-card rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center gap-3 md:gap-4 hover:bg-white/[0.08] transition-all text-left group"
+                        style={{ animationDelay: `${index * 30}ms` }}
                       >
-                        <ArrowDownToLine
+                        {/* Icon */}
+                        <div
                           className={cn(
-                            'h-4 w-4 md:h-6 md:w-6',
-                            payment.isPaid ? 'text-success' : 'text-yellow-500'
+                            'flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl md:rounded-2xl shrink-0 transition-transform group-hover:scale-110',
+                            payment.isPaid
+                              ? 'bg-gradient-to-br from-success/20 to-emerald-600/20'
+                              : 'bg-yellow-500/10'
                           )}
-                        />
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1">
-                          <span className="font-bold text-sm md:text-lg text-success">
-                            +{formatValue(payment.receivedSat)}
-                          </span>
-                          <span
+                        >
+                          <ArrowDownToLine
                             className={cn(
-                              'text-[10px] md:text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full font-medium',
-                              payment.isPaid
-                                ? 'bg-success/10 text-success'
-                                : 'bg-yellow-500/10 text-yellow-500'
+                              'h-4 w-4 md:h-6 md:w-6',
+                              payment.isPaid ? 'text-success' : 'text-yellow-500'
                             )}
-                          >
-                            {payment.isPaid ? t('received') : tc('pending')}
-                          </span>
+                          />
                         </div>
-                        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" />
-                          <span className="truncate">
-                            {formatShortDate(payment.completedAt || payment.createdAt)}
-                            {payment.description && ` • ${payment.description}`}
-                          </span>
-                        </div>
-                      </div>
 
-                      {/* Arrow */}
-                      <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-                    </button>
-                  ))
-                : outgoingPayments.map((payment, index) => (
-                    <button
-                      key={payment.paymentId}
-                      onClick={() => setSelectedPayment(payment)}
-                      className="w-full glass-card rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center gap-3 md:gap-4 hover:bg-white/[0.08] transition-all text-left group"
-                      style={{ animationDelay: `${index * 30}ms` }}
-                    >
-                      {/* Icon */}
-                      <div
-                        className={cn(
-                          'flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl md:rounded-2xl shrink-0 transition-transform group-hover:scale-110',
-                          payment.isPaid
-                            ? 'bg-gradient-to-br from-primary/20 to-orange-600/20'
-                            : 'bg-yellow-500/10'
-                        )}
-                      >
-                        <ArrowUpFromLine
-                          className={cn(
-                            'h-4 w-4 md:h-6 md:w-6',
-                            payment.isPaid ? 'text-primary' : 'text-yellow-500'
-                          )}
-                        />
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
-                          <span className="font-bold text-sm md:text-lg">
-                            -{formatValue(payment.sent)}
-                          </span>
-                          <span
-                            className={cn(
-                              'text-[10px] md:text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full font-medium',
-                              payment.isPaid
-                                ? 'bg-success/10 text-success'
-                                : 'bg-yellow-500/10 text-yellow-500'
-                            )}
-                          >
-                            {payment.isPaid ? t('sent') : tc('pending')}
-                          </span>
-                          {payment.fees > 0 && (
-                            <span className="text-[10px] md:text-xs text-muted-foreground hidden sm:inline">
-                              {t('fee')}: {formatValue(Math.floor(payment.fees / 1000))}
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
+                            <span className="font-bold text-sm md:text-lg text-success">
+                              +{formatValue(payment.receivedSat)}
                             </span>
-                          )}
+                            <span
+                              className={cn(
+                                'text-[10px] md:text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full font-medium',
+                                payment.isPaid
+                                  ? 'bg-success/10 text-success'
+                                  : 'bg-yellow-500/10 text-yellow-500'
+                              )}
+                            >
+                              {payment.isPaid ? t('received') : tc('pending')}
+                            </span>
+                            {metadata?.categories?.map((cat) => (
+                              <CategoryBadge key={cat.id} category={cat} size="sm" />
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" />
+                            <span className="truncate">
+                              {formatShortDate(payment.completedAt || payment.createdAt)}
+                              {metadata?.note
+                                ? ` • ${metadata.note}`
+                                : payment.description && ` • ${payment.description}`}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                          <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" />
-                          {formatShortDate(payment.completedAt || payment.createdAt)}
-                        </div>
-                      </div>
 
-                      {/* Arrow */}
-                      <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-                    </button>
-                  ))}
+                        {/* Arrow */}
+                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                      </button>
+                    );
+                  })
+                : (currentPayments as OutgoingPayment[]).map((payment, index) => {
+                    // Check both paymentId and paymentHash for backwards compatibility
+                    // (old data was saved with paymentHash instead of paymentId)
+                    const metadata =
+                      paymentMetadataMap[payment.paymentId] ||
+                      (payment.paymentHash ? paymentMetadataMap[payment.paymentHash] : undefined);
+                    return (
+                      <button
+                        key={payment.paymentId}
+                        onClick={() => setSelectedPayment(payment)}
+                        className="w-full glass-card rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center gap-3 md:gap-4 hover:bg-white/[0.08] transition-all text-left group"
+                        style={{ animationDelay: `${index * 30}ms` }}
+                      >
+                        {/* Icon */}
+                        <div
+                          className={cn(
+                            'flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl md:rounded-2xl shrink-0 transition-transform group-hover:scale-110',
+                            payment.isPaid
+                              ? 'bg-gradient-to-br from-primary/20 to-orange-600/20'
+                              : 'bg-yellow-500/10'
+                          )}
+                        >
+                          <ArrowUpFromLine
+                            className={cn(
+                              'h-4 w-4 md:h-6 md:w-6',
+                              payment.isPaid ? 'text-primary' : 'text-yellow-500'
+                            )}
+                          />
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
+                            <span className="font-bold text-sm md:text-lg">
+                              -{formatValue(payment.sent)}
+                            </span>
+                            <span
+                              className={cn(
+                                'text-[10px] md:text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full font-medium',
+                                payment.isPaid
+                                  ? 'bg-success/10 text-success'
+                                  : 'bg-yellow-500/10 text-yellow-500'
+                              )}
+                            >
+                              {payment.isPaid ? t('sent') : tc('pending')}
+                            </span>
+                            {payment.fees > 0 && (
+                              <span className="text-[10px] md:text-xs text-muted-foreground hidden sm:inline">
+                                {t('fee')}: {formatValue(Math.floor(payment.fees / 1000))}
+                              </span>
+                            )}
+                            {metadata?.categories?.map((cat) => (
+                              <CategoryBadge key={cat.id} category={cat} size="sm" />
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" />
+                            <span className="truncate">
+                              {formatShortDate(payment.completedAt || payment.createdAt)}
+                              {metadata?.note && ` • ${metadata.note}`}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Arrow */}
+                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                      </button>
+                    );
+                  })}
+
+              {/* Infinite Scroll Loader */}
+              {!selectedCategoryFilter && (
+                <div ref={loadMoreRef} className="py-4">
+                  {(activeTab === 'incoming' ? loadingMoreIncoming : loadingMoreOutgoing) && (
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span className="text-sm">{tc('loading')}</span>
+                    </div>
+                  )}
+                  {!(activeTab === 'incoming' ? hasMoreIncoming : hasMoreOutgoing) &&
+                    currentPayments.length > 0 && (
+                      <p className="text-center text-sm text-muted-foreground">
+                        {t('allPaymentsLoaded')}
+                      </p>
+                    )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -402,6 +763,80 @@ export default function PaymentsPage() {
                     {t('fee')}: {formatValue(Math.floor(selectedPayment.fees / 1000))}
                   </p>
                 )}
+              </div>
+
+              {/* Note & Category */}
+              <div className="space-y-4">
+                {/* Note Editor */}
+                <div>
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2 block">
+                    {tl('note')}
+                  </label>
+                  <PaymentNoteEditor
+                    note={selectedPaymentMetadata?.note}
+                    onSave={async (note) => {
+                      // Use 'receivedSat' to determine if it's incoming (only IncomingPayment has receivedSat)
+                      const isIncoming = 'receivedSat' in selectedPayment;
+                      const identifier = isIncoming
+                        ? (selectedPayment as IncomingPayment).paymentHash
+                        : (selectedPayment as OutgoingPayment).paymentId;
+                      if (identifier) {
+                        await handleUpdateMetadata(identifier, isIncoming, { note });
+                      }
+                    }}
+                  />
+                </div>
+
+                {/* Category Selector - Multi-select */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      {tl('category')}
+                    </label>
+                    <button
+                      onClick={() => setShowCategoryManager(true)}
+                      className="text-xs text-primary hover:text-primary/80 transition-colors"
+                    >
+                      {categories.length === 0 ? tcat('addCategory') : tcat('manage')}
+                    </button>
+                  </div>
+
+                  {categories.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">{tcat('noCategories')}</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((cat) => {
+                        const isSelected =
+                          selectedPaymentMetadata?.categories?.some((c) => c.id === cat.id) ||
+                          false;
+                        return (
+                          <button
+                            key={cat.id}
+                            onClick={() => handleToggleCategory(cat.id)}
+                            className={cn(
+                              'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                              isSelected
+                                ? 'ring-2 ring-offset-2 ring-offset-background'
+                                : 'opacity-60 hover:opacity-100'
+                            )}
+                            style={{
+                              backgroundColor: `${cat.color}20`,
+                              color: cat.color,
+                              ...(isSelected && { ringColor: cat.color }),
+                            }}
+                          >
+                            {isSelected && <Check className="h-3 w-3" />}
+                            <span
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: cat.color }}
+                            />
+                            {cat.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Details Grid */}
@@ -539,6 +974,16 @@ export default function PaymentsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Category Manager */}
+      <CategoryManager
+        open={showCategoryManager}
+        onClose={() => {
+          setShowCategoryManager(false);
+          // Refresh categories
+          getCategories().then(setCategories).catch(console.error);
+        }}
+      />
     </>
   );
 }

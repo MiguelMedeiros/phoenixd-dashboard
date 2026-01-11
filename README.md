@@ -41,6 +41,14 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **History** — Full payment history with filters & CSV export
 
+✅ **Contacts** — Save Lightning Addresses, Node IDs, and BOLT12 offers with labels for quick payments
+
+✅ **Recurring Payments** — Schedule automatic payments (daily, weekly, monthly) to contacts
+
+✅ **Payment Labels** — Add notes, categories, and tags to organize transactions
+
+✅ **Contact Labels** — Categorize contacts with custom labels and filter by category
+
 ✅ **Tools** — Decode invoices, liquidity fees, LNURL support
 
 ✅ **Multi-Currency** — Display in 10+ fiat currencies

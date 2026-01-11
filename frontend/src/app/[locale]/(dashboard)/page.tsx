@@ -16,6 +16,9 @@ import {
   Server,
   BookOpen,
   Github,
+  Users,
+  RefreshCw,
+  Clock,
 } from 'lucide-react';
 import {
   getNodeInfo,
@@ -23,9 +26,13 @@ import {
   listChannels,
   getIncomingPayments,
   getOutgoingPayments,
+  getContacts,
+  getRecurringPayments,
   type Channel,
   type IncomingPayment,
   type OutgoingPayment,
+  type Contact,
+  type RecurringPayment,
 } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useCurrencyContext } from '@/components/currency-provider';
@@ -55,6 +62,8 @@ export default function OverviewPage() {
   const [recentPayments, setRecentPayments] = useState<RecentPayment[]>([]);
   const [allIncoming, setAllIncoming] = useState<IncomingPayment[]>([]);
   const [allOutgoing, setAllOutgoing] = useState<OutgoingPayment[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [recurringPayments, setRecurringPayments] = useState<RecurringPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { copy: copyToClipboard } = useCopyToClipboard();
@@ -62,18 +71,22 @@ export default function OverviewPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [info, bal, ch, incoming, outgoing] = await Promise.all([
+        const [info, bal, ch, incoming, outgoing, contactsList, recurring] = await Promise.all([
           getNodeInfo(),
           getBalance(),
           listChannels(),
           getIncomingPayments({ limit: 100 }),
           getOutgoingPayments({ limit: 100 }),
+          getContacts(),
+          getRecurringPayments({ status: 'active' }),
         ]);
         setNodeInfo(info);
         setBalance(bal);
         setChannels(ch);
         setAllIncoming(incoming || []);
         setAllOutgoing(outgoing || []);
+        setContacts(contactsList || []);
+        setRecurringPayments(recurring || []);
 
         // Combine and sort recent payments - more for mobile
         const allPayments = [...(incoming || []), ...(outgoing || [])];
@@ -281,7 +294,7 @@ export default function OverviewPage() {
         <PaymentsChart incomingPayments={allIncoming} outgoingPayments={allOutgoing} />
 
         {/* Quick Actions Grid */}
-        <div className="grid gap-3 grid-cols-5">
+        <div className="grid gap-3 grid-cols-6">
           <Link
             href="/receive"
             className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
@@ -302,6 +315,17 @@ export default function OverviewPage() {
             </div>
             <p className="font-medium text-sm">{tc('send')}</p>
             <p className="text-xs text-muted-foreground">{t('payInvoice')}</p>
+          </Link>
+
+          <Link
+            href="/contacts"
+            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <Users className="h-5 w-5 text-cyan-500" />
+            </div>
+            <p className="font-medium text-sm">{tc('contacts')}</p>
+            <p className="text-xs text-muted-foreground">{t('manageContacts')}</p>
           </Link>
 
           <Link
@@ -337,6 +361,55 @@ export default function OverviewPage() {
             <p className="text-xs text-muted-foreground">{t('payAndAuth')}</p>
           </Link>
         </div>
+
+        {/* Contacts & Recurring - Compact Row */}
+        {(contacts.length > 0 || recurringPayments.length > 0) && (
+          <Link
+            href="/contacts"
+            className="glass-card rounded-xl px-4 py-2.5 flex items-center justify-between hover:bg-white/[0.06] transition-colors group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-cyan-500" />
+                <span className="text-sm">
+                  <span className="font-semibold text-cyan-500">{contacts.length}</span>
+                  <span className="text-muted-foreground ml-1">{tc('contacts')}</span>
+                </span>
+              </div>
+              {recurringPayments.length > 0 && (
+                <>
+                  <div className="w-px h-4 bg-white/10" />
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 text-purple-500" />
+                    <span className="text-sm">
+                      <span className="font-semibold text-purple-500">
+                        {recurringPayments.length}
+                      </span>
+                      <span className="text-muted-foreground ml-1">{t('recurringActive')}</span>
+                    </span>
+                  </div>
+                  {/* Next payment indicator */}
+                  {recurringPayments[0] && (
+                    <>
+                      <div className="w-px h-4 bg-white/10 hidden sm:block" />
+                      <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>{tc('next')}:</span>
+                        <span className="font-medium text-foreground">
+                          {recurringPayments[0].contact?.name || '?'}
+                        </span>
+                        <span className="font-mono text-primary">
+                          {formatValue(recurringPayments[0].amountSat)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          </Link>
+        )}
 
         {/* Bottom Row: Node Info + Recent Payments */}
         <div className="grid gap-4 lg:grid-cols-5">

@@ -84,3 +84,100 @@ model Session {
 
   @@index([expiresAt])
 }
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  avatarUrl String?  // Optional avatar image URL
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  addresses ContactAddress[]
+  payments  PaymentMetadata[]
+  recurringPayments RecurringPayment[]
+
+  @@index([name])
+}
+
+model ContactAddress {
+  id        String   @id @default(cuid())
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  address   String   // Lightning Address, Node ID, or BOLT12 offer
+  type      String   // "lightning_address", "node_id", "bolt12_offer"
+  label     String?  // Optional label like "Personal", "Work"
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([contactId])
+  @@index([address])
+  @@index([type])
+}
+
+model PaymentCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#6366f1") // Hex color
+  icon      String?  // Lucide icon name
+  createdAt DateTime @default(now())
+  payments  PaymentMetadata[]
+  recurringPayments RecurringPayment[]
+}
+
+model PaymentMetadata {
+  id          String   @id @default(cuid())
+  paymentHash String?  @unique // For incoming payments
+  paymentId   String?  @unique // For outgoing payments
+  note        String?
+  contactId   String?
+  categoryId  String?
+  contact     Contact?  @relation(fields: [contactId], references: [id])
+  category    PaymentCategory? @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([categoryId])
+}
+
+model RecurringPayment {
+  id          String   @id @default(cuid())
+  contactId   String
+  contact     Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  addressId   String   // ContactAddress ID to use
+  amountSat   Int      // Amount in satoshis
+  frequency   String   // "daily", "weekly", "monthly"
+  dayOfWeek   Int?     // 0-6 for weekly (0=Sunday)
+  dayOfMonth  Int?     // 1-31 for monthly
+  timeOfDay   String   @default("09:00") // HH:mm format (UTC)
+  note        String?  // Optional note for the payment
+  categoryId  String?  // Optional category
+  category    PaymentCategory? @relation(fields: [categoryId], references: [id])
+  status      String   @default("active") // "active", "paused", "cancelled"
+  nextRunAt   DateTime // Next scheduled execution
+  lastRunAt   DateTime? // Last successful execution
+  lastError   String?  // Last error message if failed
+  totalPaid   Int      @default(0) // Total amount paid so far
+  paymentCount Int     @default(0) // Number of successful payments
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  executions  RecurringPaymentExecution[]
+
+  @@index([contactId])
+  @@index([status])
+  @@index([nextRunAt])
+}
+
+model RecurringPaymentExecution {
+  id                 String   @id @default(cuid())
+  recurringPaymentId String
+  recurringPayment   RecurringPayment @relation(fields: [recurringPaymentId], references: [id], onDelete: Cascade)
+  status             String   // "success", "failed", "pending"
+  amountSat          Int
+  paymentId          String?  // Outgoing payment ID if successful
+  paymentHash        String?  // Payment hash if successful
+  errorMessage       String?  // Error message if failed
+  executedAt         DateTime @default(now())
+
+  @@index([recurringPaymentId])
+  @@index([executedAt])
+}
