@@ -483,13 +483,13 @@ contactsRouter.get(
         orderBy: { createdAt: 'desc' },
         take: limit ? parseInt(limit as string) : 50,
         skip: offset ? parseInt(offset as string) : 0,
-      include: {
-        categories: {
-          include: {
-            category: true,
+        include: {
+          categories: {
+            include: {
+              category: true,
+            },
           },
         },
-      },
       });
 
       res.json(payments);
