@@ -12,6 +12,7 @@ const TAILSCALE_CONTAINER_NAME = 'phoenixd-tailscale';
 // Image name created by docker-compose build
 const TAILSCALE_IMAGE_NAME = 'phoenixd-dashboard-tailscale';
 const TAILSCALE_NETWORK = 'phoenixd-dashboard_phoenixd-network';
+const COMPOSE_PROJECT_NAME = 'phoenixd-dashboard';
 
 interface TailscaleStatus {
   enabled: boolean;
@@ -265,6 +266,10 @@ tailscaleRouter.post('/enable', requireAuth, async (_req: AuthenticatedRequest, 
         name: TAILSCALE_CONTAINER_NAME,
         Image: TAILSCALE_IMAGE_NAME,
         Env: [`TS_AUTHKEY=${settings.tailscaleAuthKey}`, `TS_HOSTNAME=${hostname}`],
+        Labels: {
+          'com.docker.compose.project': COMPOSE_PROJECT_NAME,
+          'com.docker.compose.service': 'tailscale',
+        },
         HostConfig: {
           NetworkMode: TAILSCALE_NETWORK,
           RestartPolicy: { Name: 'unless-stopped' },

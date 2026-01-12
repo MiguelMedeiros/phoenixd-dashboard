@@ -15,6 +15,7 @@ import {
   Settings,
   Globe,
   DollarSign,
+  Users,
 } from 'lucide-react';
 import { getBalance } from '@/lib/api';
 import { useAuthContext } from '@/components/auth-provider';
@@ -31,6 +32,7 @@ import { Link, usePathname } from '@/i18n/navigation';
 // Navigation items for mobile drawer
 const mobileNavItems = [
   { key: 'overview', href: '/', icon: Home },
+  { key: 'contacts', href: '/contacts', icon: Users },
   { key: 'payments', href: '/payments', icon: History },
   { key: 'channels', href: '/channels', icon: Layers },
   { key: 'tools', href: '/tools', icon: Wrench },

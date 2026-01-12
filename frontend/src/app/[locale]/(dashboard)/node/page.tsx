@@ -470,15 +470,15 @@ function LogsTab() {
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="glass-card rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+      <div className="glass-card rounded-2xl p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full lg:w-auto">
           {/* Container Selector */}
           <Select
             value={selectedContainer}
             onValueChange={handleContainerChange}
             disabled={loading}
           >
-            <SelectTrigger className="w-full sm:w-[280px] h-10 bg-black/20 border-white/10 rounded-xl">
+            <SelectTrigger className="w-full sm:w-[240px] h-10 bg-black/20 border-white/10 rounded-xl">
               <SelectValue placeholder={loading ? tc('loading') : td('selectContainer')} />
             </SelectTrigger>
             <SelectContent className="bg-background/95 backdrop-blur-xl border-white/10">
@@ -509,7 +509,7 @@ function LogsTab() {
           </Select>
 
           {/* Status Indicator */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/20 border border-white/5">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/20 border border-white/5">
             <div
               className={cn(
                 'h-2 w-2 rounded-full transition-all',
@@ -532,17 +532,17 @@ function LogsTab() {
             variant={paused ? 'lightning' : 'outline'}
             size="sm"
             onClick={() => setPaused(!paused)}
-            className="h-9 px-4 rounded-xl flex-1 sm:flex-none"
+            className="h-9 px-3 rounded-xl flex-1 sm:flex-none"
           >
             {paused ? (
               <>
-                <Play className="h-4 w-4 mr-2" />
-                {td('resume')}
+                <Play className="h-4 w-4 lg:mr-2" />
+                <span className="hidden lg:inline">{td('resume')}</span>
               </>
             ) : (
               <>
-                <Pause className="h-4 w-4 mr-2" />
-                {td('pause')}
+                <Pause className="h-4 w-4 lg:mr-2" />
+                <span className="hidden lg:inline">{td('pause')}</span>
               </>
             )}
           </Button>
@@ -552,10 +552,10 @@ function LogsTab() {
             variant="outline"
             size="sm"
             onClick={clearLogs}
-            className="h-9 px-4 rounded-xl flex-1 sm:flex-none"
+            className="h-9 px-3 rounded-xl flex-1 sm:flex-none"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">{td('clearLogs')}</span>
+            <Trash2 className="h-4 w-4 lg:mr-2" />
+            <span className="hidden lg:inline">{td('clearLogs')}</span>
           </Button>
 
           {/* Reconnect */}
@@ -564,7 +564,7 @@ function LogsTab() {
             size="sm"
             onClick={handleReconnect}
             disabled={!selectedContainer || loading}
-            className="h-9 px-4 rounded-xl"
+            className="h-9 px-3 rounded-xl"
           >
             <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
           </Button>
@@ -575,7 +575,7 @@ function LogsTab() {
       <div className="glass-card rounded-2xl overflow-hidden">
         <div
           ref={logsContainerRef}
-          className="h-[500px] overflow-auto bg-[#0a0a0a] p-4 font-mono text-[13px] leading-relaxed"
+          className="h-[500px] overflow-auto bg-zinc-100 dark:bg-[#0a0a0a] p-4 font-mono text-[13px] leading-relaxed"
         >
           {loading ? (
             <div className="flex items-center justify-center h-full">
@@ -592,14 +592,14 @@ function LogsTab() {
                 <div
                   key={index}
                   className={cn(
-                    'flex gap-4 py-1 px-2 -mx-2 rounded hover:bg-white/[0.03] transition-colors',
-                    log.stream === 'stderr' && 'text-red-400'
+                    'flex gap-4 py-1 px-2 -mx-2 rounded hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors',
+                    log.stream === 'stderr' && 'text-red-600 dark:text-red-400'
                   )}
                 >
-                  <span className="text-muted-foreground/60 flex-shrink-0 w-20 text-xs tabular-nums">
+                  <span className="text-muted-foreground/70 flex-shrink-0 w-20 text-xs tabular-nums">
                     {log.timestamp}
                   </span>
-                  <span className="break-all whitespace-pre-wrap text-foreground/90">
+                  <span className="break-all whitespace-pre-wrap text-zinc-800 dark:text-foreground/90">
                     {log.message}
                   </span>
                 </div>
@@ -611,19 +611,19 @@ function LogsTab() {
         {/* Footer */}
         {error && (
           <div className="px-4 py-3 border-t border-red-500/20 bg-red-500/10">
-            <p className="text-sm text-red-400 flex items-center gap-2">
+            <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
               {error}
             </p>
           </div>
         )}
 
-        <div className="px-4 py-3 border-t border-white/5 flex items-center justify-between bg-white/[0.02]">
+        <div className="px-4 py-3 border-t border-black/5 dark:border-white/5 flex items-center justify-between bg-black/[0.02] dark:bg-white/[0.02]">
           <span className="text-sm text-muted-foreground tabular-nums">
             {logs.length.toLocaleString()} {td('logLines')}
           </span>
           {paused && (
-            <span className="text-sm text-yellow-500 flex items-center gap-2">
+            <span className="text-sm text-yellow-600 dark:text-yellow-500 flex items-center gap-2">
               <Pause className="h-3 w-3" />
               {td('pausedHint')}
             </span>

@@ -16,6 +16,9 @@ import {
   Clock,
   FileText,
   Hash,
+  Tag,
+  Rocket,
+  PartyPopper,
 } from 'lucide-react';
 import {
   payInvoice,
@@ -24,38 +27,74 @@ import {
   sendToAddress,
   getNodeInfo,
   decodeInvoice,
+  getCategories,
+  updatePaymentMetadata,
+  type Contact,
+  type ContactAddress,
+  type PaymentCategory,
 } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useCurrencyContext } from '@/components/currency-provider';
+import { useAnimationContext } from '@/components/animation-provider';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
 import { QRScanner } from '@/components/qr-scanner';
 import { useRouter } from '@/i18n/navigation';
+import { ContactSelector } from '@/components/contact-selector';
 
 export default function SendPage() {
   const t = useTranslations('send');
   const ts = useTranslations('scanner');
+  const tc = useTranslations('contacts');
   const { formatValue } = useCurrencyContext();
+  const { playAnimation } = useAnimationContext();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer' | 'address' | 'onchain'>(
     'invoice'
   );
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ success: boolean; data?: unknown; error?: string } | null>(
-    null
-  );
+  const [result, setResult] = useState<{
+    success: boolean;
+    data?: unknown;
+    error?: string;
+    amountSat?: number;
+  } | null>(null);
   const [chain, setChain] = useState<string>('mainnet');
   const [scannerOpen, setScannerOpen] = useState(false);
   const { toast } = useToast();
+
+  // Contact selector state for LN Address tab
+  const [selectedLnAddressContact, setSelectedLnAddressContact] = useState<{
+    contact: Contact;
+    address: ContactAddress;
+  } | null>(null);
+
+  // Contact selector state for Offer tab
+  const [selectedOfferContact, setSelectedOfferContact] = useState<{
+    contact: Contact;
+    address: ContactAddress;
+  } | null>(null);
+
+  // Category state
+  const [categories, setCategories] = useState<PaymentCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const tcat = useTranslations('paymentLabels');
 
   // Fetch node info to get current chain
   useEffect(() => {
     getNodeInfo()
       .then((info) => setChain(info.chain || 'mainnet'))
       .catch(() => setChain('mainnet'));
+  }, []);
+
+  // Fetch categories
+  useEffect(() => {
+    getCategories()
+      .then((data) => setCategories(data))
+      .catch((err) => console.error('Failed to load categories:', err));
   }, []);
 
   // Read URL params and populate fields
@@ -208,9 +247,31 @@ export default function SendPage() {
     setResult(null);
     try {
       const data = await payInvoice({ invoice });
-      setResult({ success: true, data });
+      const amountSat = decodedInvoice?.amountMsat
+        ? Math.floor(decodedInvoice.amountMsat / 1000)
+        : 0;
+      setResult({ success: true, data, amountSat });
+
+      // Save category metadata if selected
+      if (selectedCategory && data.paymentHash) {
+        try {
+          await updatePaymentMetadata(data.paymentHash, {
+            categoryIds: selectedCategory ? [selectedCategory] : [],
+            isIncoming: false,
+          });
+        } catch (err) {
+          console.error('Failed to save payment category:', err);
+        }
+      }
+
+      // Fire confetti and play sound on success
+      setTimeout(() => {
+        playAnimation();
+      }, 100);
+
       setInvoice('');
-      toast({ title: 'Payment Sent!', description: 'Invoice paid successfully' });
+      setSelectedCategory('');
+      setDecodedInvoice(null);
     } catch (error) {
       setResult({ success: false, error: String(error) });
       toast({ variant: 'destructive', title: 'Payment Failed', description: String(error) });
@@ -230,19 +291,39 @@ export default function SendPage() {
       return;
     }
 
+    const amountSat = parseInt(offerAmount);
     setLoading(true);
     setResult(null);
     try {
       const data = await payOffer({
         offer,
-        amountSat: parseInt(offerAmount),
+        amountSat,
         message: offerMessage || undefined,
       });
-      setResult({ success: true, data });
+      setResult({ success: true, data, amountSat });
+
+      // Save category metadata if selected
+      if (selectedCategory && data.paymentHash) {
+        try {
+          await updatePaymentMetadata(data.paymentHash, {
+            categoryIds: selectedCategory ? [selectedCategory] : [],
+            isIncoming: false,
+          });
+        } catch (err) {
+          console.error('Failed to save payment category:', err);
+        }
+      }
+
+      // Fire confetti and play sound on success
+      setTimeout(() => {
+        playAnimation();
+      }, 100);
+
       setOffer('');
       setOfferAmount('');
       setOfferMessage('');
-      toast({ title: 'Payment Sent!', description: 'Offer paid successfully' });
+      setSelectedCategory('');
+      setSelectedOfferContact(null);
     } catch (error) {
       setResult({ success: false, error: String(error) });
       toast({ variant: 'destructive', title: 'Payment Failed', description: String(error) });
@@ -262,19 +343,39 @@ export default function SendPage() {
       return;
     }
 
+    const amountSat = parseInt(lnAddressAmount);
     setLoading(true);
     setResult(null);
     try {
       const data = await payLnAddress({
         address: lnAddress,
-        amountSat: parseInt(lnAddressAmount),
+        amountSat,
         message: lnAddressMessage || undefined,
       });
-      setResult({ success: true, data });
+      setResult({ success: true, data, amountSat });
+
+      // Save category metadata if selected
+      if (selectedCategory && data.paymentHash) {
+        try {
+          await updatePaymentMetadata(data.paymentHash, {
+            categoryIds: selectedCategory ? [selectedCategory] : [],
+            isIncoming: false,
+          });
+        } catch (err) {
+          console.error('Failed to save payment category:', err);
+        }
+      }
+
+      // Fire confetti and play sound on success
+      setTimeout(() => {
+        playAnimation();
+      }, 100);
+
       setLnAddress('');
       setLnAddressAmount('');
       setLnAddressMessage('');
-      toast({ title: 'Payment Sent!', description: 'Payment to LN address successful' });
+      setSelectedCategory('');
+      setSelectedLnAddressContact(null);
     } catch (error) {
       setResult({ success: false, error: String(error) });
       toast({ variant: 'destructive', title: 'Payment Failed', description: String(error) });
@@ -294,19 +395,26 @@ export default function SendPage() {
       return;
     }
 
+    const amountSat = parseInt(btcAmount);
     setLoading(true);
     setResult(null);
     try {
       const data = await sendToAddress({
         address: btcAddress,
-        amountSat: parseInt(btcAmount),
+        amountSat,
         feerateSatByte: btcFeeRate ? parseInt(btcFeeRate) : undefined,
       });
-      setResult({ success: true, data });
+      setResult({ success: true, data, amountSat });
+
+      // Fire confetti and play sound on success
+      setTimeout(() => {
+        playAnimation();
+      }, 100);
+
       setBtcAddress('');
       setBtcAmount('');
       setBtcFeeRate('');
-      toast({ title: 'Transaction Sent!', description: 'On-chain payment initiated' });
+      setSelectedCategory('');
     } catch (error) {
       setResult({ success: false, error: String(error) });
       toast({ variant: 'destructive', title: 'Transaction Failed', description: String(error) });
@@ -439,6 +547,30 @@ export default function SendPage() {
                 </div>
               )}
 
+              {/* Category Selector */}
+              {categories.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {tcat('category')}
+                  </label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="glass-input w-full pl-11 pr-4 py-3 text-sm appearance-none cursor-pointer"
+                    >
+                      <option value="">{tcat('selectCategory')}</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.icon} {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={
@@ -481,6 +613,30 @@ export default function SendPage() {
             </div>
 
             <form onSubmit={handlePayOffer} className="space-y-5">
+              {/* Contact Selector for BOLT12 */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {tc('selectContact')}
+                </label>
+                <ContactSelector
+                  value={selectedOfferContact}
+                  onChange={(selection) => {
+                    setSelectedOfferContact(selection);
+                    if (selection) {
+                      setOffer(selection.address.address);
+                    }
+                  }}
+                  filterType="bolt12_offer"
+                  placeholder={tc('searchContacts')}
+                />
+              </div>
+
+              <div className="relative flex items-center gap-4">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-muted-foreground">{tc('or')}</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
               <div className="space-y-2">
                 <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('offerLabel')} *
@@ -488,7 +644,10 @@ export default function SendPage() {
                 <textarea
                   placeholder={t('offerPlaceholder')}
                   value={offer}
-                  onChange={(e) => setOffer(e.target.value)}
+                  onChange={(e) => {
+                    setOffer(e.target.value);
+                    setSelectedOfferContact(null);
+                  }}
                   className="glass-input w-full px-4 py-3 font-mono text-sm h-24 resize-none"
                 />
               </div>
@@ -524,6 +683,30 @@ export default function SendPage() {
                 />
               </div>
 
+              {/* Category Selector */}
+              {categories.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {tcat('category')}
+                  </label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="glass-input w-full pl-11 pr-4 py-3 text-sm appearance-none cursor-pointer"
+                    >
+                      <option value="">{tcat('selectCategory')}</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.icon} {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
@@ -557,6 +740,30 @@ export default function SendPage() {
             </div>
 
             <form onSubmit={handlePayLnAddress} className="space-y-5">
+              {/* Contact Selector */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {tc('selectContact')}
+                </label>
+                <ContactSelector
+                  value={selectedLnAddressContact}
+                  onChange={(selection) => {
+                    setSelectedLnAddressContact(selection);
+                    if (selection) {
+                      setLnAddress(selection.address.address);
+                    }
+                  }}
+                  filterType="lightning_address"
+                  placeholder={tc('searchContacts')}
+                />
+              </div>
+
+              <div className="relative flex items-center gap-4">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-muted-foreground">{tc('or')}</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
               <div className="space-y-2">
                 <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('lnAddress')} *
@@ -564,7 +771,10 @@ export default function SendPage() {
                 <input
                   placeholder={t('addressPlaceholder')}
                   value={lnAddress}
-                  onChange={(e) => setLnAddress(e.target.value)}
+                  onChange={(e) => {
+                    setLnAddress(e.target.value);
+                    setSelectedLnAddressContact(null);
+                  }}
                   className="glass-input w-full px-4 py-3.5"
                 />
               </div>
@@ -599,6 +809,30 @@ export default function SendPage() {
                   className="glass-input w-full px-4 py-3"
                 />
               </div>
+
+              {/* Category Selector */}
+              {categories.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {tcat('category')}
+                  </label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="glass-input w-full pl-11 pr-4 py-3 text-sm appearance-none cursor-pointer"
+                    >
+                      <option value="">{tcat('selectCategory')}</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.icon} {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -683,6 +917,30 @@ export default function SendPage() {
                 />
               </div>
 
+              {/* Category Selector */}
+              {categories.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {tcat('category')}
+                  </label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="glass-input w-full pl-11 pr-4 py-3 text-sm appearance-none cursor-pointer"
+                    >
+                      <option value="">{tcat('selectCategory')}</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.icon} {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
@@ -705,37 +963,68 @@ export default function SendPage() {
       {result && (
         <div
           className={cn(
-            'max-w-2xl glass-card rounded-2xl md:rounded-3xl p-4 md:p-6 flex items-center gap-3 md:gap-4',
-            result.success ? 'border-success/30' : 'border-destructive/30'
+            'max-w-2xl glass-card rounded-2xl md:rounded-3xl p-4 md:p-6',
+            result.success ? 'border-primary/30' : 'border-destructive/30'
           )}
         >
-          <div
-            className={cn(
-              'flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl md:rounded-2xl shrink-0',
-              result.success ? 'bg-success/10' : 'bg-destructive/10'
-            )}
-          >
-            {result.success ? (
-              <Check className="h-5 w-5 md:h-6 md:w-6 text-success" />
-            ) : (
-              <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p
-              className={cn(
-                'font-semibold text-sm md:text-base',
-                result.success ? 'text-success' : 'text-destructive'
-              )}
-            >
-              {result.success ? t('paymentSuccessful') : t('paymentFailed')}
-            </p>
-            {result.error && (
-              <p className="mt-1 text-xs md:text-sm text-muted-foreground truncate">
-                {result.error}
-              </p>
-            )}
-          </div>
+          {result.success ? (
+            /* Success State */
+            <div className="flex flex-col items-center justify-center py-4 md:py-6 text-center">
+              {/* Animated Icon */}
+              <div className="relative mb-4 md:mb-6">
+                <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+                <div className="relative flex h-16 w-16 md:h-20 md:w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary to-orange-600 shadow-lg shadow-primary/30">
+                  <Rocket className="h-8 w-8 md:h-10 md:w-10 text-white" strokeWidth={2} />
+                </div>
+              </div>
+
+              {/* Success Text */}
+              <div className="space-y-1 md:space-y-2 mb-4 md:mb-6">
+                <h2 className="text-lg md:text-2xl font-bold text-primary flex items-center justify-center gap-1.5 md:gap-2">
+                  <PartyPopper className="h-4 w-4 md:h-5 md:w-5" />
+                  {t('paymentSuccessful')}
+                  <PartyPopper className="h-4 w-4 md:h-5 md:w-5 scale-x-[-1]" />
+                </h2>
+                {result.amountSat && result.amountSat > 0 && (
+                  <p className="text-2xl md:text-3xl font-bold font-mono text-foreground">
+                    -{formatValue(result.amountSat)} sats
+                  </p>
+                )}
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  {t('paymentSentSuccessfully')}
+                </p>
+              </div>
+
+              {/* Send Another Button */}
+              <button
+                onClick={() => setResult(null)}
+                className="btn-gradient flex items-center justify-center gap-2 px-6 md:px-8 py-2.5 md:py-3 text-sm md:text-base"
+              >
+                <Send className="h-4 w-4 md:h-5 md:w-5" />
+                {t('sendAnother')}
+              </button>
+            </div>
+          ) : (
+            /* Error State */
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl md:rounded-2xl shrink-0 bg-destructive/10">
+                <AlertCircle className="h-5 w-5 md:h-6 md:w-6 text-destructive" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm md:text-base text-destructive">
+                  {t('paymentFailed')}
+                </p>
+                {result.error && (
+                  <p className="mt-1 text-xs md:text-sm text-muted-foreground truncate">
+                    {result.error}
+                  </p>
+                )}
+              </div>
+              <button onClick={() => setResult(null)} className="glass-button px-3 py-2 text-sm">
+                {t('tryAgain')}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

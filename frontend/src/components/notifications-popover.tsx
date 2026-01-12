@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 
 export interface Notification {
   id: string;
-  type: 'payment_received' | 'payment_sent' | 'channel' | 'info';
+  type: 'payment_received' | 'payment_sent' | 'channel' | 'info' | 'warning' | 'error';
   title: string;
   message: string;
   amount?: number;

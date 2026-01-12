@@ -73,9 +73,9 @@ describe('Send Page', () => {
       // Wait for the form to appear
       cy.get('form').should('be.visible');
       
-      // Fill in address (first non-numeric input)
-      cy.get('form input').first().clear().type('test@example.com');
-      // Fill in amount (first inputmode numeric)
+      // Find the LN Address input field (it has a specific placeholder)
+      cy.get('form input[placeholder*="@"]').clear().type('test@example.com');
+      // Fill in amount (inputmode numeric for the amount field)
       cy.get('form input[inputmode="numeric"]').first().clear().type('1000');
       
       // Submit the form by clicking the submit button

@@ -1,0 +1,15 @@
+{
+  "name": "phoenixd-dashboard-desktop",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Phoenixd Dashboard Desktop App",
+  "scripts": {
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:build:debug": "tauri build --debug"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

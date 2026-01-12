@@ -3,7 +3,14 @@
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type StatCardVariant = 'success' | 'primary' | 'warning' | 'error' | 'muted';
+export type StatCardVariant =
+  | 'success'
+  | 'primary'
+  | 'warning'
+  | 'error'
+  | 'muted'
+  | 'info'
+  | 'accent';
 
 interface StatCardProps {
   label: string;
@@ -20,6 +27,8 @@ const variantStyles: Record<StatCardVariant, { text: string; bg: string }> = {
   warning: { text: 'text-yellow-500', bg: 'bg-yellow-500/10' },
   error: { text: 'text-red-500', bg: 'bg-red-500/10' },
   muted: { text: 'text-muted-foreground', bg: 'bg-white/5' },
+  info: { text: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+  accent: { text: 'text-purple-500', bg: 'bg-purple-500/10' },
 };
 
 export function StatCard({
@@ -63,7 +72,7 @@ export function StatCard({
 
 interface StatCardGridProps {
   children: React.ReactNode;
-  columns?: 2 | 3 | 4;
+  columns?: 2 | 3 | 4 | 6;
   className?: string;
 }
 
@@ -72,6 +81,7 @@ export function StatCardGrid({ children, columns = 3, className }: StatCardGridP
     2: 'grid-cols-2',
     3: 'grid-cols-3',
     4: 'grid-cols-2 md:grid-cols-4',
+    6: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6',
   };
 
   return <div className={cn('grid gap-2 md:gap-4', colsClass[columns], className)}>{children}</div>;

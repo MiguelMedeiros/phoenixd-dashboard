@@ -86,6 +86,21 @@ declare global {
        * Mock seed retrieval failure
        */
       mockGetSeedFailure(errorMessage?: string): Chainable<void>;
+
+      /**
+       * Mock contacts with fixtures
+       */
+      mockContactsWithData(): Chainable<void>;
+
+      /**
+       * Mock recurring payments with fixtures
+       */
+      mockRecurringPaymentsWithData(): Chainable<void>;
+
+      /**
+       * Setup all mocks for contacts page
+       */
+      setupContactsMocks(): Chainable<void>;
     }
   }
 }
@@ -160,6 +175,17 @@ Cypress.Commands.add('setupApiMocks', () => {
 
   // Pay offer
   cy.intercept('POST', '**/api/phoenixd/payoffer', { fixture: 'pay-invoice.json' }).as('payOffer');
+
+  // Contacts endpoints
+  cy.intercept('GET', '**/api/contacts*', { body: [] }).as('getContacts');
+  cy.intercept('POST', '**/api/contacts', { body: { id: 'contact-1', name: 'Test Contact', addresses: [] } }).as('createContact');
+
+  // Recurring payments endpoints
+  cy.intercept('GET', '**/api/recurring-payments*', { body: [] }).as('getRecurringPayments');
+  cy.intercept('POST', '**/api/recurring-payments', { body: { id: 'recurring-1', status: 'active' } }).as('createRecurringPayment');
+
+  // Categories endpoint
+  cy.intercept('GET', '**/api/categories*', { body: [] }).as('getCategories');
 });
 
 // Mock only node endpoints
@@ -313,6 +339,94 @@ Cypress.Commands.add('mockGetSeedFailure', (errorMessage = 'Invalid password') =
     statusCode: 401,
     body: { error: errorMessage },
   }).as('getSeedFailure');
+});
+
+// Mock contacts with fixture data
+Cypress.Commands.add('mockContactsWithData', () => {
+  cy.intercept('GET', '**/api/contacts*', { fixture: 'contacts.json' }).as('getContactsWithData');
+  cy.intercept('POST', '**/api/contacts', (req) => {
+    req.reply({
+      statusCode: 201,
+      body: {
+        id: 'new-contact-' + Date.now(),
+        name: req.body.name,
+        label: req.body.label || null,
+        addresses: req.body.addresses || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        _count: { payments: 0 },
+      },
+    });
+  }).as('createContactWithData');
+  cy.intercept('PUT', '**/api/contacts/*', (req) => {
+    req.reply({
+      statusCode: 200,
+      body: {
+        ...req.body,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  }).as('updateContact');
+  cy.intercept('DELETE', '**/api/contacts/*', {
+    statusCode: 200,
+    body: { success: true },
+  }).as('deleteContact');
+});
+
+// Mock recurring payments with fixture data
+Cypress.Commands.add('mockRecurringPaymentsWithData', () => {
+  cy.intercept('GET', '**/api/recurring-payments*', { fixture: 'recurring-payments.json' }).as(
+    'getRecurringPaymentsWithData'
+  );
+  cy.intercept('GET', '**/api/recurring-payments/*/executions*', {
+    fixture: 'recurring-executions.json',
+  }).as('getRecurringExecutions');
+  cy.intercept('POST', '**/api/recurring-payments', (req) => {
+    req.reply({
+      statusCode: 201,
+      body: {
+        id: 'new-recurring-' + Date.now(),
+        ...req.body,
+        status: 'active',
+        paymentCount: 0,
+        totalPaidSat: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  }).as('createRecurringPaymentWithData');
+  cy.intercept('PUT', '**/api/recurring-payments/*', (req) => {
+    req.reply({
+      statusCode: 200,
+      body: {
+        ...req.body,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  }).as('updateRecurringPayment');
+  cy.intercept('DELETE', '**/api/recurring-payments/*', {
+    statusCode: 200,
+    body: { success: true },
+  }).as('deleteRecurringPayment');
+  cy.intercept('POST', '**/api/recurring-payments/*/pause', (req) => {
+    req.reply({
+      statusCode: 200,
+      body: { status: 'paused' },
+    });
+  }).as('pauseRecurringPayment');
+  cy.intercept('POST', '**/api/recurring-payments/*/resume', (req) => {
+    req.reply({
+      statusCode: 200,
+      body: { status: 'active' },
+    });
+  }).as('resumeRecurringPayment');
+});
+
+// Setup all mocks for contacts page
+Cypress.Commands.add('setupContactsMocks', () => {
+  cy.setupApiMocks();
+  cy.mockContactsWithData();
+  cy.mockRecurringPaymentsWithData();
 });
 
 export {};

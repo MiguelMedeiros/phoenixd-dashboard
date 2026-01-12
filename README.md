@@ -19,6 +19,7 @@
   <img src="https://img.shields.io/badge/Bitcoin-Lightning-F7931A?style=flat-square&logo=bitcoin&logoColor=white" alt="Bitcoin Lightning">
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker Ready">
   <img src="https://img.shields.io/badge/PWA-Installable-5A0FC8?style=flat-square&logo=pwa&logoColor=white" alt="PWA Ready">
+  <img src="https://img.shields.io/badge/Desktop-Tauri-FFC131?style=flat-square&logo=tauri&logoColor=white" alt="Desktop App">
   <img src="https://img.shields.io/github/license/MiguelMedeiros/phoenixd-dashboard?style=flat-square" alt="License">
 </p>
 
@@ -40,15 +41,31 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **History** — Full payment history with filters & CSV export
 
+✅ **Contacts** — Save Lightning Addresses, Node IDs, and BOLT12 offers with labels for quick payments
+
+✅ **Recurring Payments** — Schedule automatic payments (daily, weekly, monthly) to contacts
+
+✅ **Payment Labels** — Add notes, categories, and tags to organize transactions
+
+✅ **Contact Labels** — Categorize contacts with custom labels and filter by category
+
 ✅ **Tools** — Decode invoices, liquidity fees, LNURL support
 
 ✅ **Multi-Currency** — Display in 10+ fiat currencies
 
 ✅ **PWA** — Install as native app on any device
 
-✅ **Remote Access** — Secure access via Tailscale VPN
+✅ **Desktop App** — Native macOS/Linux app with system tray
 
-✅ **Tor Support** — Optional hidden service for privacy
+✅ **Remote Access** — Tailscale VPN, Cloudflare Tunnel, or Tor Hidden Service
+
+<br>
+
+## Download
+
+**[📥 Download Latest Release](https://github.com/MiguelMedeiros/phoenixd-dashboard/releases/latest)**
+
+Available for macOS and Linux. See [Desktop App](desktop/README.md) for details.
 
 <br>
 
@@ -76,15 +93,19 @@ open http://localhost:3000
 
 - 📦 [**Installation**](docs/installation.md) — Docker setup, local development, and requirements
 - ⚙️ [**Configuration**](docs/configuration.md) — Environment variables, network modes, and options
+- 🖥️ [**Desktop App**](desktop/README.md) — Native app for macOS and Linux
 
 ### Mobile & Remote Access
 
 - 📱 [**PWA Installation**](docs/pwa-install.md) — Install on iOS/Android without app stores
-- 🌐 [**Remote Access**](docs/mobile-wallet-setup.md) — Secure remote access with Tailscale VPN
+- 🔗 [**Tailscale VPN**](docs/mobile-wallet-setup.md) — Private remote access via Tailscale
+- ☁️ [**Cloudflare Tunnel**](docs/cloudflare-tunnel.md) — Public access with custom domain
+- 🧅 [**Tor Hidden Service**](docs/tor-hidden-service.md) — Anonymous access via .onion address
 
 ### Security & API
 
 - 💾 [**Backup & Recovery**](docs/backup-recovery.md) — Protect your funds with proper backups
+- 🔐 [**Verify Downloads**](docs/verify-downloads.md) — Verify checksums and GPG signatures
 - 🔌 [**API Reference**](docs/api.md) — REST endpoints and WebSocket events
 
 <br>

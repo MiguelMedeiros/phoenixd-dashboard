@@ -44,6 +44,9 @@ docker-compose.override.yml
 
 # Prisma
 prisma/migrations/*.sql.backup
+*.db
+*.db-shm
+*.db-wal
 
 # TypeScript
 *.tsbuildinfo

@@ -224,10 +224,10 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
       />
 
       {/* Dialog */}
-      <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-5xl h-[700px] -translate-x-1/2 -translate-y-1/2 animate-in fade-in-0 zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%]">
-        <div className="glass-card rounded-2xl shadow-2xl border border-white/10 h-full flex flex-col overflow-hidden">
+      <div className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] sm:w-[calc(100%-4rem)] max-w-5xl h-[80vh] sm:h-[700px] -translate-x-1/2 -translate-y-1/2 animate-in fade-in-0 zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%]">
+        <div className="rounded-2xl shadow-2xl border border-border bg-card h-full flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <div className="flex items-center justify-between p-5 border-b border-border">
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
                 <ScrollText className="h-6 w-6 text-blue-400" />
@@ -245,18 +245,18 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
           </div>
 
           {/* Toolbar */}
-          <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/[0.02]">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 border-b border-border bg-muted/30">
+            <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               {/* Container Selector */}
               <Select
                 value={selectedContainer}
                 onValueChange={handleContainerChange}
                 disabled={loading}
               >
-                <SelectTrigger className="w-[280px] h-10 bg-black/20 border-white/10 rounded-xl">
+                <SelectTrigger className="w-full sm:w-[280px] h-10 bg-background border-border rounded-xl">
                   <SelectValue placeholder={loading ? tc('loading') : t('selectContainer')} />
                 </SelectTrigger>
-                <SelectContent className="bg-background/95 backdrop-blur-xl border-white/10">
+                <SelectContent className="bg-background border-border">
                   {containers.length === 0 && !loading && (
                     <SelectItem value="none" disabled>
                       {t('noContainers')}
@@ -284,7 +284,7 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
               </Select>
 
               {/* Status Indicator */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/20 border border-white/5">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
                 <div
                   className={cn(
                     'h-2 w-2 rounded-full transition-all',
@@ -301,23 +301,23 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               {/* Pause/Resume Button */}
               <Button
                 variant={paused ? 'lightning' : 'outline'}
                 size="sm"
                 onClick={() => setPaused(!paused)}
-                className="h-9 px-4 rounded-xl"
+                className="h-9 px-3 sm:px-4 rounded-xl flex-1 sm:flex-none"
               >
                 {paused ? (
                   <>
-                    <Play className="h-4 w-4 mr-2" />
-                    {t('resume')}
+                    <Play className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{t('resume')}</span>
                   </>
                 ) : (
                   <>
-                    <Pause className="h-4 w-4 mr-2" />
-                    {t('pause')}
+                    <Pause className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">{t('pause')}</span>
                   </>
                 )}
               </Button>
@@ -327,10 +327,10 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
                 variant="outline"
                 size="sm"
                 onClick={clearLogs}
-                className="h-9 px-4 rounded-xl"
+                className="h-9 px-3 sm:px-4 rounded-xl flex-1 sm:flex-none"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {t('clearLogs')}
+                <Trash2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('clearLogs')}</span>
               </Button>
 
               {/* Reconnect Button */}
@@ -339,10 +339,10 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
                 size="sm"
                 onClick={handleReconnect}
                 disabled={!selectedContainer || loading}
-                className="h-9 px-4 rounded-xl"
+                className="h-9 px-3 sm:px-4 rounded-xl flex-1 sm:flex-none"
               >
-                <RefreshCw className={cn('h-4 w-4 mr-2', loading && 'animate-spin')} />
-                {t('reconnect')}
+                <RefreshCw className={cn('h-4 w-4 sm:mr-2', loading && 'animate-spin')} />
+                <span className="hidden sm:inline">{t('reconnect')}</span>
               </Button>
             </div>
           </div>
@@ -350,7 +350,7 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
           {/* Logs */}
           <div
             ref={logsContainerRef}
-            className="flex-1 overflow-auto bg-[#0a0a0a] p-4 font-mono text-[13px] leading-relaxed"
+            className="flex-1 overflow-auto bg-zinc-100 dark:bg-zinc-900 p-4 font-mono text-[13px] leading-relaxed"
           >
             {loading ? (
               <div className="flex items-center justify-center h-full">
@@ -367,14 +367,14 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
                   <div
                     key={index}
                     className={cn(
-                      'flex gap-4 py-1 px-2 -mx-2 rounded hover:bg-white/[0.03] transition-colors',
-                      log.stream === 'stderr' && 'text-red-400'
+                      'flex gap-4 py-1 px-2 -mx-2 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors',
+                      log.stream === 'stderr' && 'text-red-600 dark:text-red-400'
                     )}
                   >
-                    <span className="text-muted-foreground/60 flex-shrink-0 w-20 text-xs tabular-nums">
+                    <span className="text-muted-foreground flex-shrink-0 w-20 text-xs tabular-nums">
                       {log.timestamp}
                     </span>
-                    <span className="break-all whitespace-pre-wrap text-foreground/90">
+                    <span className="break-all whitespace-pre-wrap text-foreground">
                       {log.message}
                     </span>
                   </div>
@@ -394,7 +394,7 @@ export function LogsDialog({ open, onClose }: LogsDialogProps) {
           )}
 
           {/* Footer with log count */}
-          <div className="px-5 py-3 border-t border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <div className="px-5 py-3 border-t border-border flex items-center justify-between bg-muted/30">
             <span className="text-sm text-muted-foreground tabular-nums">
               {logs.length.toLocaleString()} {t('logLines')}
             </span>

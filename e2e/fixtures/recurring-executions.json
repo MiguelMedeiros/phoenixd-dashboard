@@ -1,0 +1,42 @@
+[
+  {
+    "id": "exec-001",
+    "recurringPaymentId": "recurring-001",
+    "status": "success",
+    "amountSat": 1000,
+    "paymentId": "pay-001",
+    "paymentHash": "hash001",
+    "errorMessage": null,
+    "executedAt": "2024-01-01T12:00:00.000Z"
+  },
+  {
+    "id": "exec-002",
+    "recurringPaymentId": "recurring-001",
+    "status": "success",
+    "amountSat": 1000,
+    "paymentId": "pay-002",
+    "paymentHash": "hash002",
+    "errorMessage": null,
+    "executedAt": "2024-01-08T12:00:00.000Z"
+  },
+  {
+    "id": "exec-003",
+    "recurringPaymentId": "recurring-002",
+    "status": "success",
+    "amountSat": 100,
+    "paymentId": "pay-003",
+    "paymentHash": "hash003",
+    "errorMessage": null,
+    "executedAt": "2024-01-04T08:00:00.000Z"
+  },
+  {
+    "id": "exec-004",
+    "recurringPaymentId": "recurring-002",
+    "status": "failed",
+    "amountSat": 100,
+    "paymentId": null,
+    "paymentHash": null,
+    "errorMessage": "Insufficient balance",
+    "executedAt": "2024-01-03T08:00:00.000Z"
+  }
+]

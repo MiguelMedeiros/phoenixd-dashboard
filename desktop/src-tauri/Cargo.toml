@@ -1,0 +1,31 @@
+[package]
+name = "phoenixd-dashboard"
+version = "1.0.0"
+description = "Phoenixd Dashboard - Lightning Network Node Management"
+authors = ["Phoenixd Dashboard Team"]
+license = "MIT"
+repository = "https://github.com/AzielCF/phoenixd-dashboard"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dirs = "5"
+which = "7"
+open = "5"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

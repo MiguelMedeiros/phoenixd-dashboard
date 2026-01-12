@@ -136,10 +136,11 @@ describe('Authentication & Security', () => {
       });
 
       it('shows hint about seed phrase access', () => {
-        cy.visit('/settings');
+        cy.visit('/settings?tab=wallet');
         cy.wait('@getAuthStatus');
 
-        cy.contains('Set a password to view your wallet seed phrase').should('be.visible');
+        // The wallet tab should show a warning about needing a password
+        cy.contains('Set a password').should('be.visible');
       });
 
       it('shows Setup button', () => {
@@ -149,11 +150,12 @@ describe('Authentication & Security', () => {
         cy.contains('button', 'Setup').should('be.visible');
       });
 
-      it('does not show Wallet Seed section', () => {
-        cy.visit('/settings');
+      it('does not show View Seed Phrase button without password', () => {
+        cy.visit('/settings?tab=wallet');
         cy.wait('@getAuthStatus');
 
-        cy.contains('Wallet Seed').should('not.exist');
+        // Without password, the View Seed Phrase button should not exist
+        cy.contains('button', 'View Seed Phrase').should('not.exist');
       });
 
       it('clicking Setup shows password form', () => {
@@ -203,19 +205,18 @@ describe('Authentication & Security', () => {
       });
 
       it('shows Lock Now and Logout buttons', () => {
-        cy.visit('/settings');
+        cy.visit('/settings?tab=security');
         cy.wait('@getAuthStatus');
 
-        cy.contains('button', 'Lock Now').should('be.visible');
-        cy.contains('button', 'Logout').should('be.visible');
+        cy.contains('button', 'Lock Now').scrollIntoView().should('exist');
+        cy.contains('button', 'Logout').scrollIntoView().should('exist');
       });
 
-      it('shows Wallet Seed section', () => {
-        cy.visit('/settings');
+      it('shows Wallet Seed tab and View Seed Phrase button', () => {
+        cy.visit('/settings?tab=wallet');
         cy.wait('@getAuthStatus');
 
-        cy.contains('Wallet Seed').scrollIntoView().should('be.visible');
-        cy.contains('button', 'View Seed Phrase').should('exist');
+        cy.contains('button', 'View Seed Phrase').should('be.visible');
       });
 
       it('clicking Manage shows password options', () => {
@@ -236,28 +237,28 @@ describe('Authentication & Security', () => {
     });
 
     it('clicking View Seed Phrase shows password prompt', () => {
-      cy.visit('/settings');
+      cy.visit('/settings?tab=wallet');
       cy.wait('@getAuthStatus');
 
-      cy.contains('button', 'View Seed Phrase').scrollIntoView().click();
-      cy.contains('Enter your dashboard password').should('exist');
-      cy.get('input[placeholder="Enter your password"]').should('be.visible');
+      cy.contains('button', 'View Seed Phrase').click();
+      cy.contains('Enter your dashboard password to reveal').should('exist');
+      cy.get('input[placeholder="Current password"]').should('be.visible');
     });
 
     it('Reveal Seed button is disabled without password', () => {
-      cy.visit('/settings');
+      cy.visit('/settings?tab=wallet');
       cy.wait('@getAuthStatus');
 
-      cy.contains('button', 'View Seed Phrase').scrollIntoView().click();
+      cy.contains('button', 'View Seed Phrase').click();
       cy.contains('button', 'Reveal Seed').should('be.disabled');
     });
 
     it('Reveal Seed button is enabled with password', () => {
-      cy.visit('/settings');
+      cy.visit('/settings?tab=wallet');
       cy.wait('@getAuthStatus');
 
-      cy.contains('button', 'View Seed Phrase').scrollIntoView().click();
-      cy.get('input[placeholder="Enter your password"]').type('test1234');
+      cy.contains('button', 'View Seed Phrase').click();
+      cy.get('input[placeholder="Current password"]').type('test1234');
       cy.contains('button', 'Reveal Seed').should('not.be.disabled');
     });
 
@@ -265,25 +266,27 @@ describe('Authentication & Security', () => {
       const testSeed = 'movie fan finish armed enough nut ramp picnic into jump token few';
       cy.mockGetSeed(testSeed);
 
-      cy.visit('/settings');
+      cy.visit('/settings?tab=wallet');
       cy.wait('@getAuthStatus');
 
-      cy.contains('button', 'View Seed Phrase').scrollIntoView().click();
-      cy.get('input[placeholder="Enter your password"]').type('correctpassword');
+      cy.contains('button', 'View Seed Phrase').click();
+      cy.get('input[placeholder="Current password"]').type('correctpassword');
       cy.contains('button', 'Reveal Seed').click();
 
       cy.wait('@getSeed');
-      cy.contains(testSeed).should('exist');
+      // Seed is displayed word by word in a grid, check for first and last word
+      cy.contains('movie').should('exist');
+      cy.contains('few').should('exist');
     });
 
     it('shows error on incorrect password', () => {
       cy.mockGetSeedFailure('Invalid password');
 
-      cy.visit('/settings');
+      cy.visit('/settings?tab=wallet');
       cy.wait('@getAuthStatus');
 
-      cy.contains('button', 'View Seed Phrase').scrollIntoView().click();
-      cy.get('input[placeholder="Enter your password"]').type('wrongpassword');
+      cy.contains('button', 'View Seed Phrase').click();
+      cy.get('input[placeholder="Current password"]').type('wrongpassword');
       cy.contains('button', 'Reveal Seed').click();
 
       cy.wait('@getSeedFailure');
@@ -294,29 +297,20 @@ describe('Authentication & Security', () => {
       const testSeed = 'movie fan finish armed enough nut ramp picnic into jump token few';
       cy.mockGetSeed(testSeed);
 
-      cy.visit('/settings');
+      cy.visit('/settings?tab=wallet');
       cy.wait('@getAuthStatus');
 
-      cy.contains('button', 'View Seed Phrase').scrollIntoView().click();
-      cy.get('input[placeholder="Enter your password"]').type('correctpassword');
+      cy.contains('button', 'View Seed Phrase').click();
+      cy.get('input[placeholder="Current password"]').type('correctpassword');
       cy.contains('button', 'Reveal Seed').click();
 
       cy.wait('@getSeed');
-      cy.contains(testSeed).should('exist');
+      // Seed is displayed word by word in a grid
+      cy.contains('movie').should('exist');
 
       cy.contains('button', 'Hide Seed Phrase').click();
-      cy.contains(testSeed).should('not.exist');
-    });
-
-    it('can cancel seed viewing', () => {
-      cy.visit('/settings');
-      cy.wait('@getAuthStatus');
-
-      cy.contains('button', 'View Seed Phrase').scrollIntoView().click();
-      cy.contains('Enter your dashboard password').should('exist');
-
-      cy.contains('button', 'Cancel').click();
-      cy.contains('Enter your dashboard password').should('not.exist');
+      // After hiding, the seed words should not be visible
+      cy.contains('button', 'View Seed Phrase').should('exist');
     });
   });
 

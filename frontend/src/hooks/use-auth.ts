@@ -79,16 +79,18 @@ export function useAuth(): UseAuthReturn {
 
   const lock = useCallback(async () => {
     if (status?.hasPassword) {
-      // Refresh status to get the latest settings (like lockScreenBg) before locking
+      // Lock should always logout to invalidate the session
+      // This ensures that refreshing the page will require password again
       try {
-        const authStatus = await getAuthStatus();
-        setStatus(authStatus);
+        await apiLogout();
+        await refreshStatus();
       } catch (err) {
-        console.error('Error refreshing status before lock:', err);
+        console.error('Error locking:', err);
+        // Even if API fails, still lock the UI
+        setIsLocked(true);
       }
-      setIsLocked(true);
     }
-  }, [status?.hasPassword]);
+  }, [status?.hasPassword, refreshStatus]);
 
   // Initial status check
   useEffect(() => {

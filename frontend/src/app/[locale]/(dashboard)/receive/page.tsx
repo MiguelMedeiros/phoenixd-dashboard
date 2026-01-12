@@ -14,112 +14,30 @@ import {
   PartyPopper,
   X,
   Share2,
+  Tag,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import confetti from 'canvas-confetti';
-import { createInvoice, createOffer } from '@/lib/api';
+import {
+  createInvoice,
+  createOffer,
+  getCategories,
+  updatePaymentMetadata,
+  type PaymentCategory,
+} from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useCurrencyContext } from '@/components/currency-provider';
+import { useAnimationContext } from '@/components/animation-provider';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
 
-// Success sound using Web Audio API
-const playSuccessSound = () => {
-  try {
-    const audioContext = new (
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-    )();
-
-    // Create a pleasant "ding" sound
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
-    oscillator.type = 'sine';
-
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
-
-    // Second note (higher)
-    setTimeout(() => {
-      const osc2 = audioContext.createOscillator();
-      const gain2 = audioContext.createGain();
-
-      osc2.connect(gain2);
-      gain2.connect(audioContext.destination);
-
-      osc2.frequency.setValueAtTime(1318.5, audioContext.currentTime); // E6
-      osc2.type = 'sine';
-
-      gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-
-      osc2.start(audioContext.currentTime);
-      osc2.stop(audioContext.currentTime + 0.8);
-    }, 150);
-  } catch {
-    console.log('Audio not supported');
-  }
-};
-
-// Fire confetti
-const fireConfetti = () => {
-  const count = 200;
-  const defaults = {
-    origin: { y: 0.7 },
-    zIndex: 9999,
-  };
-
-  function fire(particleRatio: number, opts: confetti.Options) {
-    confetti({
-      ...defaults,
-      ...opts,
-      particleCount: Math.floor(count * particleRatio),
-    });
-  }
-
-  fire(0.25, {
-    spread: 26,
-    startVelocity: 55,
-    colors: ['#f97316', '#fb923c', '#fdba74'],
-  });
-  fire(0.2, {
-    spread: 60,
-    colors: ['#22c55e', '#4ade80', '#86efac'],
-  });
-  fire(0.35, {
-    spread: 100,
-    decay: 0.91,
-    scalar: 0.8,
-    colors: ['#eab308', '#facc15', '#fde047'],
-  });
-  fire(0.1, {
-    spread: 120,
-    startVelocity: 25,
-    decay: 0.92,
-    scalar: 1.2,
-    colors: ['#f97316', '#22c55e', '#eab308'],
-  });
-  fire(0.1, {
-    spread: 120,
-    startVelocity: 45,
-    colors: ['#ffffff', '#fef3c7'],
-  });
-};
-
 export default function ReceivePage() {
   const t = useTranslations('receive');
   const _tc = useTranslations('common'); // Prefixed with _ for future use
+  const tcat = useTranslations('paymentLabels');
   const { formatValue } = useCurrencyContext();
+  const { playAnimation } = useAnimationContext();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer'>('invoice');
   const [loading, setLoading] = useState(false);
   const [invoiceResult, setInvoiceResult] = useState<{
@@ -136,9 +54,20 @@ export default function ReceivePage() {
   // Invoice form state
   const [invoiceAmount, setInvoiceAmount] = useState('');
   const [invoiceDescription, setInvoiceDescription] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   // Offer form state
   const [offerDescription, setOfferDescription] = useState('');
+
+  // Category state
+  const [categories, setCategories] = useState<PaymentCategory[]>([]);
+
+  // Fetch categories
+  useEffect(() => {
+    getCategories()
+      .then((data) => setCategories(data))
+      .catch((err) => console.error('Failed to load categories:', err));
+  }, []);
 
   // Portal mounting state
   const [mounted, setMounted] = useState(false);
@@ -176,10 +105,9 @@ export default function ReceivePage() {
           setIsPaid(true);
           setPaidAmount(data.amountSat || parseInt(invoiceAmount));
 
-          // Fire confetti and play sound
+          // Fire celebration animation
           setTimeout(() => {
-            fireConfetti();
-            playSuccessSound();
+            playAnimation();
           }, 100);
         }
       } catch (e) {
@@ -192,7 +120,7 @@ export default function ReceivePage() {
         wsRef.current.close();
       }
     };
-  }, [invoiceResult?.paymentHash, invoiceAmount]);
+  }, [invoiceResult?.paymentHash, invoiceAmount, playAnimation]);
 
   const handleCreateInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +137,19 @@ export default function ReceivePage() {
         description: invoiceDescription || undefined,
       });
       setInvoiceResult(result);
+
+      // Save category metadata if selected
+      if (selectedCategory && result.paymentHash) {
+        try {
+          await updatePaymentMetadata(result.paymentHash, {
+            categoryIds: [selectedCategory],
+            isIncoming: true,
+          });
+        } catch (err) {
+          console.error('Failed to save payment category:', err);
+        }
+      }
+
       toast({ title: 'Invoice Created!', description: 'Ready to receive payment' });
     } catch {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to create invoice' });
@@ -235,6 +176,7 @@ export default function ReceivePage() {
     setInvoiceResult(null);
     setInvoiceAmount('');
     setInvoiceDescription('');
+    setSelectedCategory('');
     setIsPaid(false);
     setPaidAmount(0);
   };
@@ -461,6 +403,30 @@ export default function ReceivePage() {
                     className="glass-input w-full px-3 md:px-4 py-2.5 md:py-3 min-h-[60px] md:min-h-[80px] resize-none text-xs md:text-sm"
                   />
                 </div>
+
+                {/* Category Selector */}
+                {categories.length > 0 && (
+                  <div className="space-y-1 md:space-y-1.5">
+                    <label className="text-[10px] md:text-xs font-medium text-muted-foreground">
+                      {tcat('category')}
+                    </label>
+                    <div className="relative">
+                      <Tag className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="glass-input w-full pl-9 md:pl-11 pr-4 py-2.5 md:py-3 text-xs md:text-sm appearance-none cursor-pointer"
+                      >
+                        <option value="">{tcat('selectCategory')}</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.icon} {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
 
                 <button
                   type="submit"

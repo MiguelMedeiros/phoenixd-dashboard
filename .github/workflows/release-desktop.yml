@@ -1,0 +1,293 @@
+name: Release Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+env:
+  PHOENIXD_VERSION: '0.7.1'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get-version.outputs.version }}
+          name: Phoenixd Dashboard v${{ steps.get-version.outputs.version }}
+          body: |
+            ## Phoenixd Dashboard Desktop v${{ steps.get-version.outputs.version }}
+
+            ### Downloads
+
+            | Platform | Download |
+            |----------|----------|
+            | macOS (Apple Silicon) | `.dmg` |
+            | macOS (Intel) | `.dmg` |
+            | Linux (Debian/Ubuntu) | `.deb` |
+
+            ### Verify Downloads
+
+            Download `SHA256SUMS.txt` and verify:
+            ```bash
+            sha256sum -c SHA256SUMS.txt --ignore-missing
+            ```
+
+            ### Installation
+
+            1. Download the appropriate file for your operating system
+            2. Run the installer
+            3. Launch Phoenixd Dashboard
+            4. The app will automatically set up phoenixd and all required services
+
+            > **Note:** Windows is not supported. See [Platform Support](https://github.com/${{ github.repository }}/blob/main/desktop/README.md#platform-support) for details.
+          draft: true
+          prerelease: ${{ contains(steps.get-version.outputs.version, 'alpha') || contains(steps.get-version.outputs.version, 'beta') || contains(steps.get-version.outputs.version, 'rc') }}
+
+  build-macos:
+    needs: create-release
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            runner: macos-14
+            phoenixd_binary: phoenixd-aarch64-apple-darwin
+          - target: x86_64-apple-darwin
+            runner: macos-14
+            phoenixd_binary: phoenixd-x86_64-apple-darwin
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix frontend
+          npm ci --prefix backend
+          npm ci --prefix desktop
+
+      - name: Download phoenixd binary
+        run: |
+          mkdir -p desktop/binaries
+          curl -L -o phoenix.zip "https://github.com/ACINQ/phoenixd/releases/download/v${PHOENIXD_VERSION}/phoenixd-${PHOENIXD_VERSION}-macos-$([ '${{ matrix.target }}' = 'aarch64-apple-darwin' ] && echo 'arm64' || echo 'x64').zip"
+          unzip phoenix.zip
+          find . -name "phoenixd" -type f -exec cp {} desktop/binaries/${{ matrix.phoenixd_binary }} \;
+          chmod +x desktop/binaries/${{ matrix.phoenixd_binary }}
+
+      - name: Prepare SQLite schema
+        run: |
+          cd backend
+          cp prisma/schema.sqlite.prisma prisma/schema.prisma
+          npx prisma generate
+
+      - name: Build frontend
+        run: npm run build:frontend
+
+      - name: Build backend
+        run: npm run build:backend
+
+      - name: Prepare resources
+        run: |
+          chmod +x desktop/scripts/*.sh
+          desktop/scripts/prepare-resources.sh
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: desktop
+          tauriScript: npm run tauri
+          args: --target ${{ matrix.target }}
+
+      - name: Upload DMG to release
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        with:
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+
+  # NOTE: Windows build disabled - phoenixd does not provide Windows binaries
+  # build-windows:
+  #   See: https://github.com/ACINQ/phoenixd/releases
+
+  build-linux:
+    needs: create-release
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm ci --prefix frontend
+          npm ci --prefix backend
+          npm ci --prefix desktop
+
+      - name: Download phoenixd binary
+        run: |
+          mkdir -p desktop/binaries
+          curl -L -o phoenix.zip "https://github.com/ACINQ/phoenixd/releases/download/v${PHOENIXD_VERSION}/phoenixd-${PHOENIXD_VERSION}-linux-x64.zip"
+          unzip phoenix.zip
+          find . -name "phoenixd" -type f -exec cp {} desktop/binaries/phoenixd-x86_64-unknown-linux-gnu \;
+          chmod +x desktop/binaries/phoenixd-x86_64-unknown-linux-gnu
+
+      - name: Prepare SQLite schema
+        run: |
+          cd backend
+          cp prisma/schema.sqlite.prisma prisma/schema.prisma
+          npx prisma generate
+
+      - name: Build frontend
+        run: npm run build:frontend
+
+      - name: Build backend
+        run: npm run build:backend
+
+      - name: Prepare resources
+        run: |
+          chmod +x desktop/scripts/*.sh
+          desktop/scripts/prepare-resources.sh
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: desktop
+          tauriScript: npm run tauri
+
+      - name: Upload Linux deb to release
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        with:
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: desktop/src-tauri/target/release/bundle/deb/*.deb
+
+  generate-checksums:
+    needs: [create-release, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: get-version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Wait for GitHub to process uploads
+          sleep 10
+          
+          mkdir -p assets
+          cd assets
+          
+          # Download all assets using GitHub CLI (retry up to 3 times)
+          for i in 1 2 3; do
+            gh release download "v${{ needs.create-release.outputs.version }}" --repo ${{ github.repository }} --pattern "*.dmg" --pattern "*.deb" && break
+            echo "Retry $i..."
+            sleep 5
+          done
+          
+          ls -la
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd assets
+          sha256sum * > SHA256SUMS.txt || echo "No files to checksum"
+          cat SHA256SUMS.txt
+
+      - name: Import GPG key and sign
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          if [ -n "$GPG_PRIVATE_KEY" ]; then
+            echo "$GPG_PRIVATE_KEY" | base64 --decode | gpg --batch --import
+            cd assets
+            echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 --pinentry-mode loopback --armor --detach-sign SHA256SUMS.txt
+            ls -la
+          else
+            echo "GPG_PRIVATE_KEY not set, skipping signing"
+          fi
+
+      - name: Upload checksums to release
+        uses: softprops/action-gh-release@v2
+        continue-on-error: true
+        with:
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: |
+            assets/SHA256SUMS.txt
+            assets/SHA256SUMS.txt.asc
+
+  publish-release:
+    needs: [create-release, build-macos, build-linux, generate-checksums]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.create-release.outputs.version }}
+          draft: false

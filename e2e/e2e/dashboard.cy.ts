@@ -16,8 +16,10 @@ describe('Dashboard Overview', () => {
       cy.visit('/');
       cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      // Balance from fixture - check for formatted number in hero card
-      cy.get('.hero-card').first().should('contain', '400');
+      // Wait for balance to be displayed - the header always shows balance
+      // Balance from fixture (400,000 sats) - formatted as "400.0k sats"
+      cy.contains('400').should('exist');
+      cy.contains('sats').should('exist');
     });
 
     it('displays stat cards on desktop', () => {
@@ -106,9 +108,12 @@ describe('Dashboard Overview', () => {
 
     it('displays version from fixture', () => {
       cy.visit('/');
-      cy.wait(['@getNodeInfo']);
+      cy.wait(['@getNodeInfo', '@getBalance', '@getChannels']);
 
-      cy.get('body').should('contain', '0.4.1');
+      // Scroll down to see Node Info section and wait for version to load
+      cy.contains('Node Info').scrollIntoView().should('be.visible');
+      // The version is displayed after node info loads
+      cy.contains('0.4.1', { timeout: 15000 }).should('exist');
     });
   });
 

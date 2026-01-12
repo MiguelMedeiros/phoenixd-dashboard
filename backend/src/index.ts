@@ -11,6 +11,7 @@ import { lnurlRouter } from './routes/lnurl.js';
 import { authRouter } from './routes/auth.js';
 import { torRouter } from './routes/tor.js';
 import { tailscaleRouter } from './routes/tailscale.js';
+import { cloudflaredRouter } from './routes/cloudflared.js';
 import { configRouter } from './routes/config.js';
 import {
   dockerRouter,
@@ -18,7 +19,12 @@ import {
   execInContainer,
   getContainerLogs,
 } from './routes/docker.js';
+import { contactsRouter } from './routes/contacts.js';
+import { categoriesRouter } from './routes/categories.js';
+import { paymentMetadataRouter } from './routes/payment-metadata.js';
+import { recurringPaymentsRouter } from './routes/recurring-payments.js';
 import { PhoenixdService } from './services/phoenixd.js';
+import { startRecurringPaymentScheduler } from './services/recurring-scheduler.js';
 import { cleanupExpiredSessions, validateSessionFromCookie } from './middleware/auth.js';
 
 const app = express();
@@ -36,18 +42,40 @@ const wssTerminal = new WebSocketServer({ noServer: true });
 export const prisma = new PrismaClient();
 export const phoenixd = new PhoenixdService();
 
-// CORS configuration - allow localhost and Tailscale domains
+// CORS configuration - allow localhost, Tailscale domains, and same root domain
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
   'http://localhost:3000',
   'http://localhost:4001',
 ];
 
+// Extract root domain from a hostname (e.g., "api.example.com" -> "example.com")
+function getRootDomain(hostname: string): string {
+  const parts = hostname.split('.');
+  // Handle cases like "localhost" or IP addresses
+  if (parts.length <= 2) return hostname;
+  // Return last two parts (e.g., "miguelmedeiros.dev" from "phoenixd-api.miguelmedeiros.dev")
+  return parts.slice(-2).join('.');
+}
+
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void
+    ) => {
       // Allow requests with no origin (like mobile apps, curl, etc)
       if (!origin) {
+        return callback(null, true);
+      }
+
+      // Allow "null" origin (Tor Browser sends this for privacy)
+      if (origin === 'null') {
+        return callback(null, true);
+      }
+
+      // Allow any Tor Hidden Service (.onion)
+      if (origin.includes('.onion')) {
         return callback(null, true);
       }
 
@@ -56,16 +84,62 @@ app.use(
         return callback(null, true);
       }
 
-      // Allow configured origins
-      if (allowedOrigins.some((allowed) => origin.startsWith(allowed.replace(/:\d+$/, '')))) {
-        return callback(null, true);
-      }
-
       // Allow localhost with any port
       if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
         return callback(null, true);
       }
 
+      // Allow Tauri desktop app origins
+      if (origin.startsWith('tauri://') || origin.startsWith('http://tauri.')) {
+        return callback(null, true);
+      }
+
+      // Allow configured origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Auto-detect: Allow any origin from the same root domain as the API
+      // e.g., if API is at phoenixd-api.miguelmedeiros.dev, allow phoenixd.miguelmedeiros.dev
+      try {
+        const originUrl = new URL(origin);
+        const originRootDomain = getRootDomain(originUrl.hostname);
+
+        // Check if origin shares the same root domain as any of our configured origins
+        // or if it matches a pattern like *.domain.com
+        if (process.env.FRONTEND_URL) {
+          const frontendUrl = new URL(process.env.FRONTEND_URL);
+          const frontendRootDomain = getRootDomain(frontendUrl.hostname);
+          if (originRootDomain === frontendRootDomain) {
+            return callback(null, true);
+          }
+        }
+
+        // Also check against NEXT_PUBLIC_API_URL if set (to infer the deployment domain)
+        if (process.env.NEXT_PUBLIC_API_URL) {
+          const apiUrl = new URL(process.env.NEXT_PUBLIC_API_URL);
+          const apiRootDomain = getRootDomain(apiUrl.hostname);
+          if (originRootDomain === apiRootDomain) {
+            return callback(null, true);
+          }
+        }
+
+        // Allow any HTTPS origin from a custom domain (not localhost)
+        // This handles production deployments where both frontend and API share root domain
+        if (originUrl.protocol === 'https:' && !originUrl.hostname.includes('localhost')) {
+          // If the origin looks like a production domain (has TLD), allow it
+          // This is a permissive approach for self-hosted deployments
+          const parts = originUrl.hostname.split('.');
+          if (parts.length >= 2) {
+            console.log(`CORS auto-allowing HTTPS origin: ${origin}`);
+            return callback(null, true);
+          }
+        }
+      } catch {
+        // Invalid URL, continue to rejection
+      }
+
+      console.warn(`CORS blocked origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
@@ -77,19 +151,28 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check
 app.get('/health', (_, res) => {
-  res.json({ status: 'ok', timestamp: Date.now() });
+  res.json({
+    status: 'ok',
+    timestamp: Date.now(),
+    desktopMode: process.env.DESKTOP_MODE === 'true',
+  });
 });
 
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/phoenixd', phoenixdRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/api/payments/metadata', paymentMetadataRouter);
 app.use('/api/node', nodeRouter);
 app.use('/api/lnurl', lnurlRouter);
 app.use('/api/tor', torRouter);
 app.use('/api/tailscale', tailscaleRouter);
+app.use('/api/cloudflared', cloudflaredRouter);
 app.use('/api/config', configRouter);
 app.use('/api/docker', dockerRouter);
+app.use('/api/contacts', contactsRouter);
+app.use('/api/categories', categoriesRouter);
+app.use('/api/recurring-payments', recurringPaymentsRouter);
 
 // WebSocket clients
 const clients = new Set<WebSocket>();
@@ -111,6 +194,26 @@ wss.on('connection', (ws) => {
 
 // Function to broadcast payment events to all connected clients
 export function broadcastPayment(event: object) {
+  const message = JSON.stringify(event);
+  clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
+
+// Function to broadcast service status events (Cloudflared, Tor, Tailscale)
+export function broadcastServiceEvent(event: {
+  type:
+    | 'cloudflared:connected'
+    | 'cloudflared:disconnected'
+    | 'cloudflared:error'
+    | 'tor:connected'
+    | 'tor:disconnected'
+    | 'tailscale:connected'
+    | 'tailscale:disconnected';
+  message?: string;
+}) {
   const message = JSON.stringify(event);
   clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
@@ -414,7 +517,7 @@ async function connectPhoenixdWebSocket() {
                 paymentHash: event.paymentHash || 'unknown',
                 amountSat: event.amountSat || 0,
                 status: 'completed',
-                rawData: event,
+                rawData: JSON.stringify(event),
               },
             });
           } catch (dbError) {
@@ -453,6 +556,9 @@ server.listen(PORT, () => {
   setInterval(cleanupExpiredSessions, 60 * 60 * 1000);
   // Also run cleanup on startup
   cleanupExpiredSessions();
+
+  // Start recurring payments scheduler (check every minute)
+  startRecurringPaymentScheduler(60000);
 });
 
 // Graceful shutdown

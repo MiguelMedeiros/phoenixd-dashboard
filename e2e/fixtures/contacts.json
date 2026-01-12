@@ -1,0 +1,66 @@
+[
+  {
+    "id": "contact-001",
+    "name": "Alice Lightning",
+    "label": "Family",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "addresses": [
+      {
+        "id": "addr-001",
+        "contactId": "contact-001",
+        "type": "lightning_address",
+        "address": "alice@example.com",
+        "isPrimary": true
+      }
+    ],
+    "_count": {
+      "payments": 5
+    }
+  },
+  {
+    "id": "contact-002",
+    "name": "Bob Bitcoin",
+    "label": "Friends",
+    "createdAt": "2024-01-02T00:00:00.000Z",
+    "updatedAt": "2024-01-02T00:00:00.000Z",
+    "addresses": [
+      {
+        "id": "addr-002",
+        "contactId": "contact-002",
+        "type": "bolt12_offer",
+        "address": "lno1qgsqvgnwgcg35z6ee2h3yczraddm72xrfua9uve2rlrm9deu7xyfzrc2qajx2enpwdumyp3",
+        "isPrimary": true
+      },
+      {
+        "id": "addr-003",
+        "contactId": "contact-002",
+        "type": "lightning_address",
+        "address": "bob@example.com",
+        "isPrimary": false
+      }
+    ],
+    "_count": {
+      "payments": 10
+    }
+  },
+  {
+    "id": "contact-003",
+    "name": "Charlie Node",
+    "label": null,
+    "createdAt": "2024-01-03T00:00:00.000Z",
+    "updatedAt": "2024-01-03T00:00:00.000Z",
+    "addresses": [
+      {
+        "id": "addr-004",
+        "contactId": "contact-003",
+        "type": "node_id",
+        "address": "03abc123def456789012345678901234567890123456789012345678901234567890",
+        "isPrimary": true
+      }
+    ],
+    "_count": {
+      "payments": 0
+    }
+  }
+]

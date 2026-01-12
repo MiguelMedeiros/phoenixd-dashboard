@@ -1,5 +1,7 @@
 import { Router, Response } from 'express';
 import Docker from 'dockerode';
+import { readFile } from 'fs/promises';
+import { existsSync } from 'fs';
 import { requireAuth, AuthenticatedRequest } from '../middleware/auth.js';
 import { prisma } from '../index.js';
 
@@ -12,12 +14,18 @@ const TOR_CONTAINER_NAME = 'phoenixd-tor';
 // Image name created by docker-compose build
 const TOR_IMAGE_NAME = 'phoenixd-dashboard-tor';
 const TOR_NETWORK = 'phoenixd-dashboard_phoenixd-network';
+const TOR_DATA_VOLUME = 'phoenixd-dashboard_tor_data';
+const COMPOSE_PROJECT_NAME = 'phoenixd-dashboard';
+
+// Path to the hidden service hostname file (mounted in backend container)
+const HIDDEN_SERVICE_HOSTNAME_PATH = '/tor-data/hidden_service/hostname';
 
 interface TorStatus {
   enabled: boolean;
   running: boolean;
   healthy: boolean;
   containerExists: boolean;
+  onionAddress?: string;
 }
 
 /**
@@ -63,13 +71,30 @@ async function torImageExists(): Promise<boolean> {
 }
 
 /**
+ * Read the .onion address from the hidden service hostname file
+ */
+async function getOnionAddress(): Promise<string | null> {
+  try {
+    if (!existsSync(HIDDEN_SERVICE_HOSTNAME_PATH)) {
+      return null;
+    }
+    const hostname = await readFile(HIDDEN_SERVICE_HOSTNAME_PATH, 'utf-8');
+    return hostname.trim();
+  } catch (error) {
+    console.error('Error reading onion address:', error);
+    return null;
+  }
+}
+
+/**
  * GET /api/tor/status
- * Get the current status of Tor
+ * Get the current status of Tor (including Hidden Service)
  */
 torRouter.get('/status', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const status = await getTorContainerStatus();
     const imageExists = await torImageExists();
+    const onionAddress = await getOnionAddress();
 
     // Get enabled setting from database
     const settings = await prisma.settings.findUnique({
@@ -82,6 +107,14 @@ torRouter.get('/status', requireAuth, async (_req: AuthenticatedRequest, res: Re
       healthy: status.healthy,
       containerExists: status.containerExists,
       imageExists,
+      onionAddress,
+      // Hidden service URLs (when onion address is available)
+      hiddenService: onionAddress
+        ? {
+            frontend: `http://${onionAddress}`,
+            backend: `http://${onionAddress}:4000`,
+          }
+        : null,
     });
   } catch (error) {
     console.error('Error getting Tor status:', error);
@@ -129,9 +162,15 @@ torRouter.post('/enable', requireAuth, async (_req: AuthenticatedRequest, res: R
       const container = await docker.createContainer({
         name: TOR_CONTAINER_NAME,
         Image: TOR_IMAGE_NAME,
+        Labels: {
+          'com.docker.compose.project': COMPOSE_PROJECT_NAME,
+          'com.docker.compose.service': 'tor',
+        },
         HostConfig: {
           NetworkMode: TOR_NETWORK,
           RestartPolicy: { Name: 'unless-stopped' },
+          // Mount the tor_data volume to persist hidden service keys
+          Binds: [`${TOR_DATA_VOLUME}:/var/lib/tor`],
         },
         Healthcheck: {
           Test: [

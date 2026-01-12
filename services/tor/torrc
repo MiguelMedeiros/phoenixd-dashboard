@@ -1,5 +1,5 @@
-# Tor SOCKS5 Proxy Configuration for Phoenixd Dashboard
-# Provides anonymous outbound connections for Lightning Network
+# Tor Configuration for Phoenixd Dashboard
+# Provides SOCKS5 proxy and Hidden Service for the dashboard
 
 # SOCKS5 proxy - listen on all interfaces for container access
 SocksPort 0.0.0.0:9050
@@ -18,3 +18,17 @@ AvoidDiskWrites 1
 
 # Run in foreground (required for Docker)
 RunAsDaemon 0
+
+# ============================================
+# Hidden Service Configuration
+# ============================================
+# This exposes the dashboard via a .onion address
+
+# Hidden Service directory (keys will be stored here)
+HiddenServiceDir /var/lib/tor/hidden_service/
+
+# Frontend - accessible on port 80 of the .onion address
+HiddenServicePort 80 phoenixd-frontend:3000
+
+# Backend API - accessible on port 4000 of the .onion address
+HiddenServicePort 4000 phoenixd-backend:4000

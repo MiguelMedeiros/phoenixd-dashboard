@@ -1,11 +1,19 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Shield, Wifi, WifiOff, Network, Loader2 } from 'lucide-react';
+import { Shield, Wifi, WifiOff, Network, Loader2, Cloud, CloudOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getTorStatus, getTailscaleStatus, type TorStatus, type TailscaleStatus } from '@/lib/api';
+import {
+  getTorStatus,
+  getTailscaleStatus,
+  getCloudflaredStatus,
+  type TorStatus,
+  type TailscaleStatus,
+  type CloudflaredStatus,
+} from '@/lib/api';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { useDesktopMode } from '@/hooks/use-desktop-mode';
 
 type ServiceStatus = 'healthy' | 'starting' | 'disabled' | 'error';
 
@@ -35,9 +43,11 @@ function getStatusColor(status: ServiceStatus): string {
 
 export function NetworkStatusButton() {
   const t = useTranslations('common');
+  const { isDesktopMode } = useDesktopMode();
   const [isOpen, setIsOpen] = useState(false);
   const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
   const [tailscaleStatus, setTailscaleStatus] = useState<TailscaleStatus | null>(null);
+  const [cloudflaredStatus, setCloudflaredStatus] = useState<CloudflaredStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,16 +62,20 @@ export function NetworkStatusButton() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch network status
+  // Fetch network status (skip in desktop mode)
   useEffect(() => {
+    if (isDesktopMode) return;
+
     const fetchStatus = async () => {
       try {
-        const [tor, tailscale] = await Promise.all([
+        const [tor, tailscale, cloudflared] = await Promise.all([
           getTorStatus().catch(() => null),
           getTailscaleStatus().catch(() => null),
+          getCloudflaredStatus().catch(() => null),
         ]);
         setTorStatus(tor);
         setTailscaleStatus(tailscale);
+        setCloudflaredStatus(cloudflared);
       } finally {
         setLoading(false);
       }
@@ -70,7 +84,12 @@ export function NetworkStatusButton() {
     fetchStatus();
     const interval = setInterval(fetchStatus, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isDesktopMode]);
+
+  // Hide network status button in desktop mode
+  if (isDesktopMode) {
+    return null;
+  }
 
   const torServiceStatus = getServiceStatus(
     torStatus?.enabled,
@@ -82,10 +101,15 @@ export function NetworkStatusButton() {
     tailscaleStatus?.running,
     tailscaleStatus?.healthy
   );
+  const cloudflaredServiceStatus = getServiceStatus(
+    cloudflaredStatus?.enabled,
+    cloudflaredStatus?.running,
+    cloudflaredStatus?.healthy
+  );
 
   // Overall status - show worst status
   const getOverallStatus = (): ServiceStatus => {
-    const statuses = [torServiceStatus, tailscaleServiceStatus];
+    const statuses = [torServiceStatus, tailscaleServiceStatus, cloudflaredServiceStatus];
     if (statuses.includes('error')) return 'error';
     if (statuses.includes('starting')) return 'starting';
     if (statuses.includes('healthy')) return 'healthy';
@@ -157,31 +181,18 @@ export function NetworkStatusButton() {
           {/* Tor Status */}
           <div className="px-4 py-2.5 hover:bg-white/5 transition-colors">
             <div className="flex items-center gap-3">
-              <div
+              <Shield
                 className={cn(
-                  'h-9 w-9 rounded-lg flex items-center justify-center',
+                  'h-5 w-5 flex-shrink-0',
                   torServiceStatus === 'healthy'
-                    ? 'bg-success/10'
+                    ? 'text-success'
                     : torServiceStatus === 'starting'
-                      ? 'bg-warning/10'
+                      ? 'text-warning'
                       : torServiceStatus === 'error'
-                        ? 'bg-destructive/10'
-                        : 'bg-muted/50'
+                        ? 'text-destructive'
+                        : 'text-muted-foreground'
                 )}
-              >
-                <Shield
-                  className={cn(
-                    'h-4 w-4',
-                    torServiceStatus === 'healthy'
-                      ? 'text-success'
-                      : torServiceStatus === 'starting'
-                        ? 'text-warning'
-                        : torServiceStatus === 'error'
-                          ? 'text-destructive'
-                          : 'text-muted-foreground'
-                  )}
-                />
-              </div>
+              />
               <div className="flex-1">
                 <p className="text-sm font-medium">Tor</p>
                 <p
@@ -199,40 +210,32 @@ export function NetworkStatusButton() {
                   {getServiceStatusLabel(torServiceStatus)}
                 </p>
               </div>
-              <div className={cn('h-2.5 w-2.5 rounded-full', getStatusColor(torServiceStatus))} />
+              <span
+                className={cn(
+                  'h-2.5 w-2.5 min-h-2.5 min-w-2.5 rounded-full flex-shrink-0',
+                  getStatusColor(torServiceStatus)
+                )}
+              />
             </div>
           </div>
 
           {/* Tailscale Status */}
           <div className="px-4 py-2.5 hover:bg-white/5 transition-colors">
             <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  'h-9 w-9 rounded-lg flex items-center justify-center',
-                  tailscaleServiceStatus === 'healthy'
-                    ? 'bg-success/10'
-                    : tailscaleServiceStatus === 'starting'
-                      ? 'bg-warning/10'
-                      : tailscaleServiceStatus === 'error'
-                        ? 'bg-destructive/10'
-                        : 'bg-muted/50'
-                )}
-              >
-                {tailscaleServiceStatus === 'disabled' ? (
-                  <WifiOff className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Wifi
-                    className={cn(
-                      'h-4 w-4',
-                      tailscaleServiceStatus === 'healthy'
-                        ? 'text-success'
-                        : tailscaleServiceStatus === 'starting'
-                          ? 'text-warning'
-                          : 'text-destructive'
-                    )}
-                  />
-                )}
-              </div>
+              {tailscaleServiceStatus === 'disabled' ? (
+                <WifiOff className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+              ) : (
+                <Wifi
+                  className={cn(
+                    'h-5 w-5 flex-shrink-0',
+                    tailscaleServiceStatus === 'healthy'
+                      ? 'text-success'
+                      : tailscaleServiceStatus === 'starting'
+                        ? 'text-warning'
+                        : 'text-destructive'
+                  )}
+                />
+              )}
               <div className="flex-1">
                 <p className="text-sm font-medium">Tailscale</p>
                 <p
@@ -252,8 +255,58 @@ export function NetworkStatusButton() {
                     : getServiceStatusLabel(tailscaleServiceStatus)}
                 </p>
               </div>
-              <div
-                className={cn('h-2.5 w-2.5 rounded-full', getStatusColor(tailscaleServiceStatus))}
+              <span
+                className={cn(
+                  'h-2.5 w-2.5 min-h-2.5 min-w-2.5 rounded-full flex-shrink-0',
+                  getStatusColor(tailscaleServiceStatus)
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Cloudflare Tunnel Status */}
+          <div className="px-4 py-2.5 hover:bg-white/5 transition-colors">
+            <div className="flex items-center gap-3">
+              {cloudflaredServiceStatus === 'disabled' ? (
+                <CloudOff className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+              ) : (
+                <Cloud
+                  className={cn(
+                    'h-5 w-5 flex-shrink-0',
+                    cloudflaredServiceStatus === 'healthy'
+                      ? 'text-success'
+                      : cloudflaredServiceStatus === 'starting'
+                        ? 'text-warning'
+                        : 'text-destructive'
+                  )}
+                />
+              )}
+              <div className="flex-1">
+                <p className="text-sm font-medium">Cloudflare</p>
+                <p
+                  className={cn(
+                    'text-xs',
+                    cloudflaredServiceStatus === 'healthy'
+                      ? 'text-success'
+                      : cloudflaredServiceStatus === 'starting'
+                        ? 'text-warning'
+                        : cloudflaredServiceStatus === 'error'
+                          ? 'text-destructive'
+                          : 'text-muted-foreground'
+                  )}
+                >
+                  {cloudflaredStatus?.ingress &&
+                  cloudflaredStatus.ingress.length > 0 &&
+                  cloudflaredServiceStatus === 'healthy'
+                    ? cloudflaredStatus.ingress[0].hostname
+                    : getServiceStatusLabel(cloudflaredServiceStatus)}
+                </p>
+              </div>
+              <span
+                className={cn(
+                  'h-2.5 w-2.5 min-h-2.5 min-w-2.5 rounded-full flex-shrink-0',
+                  getStatusColor(cloudflaredServiceStatus)
+                )}
               />
             </div>
           </div>

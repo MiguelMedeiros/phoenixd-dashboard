@@ -20,6 +20,7 @@ function getApiUrl(): string {
   // - localhost (development)
   // - Local IP (e.g., 192.168.1.100)
   // - Tailscale Magic DNS (*.ts.net)
+  // - Cloudflare Tunnel (custom domain)
   // - Custom domain
 
   // For Tailscale, we may need to use port 4001
@@ -27,13 +28,34 @@ function getApiUrl(): string {
     return `${protocol}//${hostname}:4001`;
   }
 
+  // For Tor Hidden Service (.onion), use port 4000 for the backend API
+  if (hostname.endsWith('.onion')) {
+    return `${protocol}//${hostname}:4000`;
+  }
+
   // For localhost, use the default port mapping
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:4001';
   }
 
-  // For any other hostname (IP address, domain, etc.),
-  // auto-detect using the same hostname with backend port
+  // For local IP addresses (192.168.x.x, 10.x.x.x, 172.16-31.x.x), use port 4001
+  const localIpPattern = /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
+  if (localIpPattern.test(hostname)) {
+    return `${protocol}//${hostname}:4001`;
+  }
+
+  // For Cloudflare Tunnel or custom domains (not localhost, not local IP, not .ts.net),
+  // use the API subdomain pattern: phoenixd.domain.com -> phoenixd-api.domain.com
+  // This assumes the API is hosted on a subdomain with "-api" suffix
+  const parts = hostname.split('.');
+  if (parts.length >= 2) {
+    // Replace the first subdomain with subdomain-api
+    // e.g., phoenixd.miguelmedeiros.dev -> phoenixd-api.miguelmedeiros.dev
+    parts[0] = `${parts[0]}-api`;
+    return `${protocol}//${parts.join('.')}`;
+  }
+
+  // Fallback: use same hostname with port 4001
   return `${protocol}//${hostname}:4001`;
 }
 
@@ -460,11 +482,19 @@ export async function getSeed(password: string) {
 }
 
 // Tor
+export interface TorHiddenService {
+  frontend: string;
+  backend: string;
+}
+
 export interface TorStatus {
   enabled: boolean;
   running: boolean;
   healthy: boolean;
   containerExists: boolean;
+  imageExists?: boolean;
+  onionAddress?: string;
+  hiddenService?: TorHiddenService | null;
 }
 
 export async function getTorStatus(): Promise<TorStatus> {
@@ -542,6 +572,72 @@ export async function removeTailscaleImage() {
   });
 }
 
+// Cloudflared
+export interface CloudflaredIngressRule {
+  hostname: string;
+  service: string;
+  path?: string;
+}
+
+export interface CloudflaredStatus {
+  enabled: boolean;
+  running: boolean;
+  healthy: boolean;
+  containerExists: boolean;
+  imageExists: boolean;
+  hasToken: boolean;
+  ingress: CloudflaredIngressRule[];
+}
+
+export async function getCloudflaredStatus(): Promise<CloudflaredStatus> {
+  return request<CloudflaredStatus>('/api/cloudflared/status');
+}
+
+export async function saveCloudflaredToken(token: string) {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/token', {
+    method: 'PUT',
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function removeCloudflaredToken() {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/token', {
+    method: 'DELETE',
+  });
+}
+
+export async function updateCloudflaredIngress(ingress: CloudflaredIngressRule[]) {
+  return request<{ success: boolean; message: string; ingress: CloudflaredIngressRule[] }>(
+    '/api/cloudflared/ingress',
+    {
+      method: 'PUT',
+      body: JSON.stringify({ ingress }),
+    }
+  );
+}
+
+export async function enableCloudflared() {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/enable', {
+    method: 'POST',
+  });
+}
+
+export async function disableCloudflared() {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/disable', {
+    method: 'POST',
+  });
+}
+
+export async function getCloudflaredLogs() {
+  return request<{ logs: string }>('/api/cloudflared/logs');
+}
+
+export async function removeCloudflaredImage() {
+  return request<{ success: boolean; message: string }>('/api/cloudflared/image', {
+    method: 'DELETE',
+  });
+}
+
 // Config / Dynamic URLs
 export interface DynamicUrls {
   apiUrl: string;
@@ -582,4 +678,395 @@ export interface ContainerInfo {
 
 export async function getContainers(): Promise<ContainerInfo[]> {
   return request<ContainerInfo[]>('/api/docker/containers');
+}
+
+// Contacts
+export type ContactType = 'lightning_address' | 'node_id' | 'bolt12_offer';
+
+export interface ContactAddress {
+  id: string;
+  contactId: string;
+  address: string;
+  type: ContactType;
+  isPrimary: boolean;
+  createdAt: string;
+}
+
+export interface Contact {
+  id: string;
+  name: string;
+  label?: string | null; // Label for categorizing the contact (e.g., "Personal", "Work")
+  avatarUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  addresses: ContactAddress[];
+  _count?: {
+    payments: number;
+  };
+}
+
+export interface CreateContactAddressInput {
+  id?: string; // Include ID when updating to preserve address references
+  address: string;
+  type: ContactType;
+  isPrimary?: boolean;
+}
+
+export async function getContacts(search?: string): Promise<Contact[]> {
+  const query = search ? `?search=${encodeURIComponent(search)}` : '';
+  return request<Contact[]>(`/api/contacts${query}`);
+}
+
+export async function getContact(id: string): Promise<Contact> {
+  return request<Contact>(`/api/contacts/${id}`);
+}
+
+export async function createContact(data: {
+  name: string;
+  label?: string;
+  avatarUrl?: string;
+  addresses: CreateContactAddressInput[];
+}): Promise<Contact> {
+  return request<Contact>('/api/contacts', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateContact(
+  id: string,
+  data: {
+    name?: string;
+    label?: string | null;
+    avatarUrl?: string | null;
+    addresses?: CreateContactAddressInput[];
+  }
+): Promise<Contact> {
+  return request<Contact>(`/api/contacts/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteContact(id: string): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/contacts/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Contact Address Management
+export async function addContactAddress(
+  contactId: string,
+  data: {
+    address: string;
+    type: ContactType;
+    label?: string;
+    isPrimary?: boolean;
+  }
+): Promise<ContactAddress> {
+  return request<ContactAddress>(`/api/contacts/${contactId}/addresses`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateContactAddress(
+  contactId: string,
+  addressId: string,
+  data: {
+    address?: string;
+    type?: ContactType;
+    label?: string | null;
+    isPrimary?: boolean;
+  }
+): Promise<ContactAddress> {
+  return request<ContactAddress>(`/api/contacts/${contactId}/addresses/${addressId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteContactAddress(
+  contactId: string,
+  addressId: string
+): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(
+    `/api/contacts/${contactId}/addresses/${addressId}`,
+    {
+      method: 'DELETE',
+    }
+  );
+}
+
+export async function getContactPayments(
+  contactId: string,
+  params?: { limit?: number; offset?: number }
+): Promise<PaymentMetadata[]> {
+  const queryParams = new URLSearchParams();
+  if (params?.limit) queryParams.append('limit', String(params.limit));
+  if (params?.offset) queryParams.append('offset', String(params.offset));
+  const query = queryParams.toString();
+  return request<PaymentMetadata[]>(
+    `/api/contacts/${contactId}/payments${query ? `?${query}` : ''}`
+  );
+}
+
+// Payment Categories
+export interface PaymentCategory {
+  id: string;
+  name: string;
+  color: string;
+  icon?: string | null;
+  createdAt: string;
+  _count?: {
+    payments: number;
+  };
+}
+
+export async function getCategories(): Promise<PaymentCategory[]> {
+  return request<PaymentCategory[]>('/api/categories');
+}
+
+export async function getCategory(id: string): Promise<PaymentCategory> {
+  return request<PaymentCategory>(`/api/categories/${id}`);
+}
+
+export async function createCategory(data: {
+  name: string;
+  color?: string;
+  icon?: string;
+}): Promise<PaymentCategory> {
+  return request<PaymentCategory>('/api/categories', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateCategory(
+  id: string,
+  data: {
+    name?: string;
+    color?: string;
+    icon?: string | null;
+  }
+): Promise<PaymentCategory> {
+  return request<PaymentCategory>(`/api/categories/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteCategory(id: string): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/categories/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Payment Metadata
+export interface PaymentMetadata {
+  id: string;
+  paymentHash?: string | null;
+  paymentId?: string | null;
+  note?: string | null;
+  contactId?: string | null;
+  contact?: Contact | null;
+  categories?: PaymentCategory[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getPaymentMetadata(identifier: string): Promise<PaymentMetadata> {
+  return request<PaymentMetadata>(`/api/payments/metadata/${identifier}`);
+}
+
+export async function updatePaymentMetadata(
+  identifier: string,
+  data: {
+    note?: string | null;
+    categoryIds?: string[];
+    contactId?: string | null;
+    isIncoming?: boolean;
+  }
+): Promise<PaymentMetadata> {
+  return request<PaymentMetadata>(`/api/payments/metadata/${identifier}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getPaymentsByCategory(
+  categoryId: string,
+  params?: { limit?: number; offset?: number }
+): Promise<PaymentMetadata[]> {
+  const queryParams = new URLSearchParams();
+  if (params?.limit) queryParams.append('limit', String(params.limit));
+  if (params?.offset) queryParams.append('offset', String(params.offset));
+  const query = queryParams.toString();
+  return request<PaymentMetadata[]>(
+    `/api/payments/metadata/by-category/${categoryId}${query ? `?${query}` : ''}`
+  );
+}
+
+export async function getPaymentsByContact(
+  contactId: string,
+  params?: { limit?: number; offset?: number }
+): Promise<PaymentMetadata[]> {
+  const queryParams = new URLSearchParams();
+  if (params?.limit) queryParams.append('limit', String(params.limit));
+  if (params?.offset) queryParams.append('offset', String(params.offset));
+  const query = queryParams.toString();
+  return request<PaymentMetadata[]>(
+    `/api/payments/metadata/by-contact/${contactId}${query ? `?${query}` : ''}`
+  );
+}
+
+export async function batchGetPaymentMetadata(params: {
+  paymentHashes?: string[];
+  paymentIds?: string[];
+}): Promise<Record<string, PaymentMetadata>> {
+  return request<Record<string, PaymentMetadata>>('/api/payments/metadata/batch', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+}
+
+// Recurring Payments
+export type RecurringPaymentFrequency =
+  | 'every_minute'
+  | 'every_5_minutes'
+  | 'every_15_minutes'
+  | 'every_30_minutes'
+  | 'hourly'
+  | 'daily'
+  | 'weekly'
+  | 'monthly';
+export type RecurringPaymentStatus = 'active' | 'paused' | 'cancelled';
+
+export interface RecurringPaymentExecution {
+  id: string;
+  recurringPaymentId: string;
+  status: 'success' | 'failed' | 'pending';
+  amountSat: number;
+  paymentId?: string | null;
+  paymentHash?: string | null;
+  errorMessage?: string | null;
+  executedAt: string;
+}
+
+export interface RecurringPayment {
+  id: string;
+  contactId: string;
+  addressId: string;
+  amountSat: number;
+  frequency: RecurringPaymentFrequency;
+  dayOfWeek?: number | null;
+  dayOfMonth?: number | null;
+  timeOfDay: string;
+  note?: string | null;
+  categoryId?: string | null;
+  status: RecurringPaymentStatus;
+  nextRunAt: string;
+  lastRunAt?: string | null;
+  lastError?: string | null;
+  totalPaid: number;
+  paymentCount: number;
+  createdAt: string;
+  updatedAt: string;
+  contact?: Contact;
+  category?: PaymentCategory | null;
+  executions?: RecurringPaymentExecution[];
+  _count?: {
+    executions: number;
+  };
+}
+
+export async function getRecurringPayments(params?: {
+  status?: RecurringPaymentStatus;
+  contactId?: string;
+}): Promise<RecurringPayment[]> {
+  const queryParams = new URLSearchParams();
+  if (params?.status) queryParams.append('status', params.status);
+  if (params?.contactId) queryParams.append('contactId', params.contactId);
+  const query = queryParams.toString();
+  return request<RecurringPayment[]>(`/api/recurring-payments${query ? `?${query}` : ''}`);
+}
+
+export async function getRecurringPayment(id: string): Promise<RecurringPayment> {
+  return request<RecurringPayment>(`/api/recurring-payments/${id}`);
+}
+
+export async function createRecurringPayment(data: {
+  contactId: string;
+  addressId: string;
+  amountSat: number;
+  frequency: RecurringPaymentFrequency;
+  dayOfWeek?: number;
+  dayOfMonth?: number;
+  timeOfDay?: string;
+  note?: string;
+  categoryId?: string;
+}): Promise<RecurringPayment> {
+  return request<RecurringPayment>('/api/recurring-payments', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateRecurringPayment(
+  id: string,
+  data: {
+    addressId?: string;
+    amountSat?: number;
+    frequency?: RecurringPaymentFrequency;
+    dayOfWeek?: number;
+    dayOfMonth?: number;
+    timeOfDay?: string;
+    note?: string | null;
+    categoryId?: string | null;
+    status?: RecurringPaymentStatus;
+  }
+): Promise<RecurringPayment> {
+  return request<RecurringPayment>(`/api/recurring-payments/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteRecurringPayment(
+  id: string
+): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/recurring-payments/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function getRecurringPaymentExecutions(
+  id: string,
+  params?: { limit?: number; offset?: number }
+): Promise<RecurringPaymentExecution[]> {
+  const queryParams = new URLSearchParams();
+  if (params?.limit) queryParams.append('limit', String(params.limit));
+  if (params?.offset) queryParams.append('offset', String(params.offset));
+  const query = queryParams.toString();
+  return request<RecurringPaymentExecution[]>(
+    `/api/recurring-payments/${id}/executions${query ? `?${query}` : ''}`
+  );
+}
+
+export async function executeRecurringPaymentNow(id: string): Promise<{
+  success: boolean;
+  paymentId?: string;
+  paymentHash?: string;
+  amountSat?: number;
+  error?: string;
+}> {
+  return request<{
+    success: boolean;
+    paymentId?: string;
+    paymentHash?: string;
+    amountSat?: number;
+    error?: string;
+  }>(`/api/recurring-payments/${id}/execute`, {
+    method: 'POST',
+  });
 }

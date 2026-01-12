@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Server,
   Lock,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getNodeInfo } from '@/lib/api';
@@ -27,6 +28,11 @@ const sidebarNavItems = [
     key: 'overview',
     href: '/',
     icon: Home,
+  },
+  {
+    key: 'contacts',
+    href: '/contacts',
+    icon: Users,
   },
   {
     key: 'receive',

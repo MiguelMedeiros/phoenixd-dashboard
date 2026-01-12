@@ -75,6 +75,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./services/tor:/tor-config:ro
       - ./services/tailscale:/tailscale-config:ro
+      - ./services/cloudflared:/cloudflared-config:ro
+      - ./data/cloudflared:/cloudflared-data
+      - tor_data:/tor-data:ro
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s
@@ -103,7 +106,7 @@ services:
     volumes:
       - ./frontend/src:/app/src:ro
 
-  # Tor SOCKS5 Proxy - managed dynamically by backend
+  # Tor SOCKS5 Proxy & Hidden Service - managed dynamically by backend
   tor:
     build:
       context: ./services/tor
@@ -147,15 +150,22 @@ services:
     profiles:
       - tailscale
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'tailscale status --json | jq -e ".Self.Online == true" || exit 1',
-        ]
+      test: ['CMD-SHELL', 'tailscale status --json | jq -e ".Self.Online == true" || exit 1']
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  # Cloudflare Tunnel - managed dynamically by backend for public access
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: phoenixd-cloudflared
+    restart: unless-stopped
+    networks:
+      - phoenixd-network
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN:-}
+    profiles:
+      - cloudflared
 
 networks:
   phoenixd-network:
