@@ -20,100 +20,6 @@ import {
   Rocket,
   PartyPopper,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
-
-// Success sound using Web Audio API
-const playSuccessSound = () => {
-  try {
-    const audioContext = new (
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-    )();
-
-    // Create a pleasant "whoosh" send sound
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
-    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.15);
-    oscillator.type = 'sine';
-
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.4);
-
-    // Second note (confirmation ding)
-    setTimeout(() => {
-      const osc2 = audioContext.createOscillator();
-      const gain2 = audioContext.createGain();
-
-      osc2.connect(gain2);
-      gain2.connect(audioContext.destination);
-
-      osc2.frequency.setValueAtTime(1046.5, audioContext.currentTime); // C6
-      osc2.type = 'sine';
-
-      gain2.gain.setValueAtTime(0.25, audioContext.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-      osc2.start(audioContext.currentTime);
-      osc2.stop(audioContext.currentTime + 0.5);
-    }, 200);
-  } catch {
-    console.log('Audio not supported');
-  }
-};
-
-// Fire confetti for sent payments
-const fireConfetti = () => {
-  const count = 150;
-  const defaults = {
-    origin: { y: 0.6 },
-    zIndex: 9999,
-  };
-
-  function fire(particleRatio: number, opts: confetti.Options) {
-    confetti({
-      ...defaults,
-      ...opts,
-      particleCount: Math.floor(count * particleRatio),
-    });
-  }
-
-  // Orange/Primary theme for outgoing payments
-  fire(0.25, {
-    spread: 26,
-    startVelocity: 55,
-    colors: ['#f97316', '#fb923c', '#fdba74'],
-  });
-  fire(0.2, {
-    spread: 60,
-    colors: ['#3b82f6', '#60a5fa', '#93c5fd'],
-  });
-  fire(0.35, {
-    spread: 100,
-    decay: 0.91,
-    scalar: 0.8,
-    colors: ['#f97316', '#ea580c', '#c2410c'],
-  });
-  fire(0.1, {
-    spread: 120,
-    startVelocity: 25,
-    decay: 0.92,
-    scalar: 1.2,
-    colors: ['#f97316', '#3b82f6', '#8b5cf6'],
-  });
-  fire(0.1, {
-    spread: 120,
-    startVelocity: 45,
-    colors: ['#ffffff', '#fef3c7'],
-  });
-};
 import {
   payInvoice,
   payOffer,
@@ -130,6 +36,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useCurrencyContext } from '@/components/currency-provider';
+import { useAnimationContext } from '@/components/animation-provider';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 import { PageHeader } from '@/components/page-header';
 import { useTranslations } from 'next-intl';
@@ -142,6 +49,7 @@ export default function SendPage() {
   const ts = useTranslations('scanner');
   const tc = useTranslations('contacts');
   const { formatValue } = useCurrencyContext();
+  const { playAnimation } = useAnimationContext();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'invoice' | 'offer' | 'address' | 'onchain'>(
@@ -358,8 +266,7 @@ export default function SendPage() {
 
       // Fire confetti and play sound on success
       setTimeout(() => {
-        fireConfetti();
-        playSuccessSound();
+        playAnimation();
       }, 100);
 
       setInvoice('');
@@ -409,8 +316,7 @@ export default function SendPage() {
 
       // Fire confetti and play sound on success
       setTimeout(() => {
-        fireConfetti();
-        playSuccessSound();
+        playAnimation();
       }, 100);
 
       setOffer('');
@@ -462,8 +368,7 @@ export default function SendPage() {
 
       // Fire confetti and play sound on success
       setTimeout(() => {
-        fireConfetti();
-        playSuccessSound();
+        playAnimation();
       }, 100);
 
       setLnAddress('');
@@ -503,8 +408,7 @@ export default function SendPage() {
 
       // Fire confetti and play sound on success
       setTimeout(() => {
-        fireConfetti();
-        playSuccessSound();
+        playAnimation();
       }, 100);
 
       setBtcAddress('');

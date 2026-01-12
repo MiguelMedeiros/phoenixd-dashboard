@@ -48,7 +48,7 @@ export function CurrencySwitcher({ openUp = false }: CurrencySwitcherProps) {
         )}
         title="Change display currency"
       >
-        <span className="text-sm font-bold text-primary">{currentCurrency.symbol}</span>
+        <span className="text-base font-bold text-primary">{currentCurrency.symbol}</span>
         <span className="text-sm font-medium hidden xl:inline">{currentCurrency.code}</span>
         {loading ? (
           <Loader2 className="h-3 w-3 text-muted-foreground animate-spin" />

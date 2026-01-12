@@ -61,7 +61,8 @@ import {
 import { PaymentDetailsDialog } from '@/components/payment-details-dialog';
 import { CategoryManager } from '@/components/category-manager';
 import { StatCard, StatCardGrid } from '@/components/stat-card';
-import { useWebSocket } from '@/hooks/use-websocket';
+import { PageHeader } from '@/components/page-header';
+import { wsEvents, WS_EVENTS } from '@/lib/websocket-events';
 import { cn } from '@/lib/utils';
 
 export default function ContactsPage() {
@@ -369,10 +370,30 @@ export default function ContactsPage() {
     return () => clearInterval(interval);
   }, [allRecurringPayments, formatCountdown, lastRefreshTime, selectedContact, expandedHistories]);
 
-  // Fetch all contacts and categories on mount
+  // Fetch all recurring payments for stats
+  const fetchAllRecurringPayments = useCallback(async () => {
+    try {
+      // Fetch all recurring payments without contact filter
+      const data = await getRecurringPayments({});
+      // Group by contactId
+      const grouped: Record<string, RecurringPayment[]> = {};
+      data.forEach((payment) => {
+        if (!grouped[payment.contactId]) {
+          grouped[payment.contactId] = [];
+        }
+        grouped[payment.contactId].push(payment);
+      });
+      setAllRecurringPayments(grouped);
+    } catch (error) {
+      console.error('Failed to load recurring payments:', error);
+    }
+  }, []);
+
+  // Fetch all contacts, categories, and recurring payments on mount
   useEffect(() => {
     fetchContacts();
     fetchCategories();
+    fetchAllRecurringPayments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -385,7 +406,7 @@ export default function ContactsPage() {
     }
   };
 
-  const fetchContacts = async () => {
+  const fetchContacts = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getContacts();
@@ -400,19 +421,19 @@ export default function ContactsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast, tc]);
 
   // Listen for recurring payment executions to refresh stats
-  useWebSocket({
-    onRecurringPaymentExecuted: () => {
+  useEffect(() => {
+    const unsubscribe = wsEvents.on(WS_EVENTS.RECURRING_PAYMENT_EXECUTED, () => {
       // Refresh contacts to update payment counts
       fetchContacts();
-      // Refresh recurring payments for all contacts
-      Object.keys(allRecurringPayments).forEach((contactId) => {
-        fetchContactRecurring(contactId);
-      });
-    },
-  });
+      // Refresh all recurring payments for stats
+      fetchAllRecurringPayments();
+    });
+
+    return unsubscribe;
+  }, [fetchContacts, fetchAllRecurringPayments]);
 
   // Filter contacts locally for instant search and label filter
   const contacts = useMemo(() => {
@@ -666,9 +687,8 @@ export default function ContactsPage() {
       await createRecurringPayment(backendData);
       toast({ title: tc('success'), description: tr('created') });
       setShowRecurringForm(false);
-      if (selectedContact) {
-        fetchContactRecurring(selectedContact.id);
-      }
+      // Refresh all recurring payments to update stats
+      fetchAllRecurringPayments();
     } catch (error) {
       console.error('Failed to create recurring payment:', error);
       toast({
@@ -730,9 +750,8 @@ export default function ContactsPage() {
         title: tc('success'),
         description: newStatus === 'paused' ? tr('paused') : tr('resumed'),
       });
-      if (selectedContact) {
-        fetchContactRecurring(selectedContact.id);
-      }
+      // Refresh all recurring payments to update stats
+      fetchAllRecurringPayments();
     } catch (error) {
       console.error('Failed to toggle recurring payment:', error);
       toast({
@@ -772,9 +791,8 @@ export default function ContactsPage() {
       await updateRecurringPayment(editingRecurring.id, backendData);
       toast({ title: tc('success'), description: tr('updated') });
       setEditingRecurring(null);
-      if (selectedContact) {
-        fetchContactRecurring(selectedContact.id);
-      }
+      // Refresh all recurring payments to update stats
+      fetchAllRecurringPayments();
     } catch (error) {
       console.error('Failed to update recurring payment:', error);
       toast({
@@ -792,9 +810,8 @@ export default function ContactsPage() {
     try {
       await deleteRecurringPayment(id);
       toast({ title: tc('success'), description: tr('deleted') });
-      if (selectedContact) {
-        fetchContactRecurring(selectedContact.id);
-      }
+      // Refresh all recurring payments to update stats
+      fetchAllRecurringPayments();
     } catch (error) {
       console.error('Failed to delete recurring payment:', error);
       toast({
@@ -811,8 +828,9 @@ export default function ContactsPage() {
       const result = await executeRecurringPaymentNow(id);
       if (result.success) {
         toast({ title: tc('success'), description: tr('executionSuccess') });
+        // Refresh all recurring payments to update stats
+        fetchAllRecurringPayments();
         if (selectedContact) {
-          fetchContactRecurring(selectedContact.id);
           _fetchContactPayments(selectedContact.id);
         }
       } else {
@@ -907,7 +925,7 @@ export default function ContactsPage() {
     let bolt12Offers = 0;
     let nodeIds = 0;
     let totalPayments = 0;
-    let totalRecurring = 0;
+    let activeRecurring = 0;
 
     allContacts.forEach((contact) => {
       contact.addresses.forEach((addr) => {
@@ -920,11 +938,16 @@ export default function ContactsPage() {
       }
     });
 
+    // Count only active recurring payments
     Object.values(allRecurringPayments).forEach((payments) => {
-      totalRecurring += payments.length;
+      payments.forEach((payment) => {
+        if (payment.status === 'active') {
+          activeRecurring++;
+        }
+      });
     });
 
-    return { lnAddresses, bolt12Offers, nodeIds, totalPayments, totalRecurring };
+    return { lnAddresses, bolt12Offers, nodeIds, totalPayments, activeRecurring };
   }, [allContacts, allRecurringPayments]);
 
   // Collect unique labels from contacts
@@ -954,14 +977,8 @@ export default function ContactsPage() {
   return (
     <>
       <div className="pt-4 md:pt-6 space-y-4">
-        {/* Header - minimal */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold">{t('title')}</h1>
-            <span className="text-sm text-muted-foreground">
-              {totalContacts} {totalContacts === 1 ? 'contact' : 'contacts'}
-            </span>
-          </div>
+        {/* Header */}
+        <PageHeader title={t('title')} subtitle={t('subtitle')}>
           <button
             onClick={() => setShowForm(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium text-sm hover:bg-primary/20 transition-colors"
@@ -969,7 +986,7 @@ export default function ContactsPage() {
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">{t('addContact')}</span>
           </button>
-        </div>
+        </PageHeader>
 
         {/* Stats Cards */}
         {totalContacts > 0 && (
@@ -983,7 +1000,7 @@ export default function ContactsPage() {
             <StatCard label="BOLT12" value={stats.bolt12Offers} icon={Gift} variant="success" />
             <StatCard
               label={tc('recurring')}
-              value={stats.totalRecurring}
+              value={stats.activeRecurring}
               icon={Repeat}
               variant="accent"
             />

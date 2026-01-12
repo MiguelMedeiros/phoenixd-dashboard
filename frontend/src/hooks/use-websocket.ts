@@ -88,6 +88,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const mountedRef = useRef(true);
   const connectingRef = useRef(false);
 
+  // Store callbacks in refs to always get the latest version
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   useEffect(() => {
     mountedRef.current = true;
 
@@ -112,7 +116,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
           connectingRef.current = false;
           console.log('WebSocket connected');
           setIsConnected(true);
-          options.onConnect?.();
+          optionsRef.current.onConnect?.();
         };
 
         ws.onmessage = (event) => {
@@ -122,12 +126,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
             // Handle payment events
             if (data.type === 'payment_received') {
-              options.onPaymentReceived?.(data as PaymentEvent);
+              optionsRef.current.onPaymentReceived?.(data as PaymentEvent);
             }
 
             // Handle recurring payment execution events
             if (data.type === 'recurring_payment_executed') {
-              options.onRecurringPaymentExecuted?.(data as RecurringPaymentEvent);
+              optionsRef.current.onRecurringPaymentExecuted?.(data as RecurringPaymentEvent);
             }
 
             // Handle service events (cloudflared, tor, tailscale)
@@ -136,7 +140,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
               data.type?.startsWith('tor:') ||
               data.type?.startsWith('tailscale:')
             ) {
-              options.onServiceEvent?.(data as ServiceEvent);
+              optionsRef.current.onServiceEvent?.(data as ServiceEvent);
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
@@ -151,7 +155,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
           console.log('WebSocket disconnected');
           setIsConnected(false);
-          options.onDisconnect?.();
+          optionsRef.current.onDisconnect?.();
 
           // Reconnect after 5 seconds if still mounted
           if (mountedRef.current) {
@@ -189,7 +193,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         wsRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on mount
 
   return { isConnected };

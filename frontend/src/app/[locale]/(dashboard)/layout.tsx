@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/components/auth-provider';
 import { CurrencyProvider, useCurrencyContext } from '@/components/currency-provider';
+import { AnimationProvider, useAnimationContext } from '@/components/animation-provider';
 import { PWAInstallPrompt } from '@/components/pwa-install-prompt';
 import { useWebSocket } from '@/hooks/use-websocket';
 import { useToast } from '@/hooks/use-toast';
@@ -17,55 +18,14 @@ import {
 import { useCallback, useRef, useState } from 'react';
 import { type Notification } from '@/components/notifications-popover';
 import { useTranslations } from 'next-intl';
-import confetti from 'canvas-confetti';
-
-// Mini confetti burst from top-right corner for payment notifications
-const firePaymentConfetti = () => {
-  const count = 100;
-  const defaults = {
-    origin: { x: 0.9, y: 0.1 }, // Top-right corner
-    zIndex: 9999,
-    disableForReducedMotion: true,
-  };
-
-  // First burst
-  confetti({
-    ...defaults,
-    particleCount: Math.floor(count * 0.4),
-    spread: 50,
-    startVelocity: 35,
-    colors: ['#f97316', '#fb923c', '#fdba74'], // Orange tones
-  });
-
-  // Second burst with delay
-  setTimeout(() => {
-    confetti({
-      ...defaults,
-      particleCount: Math.floor(count * 0.3),
-      spread: 70,
-      startVelocity: 25,
-      colors: ['#22c55e', '#4ade80', '#86efac'], // Green tones
-    });
-  }, 100);
-
-  // Third burst
-  setTimeout(() => {
-    confetti({
-      ...defaults,
-      particleCount: Math.floor(count * 0.3),
-      spread: 90,
-      startVelocity: 20,
-      decay: 0.92,
-      colors: ['#eab308', '#facc15', '#fde047'], // Yellow/gold tones
-    });
-  }, 200);
-};
+import { wsEvents, WS_EVENTS } from '@/lib/websocket-events';
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const t = useTranslations('notifications');
   const tt = useTranslations('toast');
   const { formatValue } = useCurrencyContext();
+  const { playAnimation } = useAnimationContext();
   const balanceRefreshRef = useRef<(() => void) | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -125,8 +85,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         timestamp: Date.now(),
       });
 
-      // Fire confetti celebration for any payment received! 🎉
-      firePaymentConfetti();
+      // Fire celebration animation for any payment received! 🎉
+      playAnimation(true);
 
       // Send push notification if enabled
       if (pushNotificationsEnabled) {
@@ -162,8 +122,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         timestamp: Date.now(),
       });
 
-      // Fire confetti celebration for recurring payments! 🎉
-      firePaymentConfetti();
+      // Fire celebration animation for recurring payments! 🎉
+      playAnimation(true);
 
       // Send push notification if enabled
       if (pushNotificationsEnabled) {
@@ -179,6 +139,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       }
 
       refreshBalance();
+
+      // Emit event for other components to listen
+      wsEvents.emit(WS_EVENTS.RECURRING_PAYMENT_EXECUTED, event);
     },
     onServiceEvent: (event) => {
       // Handle service connection/disconnection events
@@ -278,7 +241,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <AuthProvider>
       <CurrencyProvider>
-        <DashboardContent>{children}</DashboardContent>
+        <AnimationProvider>
+          <DashboardContent>{children}</DashboardContent>
+        </AnimationProvider>
       </CurrencyProvider>
     </AuthProvider>
   );

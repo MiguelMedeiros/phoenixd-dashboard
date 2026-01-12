@@ -30,6 +30,11 @@ const sidebarNavItems = [
     icon: Home,
   },
   {
+    key: 'contacts',
+    href: '/contacts',
+    icon: Users,
+  },
+  {
     key: 'receive',
     href: '/receive',
     icon: ArrowDownToLine,
@@ -43,11 +48,6 @@ const sidebarNavItems = [
     key: 'payments',
     href: '/payments',
     icon: History,
-  },
-  {
-    key: 'contacts',
-    href: '/contacts',
-    icon: Users,
   },
   {
     key: 'channels',

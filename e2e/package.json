@@ -16,7 +16,8 @@
     "test:navigation": "cypress run --spec 'e2e/navigation.cy.ts'",
     "test:tools": "cypress run --spec 'e2e/tools.cy.ts'",
     "test:contacts": "cypress run --spec 'e2e/contacts.cy.ts'",
-    "test:recurring": "cypress run --spec 'e2e/recurring-payments.cy.ts'"
+    "test:recurring": "cypress run --spec 'e2e/recurring-payments.cy.ts'",
+    "test:settings": "cypress run --spec 'e2e/settings.cy.ts'"
   },
   "devDependencies": {
     "cypress": "^15.3.3",

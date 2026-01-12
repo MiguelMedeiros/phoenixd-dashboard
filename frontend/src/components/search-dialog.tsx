@@ -14,6 +14,7 @@ import {
   FileCode,
   Zap,
   Settings,
+  Users,
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -53,6 +54,13 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         subtitle: t('overviewSubtitle'),
         icon: <Home className="h-4 w-4" />,
         href: '/',
+      },
+      {
+        type: 'page',
+        title: t('contactsTitle'),
+        subtitle: t('contactsSubtitle'),
+        icon: <Users className="h-4 w-4" />,
+        href: '/contacts',
       },
       {
         type: 'page',

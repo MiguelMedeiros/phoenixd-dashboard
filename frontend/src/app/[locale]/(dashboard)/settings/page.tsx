@@ -37,6 +37,13 @@ import {
   Cloud,
   CloudOff,
   Wallet,
+  PartyPopper,
+  CloudLightning,
+  Coins,
+  Ban,
+  Play,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNotifications } from '@/hooks/use-notifications';
@@ -71,6 +78,11 @@ import {
   FIAT_CURRENCIES,
   BITCOIN_DISPLAY_MODES,
 } from '@/components/currency-provider';
+import {
+  useAnimationContext,
+  ANIMATION_TYPES,
+  type AnimationType,
+} from '@/components/animation-provider';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useDesktopMode } from '@/hooks/use-desktop-mode';
 import { useTranslations } from 'next-intl';
@@ -1552,6 +1564,108 @@ function DisplayTab() {
               <span className="text-sm font-medium">{themeItem.label}</span>
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Animations */}
+      <AnimationsSection />
+    </div>
+  );
+}
+
+// Animation icon mapping
+const animationIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  PartyPopper,
+  CloudLightning,
+  Sparkles,
+  Zap,
+  Coins,
+  Ban,
+};
+
+function AnimationsSection() {
+  const t = useTranslations('settings');
+  const { animationType, setAnimationType, soundEnabled, setSoundEnabled, previewAnimation } =
+    useAnimationContext();
+
+  return (
+    <div className="glass-card rounded-xl p-5 space-y-4">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-10 w-10 rounded-lg flex items-center justify-center bg-primary/10">
+          <Sparkles className="h-5 w-5 text-primary" />
+        </div>
+        <div className="flex-1">
+          <p className="font-medium">{t('animations')}</p>
+          <p className="text-sm text-muted-foreground">{t('animationsDescription')}</p>
+        </div>
+      </div>
+
+      {/* Animation type selection */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {ANIMATION_TYPES.map((anim) => {
+          const IconComponent = animationIcons[anim.icon] || Sparkles;
+          return (
+            <button
+              key={anim.id}
+              onClick={() => setAnimationType(anim.id as AnimationType)}
+              className={cn(
+                'flex flex-col items-center gap-2 p-4 rounded-xl border transition-all relative group',
+                animationType === anim.id
+                  ? 'bg-primary/10 border-primary/50 text-primary'
+                  : 'bg-black/[0.02] dark:bg-white/[0.02] border-black/[0.08] dark:border-white/[0.04] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-muted-foreground'
+              )}
+            >
+              <IconComponent className="h-6 w-6" />
+              <span className="text-sm font-medium">{t(`animation_${anim.id}`)}</span>
+              {animationType === anim.id && <Check className="h-4 w-4 absolute top-2 right-2" />}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Preview button */}
+      {animationType !== 'none' && (
+        <div className="pt-4 border-t border-black/5 dark:border-white/5">
+          <button
+            onClick={() => previewAnimation(animationType as AnimationType)}
+            className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary transition-all"
+          >
+            <Play className="h-4 w-4" />
+            <span className="font-medium">{t('previewAnimation')}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Sound toggle */}
+      <div className="pt-4 border-t border-black/5 dark:border-white/5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {soundEnabled ? (
+              <Volume2 className="h-5 w-5 text-primary" />
+            ) : (
+              <VolumeX className="h-5 w-5 text-muted-foreground" />
+            )}
+            <div>
+              <p className="font-medium">{t('animationSounds')}</p>
+              <p className="text-sm text-muted-foreground">
+                {soundEnabled ? t('soundsEnabled') : t('soundsDisabled')}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className={cn(
+              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+              soundEnabled ? 'bg-primary' : 'bg-black/20 dark:bg-white/20'
+            )}
+          >
+            <span
+              className={cn(
+                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                soundEnabled ? 'translate-x-6' : 'translate-x-1'
+              )}
+            />
+          </button>
         </div>
       </div>
     </div>
