@@ -18,7 +18,11 @@ paymentMetadataRouter.get(
         },
         include: {
           contact: true,
-          categories: true,
+          categories: {
+            include: {
+              category: true,
+            },
+          },
         },
       });
 
@@ -52,17 +56,21 @@ paymentMetadataRouter.put(
           OR: [{ paymentHash: identifier }, { paymentId: identifier }],
         },
         include: {
-          categories: true,
+          categories: {
+            include: {
+              category: true,
+            },
+          },
         },
       });
 
-      let metadata;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let metadata: any = null;
       if (existing) {
         // Build update data
         const updateData: {
           note?: string | null;
           contactId?: string | null;
-          categories?: { set: { id: string }[] };
         } = {};
 
         if (note !== undefined) {
@@ -71,12 +79,6 @@ paymentMetadataRouter.put(
         if (contactId !== undefined) {
           updateData.contactId = contactId || null;
         }
-        if (categoryIds !== undefined) {
-          // Set the categories relation (replace all)
-          updateData.categories = {
-            set: categoryIds.map((id: string) => ({ id })),
-          };
-        }
 
         // Update existing metadata
         metadata = await prisma.paymentMetadata.update({
@@ -84,9 +86,44 @@ paymentMetadataRouter.put(
           data: updateData,
           include: {
             contact: true,
-            categories: true,
+            categories: {
+              include: {
+                category: true,
+              },
+            },
           },
         });
+
+        // Handle categories separately with junction table
+        if (categoryIds !== undefined) {
+          // Delete existing category associations
+          await prisma.paymentCategoryOnPayment.deleteMany({
+            where: { paymentMetadataId: existing.id },
+          });
+
+          // Create new category associations
+          if (categoryIds.length > 0) {
+            await prisma.paymentCategoryOnPayment.createMany({
+              data: categoryIds.map((categoryId: string) => ({
+                paymentMetadataId: existing.id,
+                categoryId,
+              })),
+            });
+          }
+
+          // Refetch with updated categories
+          metadata = await prisma.paymentMetadata.findUnique({
+            where: { id: existing.id },
+            include: {
+              contact: true,
+              categories: {
+                include: {
+                  category: true,
+                },
+              },
+            },
+          });
+        }
       } else {
         // Create new metadata
         metadata = await prisma.paymentMetadata.create({
@@ -95,18 +132,39 @@ paymentMetadataRouter.put(
             paymentId: !isIncomingPayment ? identifier : null,
             note: note || null,
             contactId: contactId || null,
-            ...(categoryIds &&
-              categoryIds.length > 0 && {
-                categories: {
-                  connect: categoryIds.map((id: string) => ({ id })),
-                },
-              }),
           },
           include: {
             contact: true,
-            categories: true,
+            categories: {
+              include: {
+                category: true,
+              },
+            },
           },
         });
+
+        // Add categories if provided
+        if (categoryIds && categoryIds.length > 0) {
+          await prisma.paymentCategoryOnPayment.createMany({
+            data: categoryIds.map((categoryId: string) => ({
+              paymentMetadataId: metadata.id,
+              categoryId,
+            })),
+          });
+
+          // Refetch with categories
+          metadata = await prisma.paymentMetadata.findUnique({
+            where: { id: metadata.id },
+            include: {
+              contact: true,
+              categories: {
+                include: {
+                  category: true,
+                },
+              },
+            },
+          });
+        }
       }
 
       res.json(metadata);
@@ -135,7 +193,7 @@ paymentMetadataRouter.get(
       const payments = await prisma.paymentMetadata.findMany({
         where: {
           categories: {
-            some: { id: categoryId },
+            some: { categoryId },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -143,7 +201,11 @@ paymentMetadataRouter.get(
         skip: offset ? parseInt(offset as string) : 0,
         include: {
           contact: true,
-          categories: true,
+          categories: {
+            include: {
+              category: true,
+            },
+          },
         },
       });
 
@@ -177,7 +239,11 @@ paymentMetadataRouter.get(
         skip: offset ? parseInt(offset as string) : 0,
         include: {
           contact: true,
-          categories: true,
+          categories: {
+            include: {
+              category: true,
+            },
+          },
         },
       });
 
@@ -215,7 +281,11 @@ paymentMetadataRouter.post(
         },
         include: {
           contact: true,
-          categories: true,
+          categories: {
+            include: {
+              category: true,
+            },
+          },
         },
       });
 

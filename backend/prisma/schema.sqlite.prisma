@@ -88,6 +88,7 @@ model Session {
 model Contact {
   id        String   @id @default(cuid())
   name      String
+  label     String?  // Optional label like "Personal", "Work", "Family"
   avatarUrl String?  // Optional avatar image URL
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -96,6 +97,7 @@ model Contact {
   recurringPayments RecurringPayment[]
 
   @@index([name])
+  @@index([label])
 }
 
 model ContactAddress {
@@ -104,7 +106,6 @@ model ContactAddress {
   contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   address   String   // Lightning Address, Node ID, or BOLT12 offer
   type      String   // "lightning_address", "node_id", "bolt12_offer"
-  label     String?  // Optional label like "Personal", "Work"
   isPrimary Boolean  @default(false)
   createdAt DateTime @default(now())
 
@@ -119,8 +120,21 @@ model PaymentCategory {
   color     String   @default("#6366f1") // Hex color
   icon      String?  // Lucide icon name
   createdAt DateTime @default(now())
-  payments  PaymentMetadata[]
+  payments  PaymentCategoryOnPayment[]
   recurringPayments RecurringPayment[]
+}
+
+// Junction table for many-to-many relationship (SQLite doesn't support implicit many-to-many)
+model PaymentCategoryOnPayment {
+  paymentMetadataId String
+  paymentMetadata   PaymentMetadata @relation(fields: [paymentMetadataId], references: [id], onDelete: Cascade)
+  categoryId        String
+  category          PaymentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  assignedAt        DateTime @default(now())
+
+  @@id([paymentMetadataId, categoryId])
+  @@index([paymentMetadataId])
+  @@index([categoryId])
 }
 
 model PaymentMetadata {
@@ -129,14 +143,12 @@ model PaymentMetadata {
   paymentId   String?  @unique // For outgoing payments
   note        String?
   contactId   String?
-  categoryId  String?
   contact     Contact?  @relation(fields: [contactId], references: [id])
-  category    PaymentCategory? @relation(fields: [categoryId], references: [id])
+  categories  PaymentCategoryOnPayment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([contactId])
-  @@index([categoryId])
 }
 
 model RecurringPayment {
@@ -145,7 +157,7 @@ model RecurringPayment {
   contact     Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   addressId   String   // ContactAddress ID to use
   amountSat   Int      // Amount in satoshis
-  frequency   String   // "daily", "weekly", "monthly"
+  frequency   String   // "every_minute", "every_5_minutes", "every_15_minutes", "every_30_minutes", "hourly", "daily", "weekly", "monthly"
   dayOfWeek   Int?     // 0-6 for weekly (0=Sunday)
   dayOfMonth  Int?     // 1-31 for monthly
   timeOfDay   String   @default("09:00") // HH:mm format (UTC)

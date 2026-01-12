@@ -11,22 +11,25 @@ contactsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res: Resp
   try {
     const { search } = req.query;
 
-    const contacts = await prisma.contact.findMany({
-      where: search
-        ? {
-            OR: [
-              { name: { contains: search as string, mode: 'insensitive' } },
-              { label: { contains: search as string, mode: 'insensitive' } },
-              {
-                addresses: {
-                  some: {
-                    address: { contains: search as string, mode: 'insensitive' },
-                  },
+    // Build search filter (case-insensitive search works in PostgreSQL, for SQLite we use contains)
+    const searchFilter = search
+      ? {
+          OR: [
+            { name: { contains: search as string } },
+            { label: { contains: search as string } },
+            {
+              addresses: {
+                some: {
+                  address: { contains: search as string },
                 },
               },
-            ],
-          }
-        : undefined,
+            },
+          ],
+        }
+      : undefined;
+
+    const contacts = await prisma.contact.findMany({
+      where: searchFilter,
       orderBy: { name: 'asc' },
       include: {
         addresses: {
@@ -480,9 +483,13 @@ contactsRouter.get(
         orderBy: { createdAt: 'desc' },
         take: limit ? parseInt(limit as string) : 50,
         skip: offset ? parseInt(offset as string) : 0,
-        include: {
-          categories: true,
+      include: {
+        categories: {
+          include: {
+            category: true,
+          },
         },
+      },
       });
 
       res.json(payments);

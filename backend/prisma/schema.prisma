@@ -120,8 +120,21 @@ model PaymentCategory {
   color     String   @default("#6366f1") // Hex color
   icon      String?  // Lucide icon name
   createdAt DateTime @default(now())
-  payments  PaymentMetadata[] @relation("PaymentCategories")
+  payments  PaymentCategoryOnPayment[]
   recurringPayments RecurringPayment[]
+}
+
+// Junction table for many-to-many relationship
+model PaymentCategoryOnPayment {
+  paymentMetadataId String
+  paymentMetadata   PaymentMetadata @relation(fields: [paymentMetadataId], references: [id], onDelete: Cascade)
+  categoryId        String
+  category          PaymentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  assignedAt        DateTime @default(now())
+
+  @@id([paymentMetadataId, categoryId])
+  @@index([paymentMetadataId])
+  @@index([categoryId])
 }
 
 model PaymentMetadata {
@@ -131,7 +144,7 @@ model PaymentMetadata {
   note        String?
   contactId   String?
   contact     Contact?  @relation(fields: [contactId], references: [id])
-  categories  PaymentCategory[] @relation("PaymentCategories")
+  categories  PaymentCategoryOnPayment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

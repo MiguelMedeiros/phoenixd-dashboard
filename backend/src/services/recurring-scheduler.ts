@@ -290,28 +290,35 @@ export async function executeRecurringPayment(
 
     // Create payment metadata to link with contact (only if we have a valid paymentId)
     if (paymentResult.paymentId) {
-      await prisma.paymentMetadata.upsert({
+      const metadata = await prisma.paymentMetadata.upsert({
         where: { paymentId: paymentResult.paymentId },
         create: {
           paymentId: paymentResult.paymentId,
           contactId: contact.id,
           note: note || `Recurring payment to ${contact.name}`,
-          ...(categoryId && {
-            categories: {
-              connect: [{ id: categoryId }],
-            },
-          }),
         },
         update: {
           contactId: contact.id,
           note: note || `Recurring payment to ${contact.name}`,
-          ...(categoryId && {
-            categories: {
-              set: [{ id: categoryId }],
-            },
-          }),
         },
       });
+
+      // Add category if provided using junction table
+      if (categoryId) {
+        await prisma.paymentCategoryOnPayment.upsert({
+          where: {
+            paymentMetadataId_categoryId: {
+              paymentMetadataId: metadata.id,
+              categoryId,
+            },
+          },
+          create: {
+            paymentMetadataId: metadata.id,
+            categoryId,
+          },
+          update: {},
+        });
+      }
     } else {
       console.warn(`[Recurring] Payment succeeded but no paymentId to create metadata`);
     }

@@ -125,14 +125,9 @@ categoriesRouter.delete('/:id', requireAuth, async (req: AuthenticatedRequest, r
       return res.status(404).json({ error: 'Category not found' });
     }
 
-    // Disconnect this category from all payment metadata first
-    await prisma.paymentCategory.update({
-      where: { id },
-      data: {
-        payments: {
-          set: [], // Disconnect all payments
-        },
-      },
+    // Delete all junction table entries for this category first
+    await prisma.paymentCategoryOnPayment.deleteMany({
+      where: { categoryId: id },
     });
 
     await prisma.paymentCategory.delete({ where: { id } });
