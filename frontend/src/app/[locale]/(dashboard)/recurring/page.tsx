@@ -296,7 +296,10 @@ export default function RecurringPage() {
   };
 
   // Fetch payment details from execution
-  const handleSelectExecution = async (exec: RecurringPaymentExecution, contact: Contact | null) => {
+  const handleSelectExecution = async (
+    exec: RecurringPaymentExecution,
+    contact: Contact | null
+  ) => {
     if (!exec.paymentId || exec.status !== 'success') return;
 
     setSelectedContactForDetail(contact);
@@ -571,11 +574,7 @@ export default function RecurringPage() {
           />
           <StatCard
             label={t('nextPayment')}
-            value={
-              stats.nextScheduled
-                ? countdowns[stats.nextScheduled.id] || '...'
-                : '-'
-            }
+            value={stats.nextScheduled ? countdowns[stats.nextScheduled.id] || '...' : '-'}
             icon={Timer}
             variant="accent"
           />
@@ -636,7 +635,8 @@ export default function RecurringPage() {
                             className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400"
                             title={`Node: ${recurring.connection.name}`}
                           >
-                            {recurring.connection.isDocker ? '🐳' : '🌐'} {recurring.connection.name}
+                            {recurring.connection.isDocker ? '🐳' : '🌐'}{' '}
+                            {recurring.connection.name}
                           </span>
                         )}
                       </div>
@@ -649,7 +649,9 @@ export default function RecurringPage() {
                         {recurring.paymentCount > 0 && (
                           <>
                             <span>•</span>
-                            <span>{recurring.paymentCount} {tc('payments').toLowerCase()}</span>
+                            <span>
+                              {recurring.paymentCount} {tc('payments').toLowerCase()}
+                            </span>
                           </>
                         )}
                       </div>
@@ -696,7 +698,10 @@ export default function RecurringPage() {
                   {/* Error Display */}
                   {recurring.lastError && (
                     <div className="px-4 pb-2">
-                      <p className="text-[11px] text-destructive truncate" title={recurring.lastError}>
+                      <p
+                        className="text-[11px] text-destructive truncate"
+                        title={recurring.lastError}
+                      >
                         {recurring.lastError}
                       </p>
                     </div>
@@ -831,9 +836,11 @@ export default function RecurringPage() {
                         <div className="flex-1 min-w-0">
                           <span className="font-medium text-sm truncate block">{contact.name}</span>
                           <span className="text-xs text-muted-foreground">
-                            {contact.addresses.filter(
-                              (a) => a.type === 'lightning_address' || a.type === 'bolt12_offer'
-                            ).length}{' '}
+                            {
+                              contact.addresses.filter(
+                                (a) => a.type === 'lightning_address' || a.type === 'bolt12_offer'
+                              ).length
+                            }{' '}
                             payable addresses
                           </span>
                         </div>
