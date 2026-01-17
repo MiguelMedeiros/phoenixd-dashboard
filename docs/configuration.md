@@ -79,6 +79,28 @@ Choose how monetary values are displayed throughout the dashboard:
 
 The preference is saved locally and prices are cached for 60 seconds to avoid rate limiting.
 
+### Bitcoin Unit Display (BIP-177)
+
+Choose how Bitcoin amounts are displayed:
+
+- **Classic (sats)** - Traditional satoshi display (e.g., "100,000 sats")
+- **Modern (BIP-177)** - Uses ₿ symbol (e.g., "₿100,000")
+
+BIP-177 proposes using ₿ (lowercase bitcoin) as the base unit symbol instead of 'sats'. Both formats represent the same value.
+
+### Celebration Animations
+
+When you receive a payment, the dashboard can show a celebration animation:
+
+- **Confetti** - Colorful confetti explosion
+- **Thunder** - Lightning bolt effects
+- **Fireworks** - Fireworks display
+- **Electric Spark** - Electric spark animation
+- **Coin Rain** - Bitcoin coins falling
+- **None** - Disable animations
+
+You can also enable/disable sound effects for animations.
+
 ### Other Settings
 
 - **Password Protection** - Secure your dashboard with a password
@@ -89,9 +111,37 @@ The preference is saved locally and prices are cached for 60 seconds to avoid ra
 
 ---
 
+## Multi-Node Connections
+
+The dashboard supports connecting to multiple phoenixd instances, allowing you to easily switch between different nodes.
+
+### Docker (Local) Connection
+
+By default, the dashboard connects to the phoenixd instance running in Docker. This connection is always available and cannot be deleted.
+
+### External Phoenixd Connections
+
+You can add connections to phoenixd instances running outside of Docker:
+
+1. Go to **Settings → Network**
+2. Click **Add Connection**
+3. Enter a name, URL (e.g., `http://192.168.1.100:9740`), and API password
+4. Click **Test Connection** to verify
+5. Save the connection
+
+### Switching Between Nodes
+
+- Click **Activate** on any connection to switch to it
+- The active connection is highlighted with a green indicator
+- Recurring payments are tied to the connection they were created on
+
+> 💡 **Tip:** Use this feature to manage mainnet and testnet nodes, or to connect to a remote phoenixd server.
+
+---
+
 ## Remote Access Options
 
-The dashboard supports three methods for secure remote access. Configure them in **Settings → Remote Access**.
+The dashboard supports three methods for secure remote access. Configure them in **Settings → Network**.
 
 ### Tailscale VPN
 

@@ -1433,7 +1433,7 @@ function NetworkTab() {
                         <button
                           onClick={() => handleEditConnection(conn)}
                           className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                          title={t('edit') || 'Edit'}
+                          title={tc('edit') || 'Edit'}
                         >
                           <Sparkles className="h-3.5 w-3.5" />
                         </button>
@@ -1442,7 +1442,7 @@ function NetworkTab() {
                             onClick={() => handleDeleteConnection(conn.id)}
                             disabled={deletingConnection === conn.id}
                             className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
-                            title={t('delete') || 'Delete'}
+                            title={tc('delete') || 'Delete'}
                           >
                             {deletingConnection === conn.id ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />

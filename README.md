@@ -51,7 +51,11 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **Tools** — Decode invoices, liquidity fees, LNURL support
 
-✅ **Multi-Currency** — Display in 10+ fiat currencies
+✅ **Multi-Currency** — Display in 10+ fiat currencies with BIP-177 unit support
+
+✅ **Multi-Node** — Connect to multiple phoenixd instances and switch between them
+
+✅ **Celebration Animations** — Confetti, thunder, fireworks, and more on payments
 
 ✅ **PWA** — Install as native app on any device
 
