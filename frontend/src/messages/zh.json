@@ -848,7 +848,8 @@
     "everyWeek": "每周",
     "everyMonth": "每月",
     "editingFor": "Editing recurring payment for {contact}",
-    "runningNow": "Running now..."
+    "runningNow": "Running now...",
+    "selectContact": "选择联系人"
   },
   "apps": {
     "title": "应用",

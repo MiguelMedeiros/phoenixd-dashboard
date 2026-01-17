@@ -848,7 +848,8 @@
     "everyWeek": "كل أسبوع",
     "everyMonth": "كل شهر",
     "editingFor": "Editing recurring payment for {contact}",
-    "runningNow": "Running now..."
+    "runningNow": "Running now...",
+    "selectContact": "اختر جهة اتصال"
   },
   "apps": {
     "title": "التطبيقات",

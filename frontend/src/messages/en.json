@@ -850,7 +850,8 @@
     "everyDay": "Every day",
     "everyWeek": "Every week",
     "everyMonth": "Every month",
-    "runningNow": "Running now..."
+    "runningNow": "Running now...",
+    "selectContact": "Select Contact"
   },
   "apps": {
     "title": "Apps",

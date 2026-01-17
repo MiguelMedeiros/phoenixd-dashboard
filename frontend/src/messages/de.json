@@ -848,7 +848,8 @@
     "everyWeek": "Jede Woche",
     "everyMonth": "Jeden Monat",
     "editingFor": "Editing recurring payment for {contact}",
-    "runningNow": "Running now..."
+    "runningNow": "Running now...",
+    "selectContact": "Kontakt auswählen"
   },
   "apps": {
     "title": "Apps",

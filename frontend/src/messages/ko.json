@@ -848,7 +848,8 @@
     "everyWeek": "매주",
     "everyMonth": "매월",
     "editingFor": "Editing recurring payment for {contact}",
-    "runningNow": "Running now..."
+    "runningNow": "Running now...",
+    "selectContact": "연락처 선택"
   },
   "apps": {
     "title": "앱",

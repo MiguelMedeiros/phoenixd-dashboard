@@ -848,7 +848,8 @@
     "everyDay": "Todos los días",
     "everyWeek": "Cada semana",
     "everyMonth": "Cada mes",
-    "runningNow": "Ejecutando ahora..."
+    "runningNow": "Ejecutando ahora...",
+    "selectContact": "Seleccionar Contacto"
   },
   "apps": {
     "title": "Apps",

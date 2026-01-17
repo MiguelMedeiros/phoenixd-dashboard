@@ -349,15 +349,29 @@ export default function AppsPage() {
     }
   };
 
-  const loadAppWebhooks = async (appId: string) => {
-    setLoadingWebhooks(appId);
+  const loadAppWebhooks = async (appId: string, showLoading = true) => {
+    if (showLoading) {
+      setLoadingWebhooks(appId);
+    }
     try {
       const webhooks = await getAppWebhooks(appId);
-      setAppWebhooks((prev) => ({ ...prev, [appId]: webhooks }));
+      // Only update state if data actually changed to prevent unnecessary re-renders
+      setAppWebhooks((prev) => {
+        const existing = prev[appId];
+        if (existing && existing.length === webhooks.length) {
+          // Check if first item ID is the same (most recent webhook)
+          if (existing[0]?.id === webhooks[0]?.id) {
+            return prev; // No change, return same reference
+          }
+        }
+        return { ...prev, [appId]: webhooks };
+      });
     } catch (error) {
       console.error('Failed to load webhooks:', error);
     } finally {
-      setLoadingWebhooks(null);
+      if (showLoading) {
+        setLoadingWebhooks(null);
+      }
     }
   };
 
@@ -392,9 +406,9 @@ export default function AppsPage() {
       // Load webhooks initially
       loadAppWebhooks(appId);
 
-      // Start polling webhooks every 5 seconds
+      // Start polling webhooks every 5 seconds (without loading indicator)
       webhookIntervalRef.current = setInterval(() => {
-        loadAppWebhooks(appId);
+        loadAppWebhooks(appId, false);
       }, 5000);
     }
   };

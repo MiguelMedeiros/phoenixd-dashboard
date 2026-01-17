@@ -848,7 +848,8 @@
     "everyWeek": "हर हफ्ते",
     "everyMonth": "हर महीने",
     "editingFor": "Editing recurring payment for {contact}",
-    "runningNow": "Running now..."
+    "runningNow": "Running now...",
+    "selectContact": "संपर्क चुनें"
   },
   "apps": {
     "title": "Apps",

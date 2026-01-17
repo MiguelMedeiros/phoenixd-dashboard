@@ -18,6 +18,7 @@ import {
   Lock,
   Users,
   Box,
+  Repeat,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getNodeInfo } from '@/lib/api';
@@ -34,6 +35,12 @@ const sidebarNavItems = [
     key: 'contacts',
     href: '/contacts',
     icon: Users,
+  },
+  {
+    key: 'recurring',
+    href: '/recurring',
+    icon: Repeat,
+    badge: 'new',
   },
   {
     key: 'receive',

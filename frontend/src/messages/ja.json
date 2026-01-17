@@ -848,7 +848,8 @@
     "everyWeek": "毎週",
     "everyMonth": "毎月",
     "editingFor": "Editing recurring payment for {contact}",
-    "runningNow": "Running now..."
+    "runningNow": "Running now...",
+    "selectContact": "連絡先を選択"
   },
   "apps": {
     "title": "アプリ",
