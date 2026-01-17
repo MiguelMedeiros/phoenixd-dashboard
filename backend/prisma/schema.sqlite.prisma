@@ -218,3 +218,63 @@ model PhoenixdConnection {
   @@index([isActive])
   @@index([isDocker])
 }
+
+// Apps System - Third-party integrations via Docker
+model App {
+  id                String    @id @default(cuid())
+  name              String                      // Display name
+  slug              String    @unique           // Unique identifier (e.g., "telegram-bot")
+  description       String?
+  icon              String?                     // Icon URL or emoji
+  
+  // Source
+  sourceType        String                      // "docker_image", "github", "marketplace"
+  sourceUrl         String                      // Docker image or GitHub repo URL
+  version           String?                     // Version tag
+  
+  // Docker
+  containerName     String?                     // Running container name
+  containerStatus   String    @default("stopped") // running, stopped, error
+  internalPort      Int       @default(3000)    // Port the app listens on inside container
+  
+  // Configuration
+  envVars           String?                     // JSON: custom env vars for this app
+  webhookEvents     String?                     // JSON array: ["payment_received", "payment_sent"]
+  webhookSecret     String?                     // Secret for signing webhooks
+  webhookPath       String    @default("/webhook") // Path to receive webhooks
+  
+  // API Access
+  apiKey            String?   @unique           // API key for app to call backend
+  apiPermissions    String?                     // JSON: ["read:payments", "write:invoices"]
+  
+  // Status
+  isEnabled         Boolean   @default(true)
+  lastHealthCheck   DateTime?
+  healthStatus      String?                     // healthy, unhealthy, unknown
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  webhookLogs       AppWebhookLog[]
+  
+  @@index([slug])
+  @@index([containerStatus])
+  @@index([isEnabled])
+}
+
+model AppWebhookLog {
+  id          String   @id @default(cuid())
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  eventType   String                           // payment_received, payment_sent, etc
+  payload     String                           // JSON payload sent
+  statusCode  Int?                             // HTTP response code
+  response    String?                          // Response body (truncated)
+  success     Boolean
+  latencyMs   Int?
+  createdAt   DateTime @default(now())
+  
+  @@index([appId])
+  @@index([eventType])
+  @@index([createdAt])
+}

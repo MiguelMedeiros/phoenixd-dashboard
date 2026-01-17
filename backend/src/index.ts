@@ -28,9 +28,14 @@ import {
   phoenixdConnectionsRouter,
   initializeDockerConnection,
 } from './routes/phoenixd-connections.js';
+import { appsRouter } from './routes/apps.js';
+import { appsApiRouter } from './routes/apps-api.js';
 import { PhoenixdService } from './services/phoenixd.js';
 import { startRecurringPaymentScheduler } from './services/recurring-scheduler.js';
 import { cleanupExpiredSessions, validateSessionFromCookie } from './middleware/auth.js';
+import { dispatchPaymentReceived, cleanupOldWebhookLogs } from './services/app-webhooks.js';
+import { AppDockerService } from './services/app-docker.js';
+import crypto from 'crypto';
 
 const app = express();
 const server = createServer(app);
@@ -180,6 +185,8 @@ app.use('/api/categories', categoriesRouter);
 app.use('/api/recurring-payments', recurringPaymentsRouter);
 app.use('/api/phoenixd', phoenixdConfigRouter); // Mount phoenixd config routes (they have their own paths like /config)
 app.use('/api/phoenixd-connections', phoenixdConnectionsRouter);
+app.use('/api/apps', appsRouter); // Apps management
+app.use('/api/apps-gateway', appsApiRouter); // API gateway for apps to call backend
 
 // WebSocket clients
 const clients = new Set<WebSocket>();
@@ -553,6 +560,19 @@ async function connectPhoenixdWebSocket() {
           } catch (dbError) {
             console.error('Error saving payment to database:', dbError);
           }
+
+          // Dispatch webhook to subscribed apps (fire and forget)
+          dispatchPaymentReceived({
+            paymentHash: event.paymentHash || '',
+            amountSat: event.amountSat || 0,
+            description: event.description,
+            externalId: event.externalId,
+            receivedAt: Date.now(),
+            payerKey: event.payerKey,
+            payerNote: event.payerNote,
+          }).catch((webhookError) => {
+            console.error('Error dispatching payment webhook:', webhookError);
+          });
         }
       } catch (error) {
         console.error('Error processing phoenixd event:', error);
@@ -585,6 +605,75 @@ export function reconnectPhoenixdWebSocket() {
   connectPhoenixdWebSocket();
 }
 
+/**
+ * Install default/featured apps from the marketplace
+ * These apps come pre-installed for convenience
+ */
+async function installDefaultApps() {
+  const defaultApps = [
+    {
+      name: 'Donations Page',
+      slug: 'donations',
+      description:
+        'Beautiful donation page to accept Lightning payments with customizable branding',
+      icon: '💜',
+      sourceType: 'docker_image',
+      // Use local image for development, will be published to ghcr.io for production
+      sourceUrl: 'phoenixd-donations:latest',
+      webhookEvents: ['payment_received'],
+      apiPermissions: ['write:invoices', 'read:node'],
+      envVars: {
+        DONATIONS_TITLE: 'Support Our Project',
+        DONATIONS_SUBTITLE: 'Your contribution helps us keep building amazing things',
+        DONATIONS_THEME: 'dark',
+        DONATIONS_AMOUNTS: '1000,5000,10000,50000',
+      },
+    },
+  ];
+
+  for (const appConfig of defaultApps) {
+    try {
+      // Check if app already exists
+      const existing = await prisma.app.findUnique({
+        where: { slug: appConfig.slug },
+      });
+
+      if (existing) {
+        console.log(`Default app "${appConfig.name}" already installed`);
+        continue;
+      }
+
+      // Create the app
+      const app = await prisma.app.create({
+        data: {
+          name: appConfig.name,
+          slug: appConfig.slug,
+          description: appConfig.description,
+          icon: appConfig.icon,
+          sourceType: appConfig.sourceType,
+          sourceUrl: appConfig.sourceUrl,
+          version: 'latest',
+          containerName: `phoenixd-app-${appConfig.slug}`,
+          containerStatus: 'stopped',
+          internalPort: 3000,
+          envVars: JSON.stringify(appConfig.envVars),
+          webhookEvents: JSON.stringify(appConfig.webhookEvents),
+          webhookSecret: crypto.randomBytes(32).toString('hex'),
+          webhookPath: '/webhook',
+          apiKey: `phxapp_${crypto.randomBytes(32).toString('hex')}`,
+          apiPermissions: JSON.stringify(appConfig.apiPermissions),
+          isEnabled: true,
+          healthStatus: 'unknown',
+        },
+      });
+
+      console.log(`✅ Default app "${appConfig.name}" installed (id: ${app.id})`);
+    } catch (error) {
+      console.error(`Failed to install default app "${appConfig.name}":`, error);
+    }
+  }
+}
+
 // Start server
 const PORT = process.env.PORT || 4000;
 
@@ -595,6 +684,9 @@ server.listen(PORT, async () => {
   await initializeDockerConnection();
   setTimeout(connectPhoenixdWebSocket, 3000);
 
+  // Install default apps (Donations, etc.)
+  await installDefaultApps();
+
   // Cleanup expired sessions every hour
   setInterval(cleanupExpiredSessions, 60 * 60 * 1000);
   // Also run cleanup on startup
@@ -602,6 +694,27 @@ server.listen(PORT, async () => {
 
   // Start recurring payments scheduler (check every minute)
   startRecurringPaymentScheduler(60000);
+
+  // Apps: Health check every 5 minutes
+  const appDockerService = new AppDockerService();
+  setInterval(
+    () => {
+      appDockerService.updateAllHealthStatuses().catch((error) => {
+        console.error('Error updating app health statuses:', error);
+      });
+    },
+    5 * 60 * 1000
+  );
+
+  // Apps: Cleanup old webhook logs daily
+  setInterval(
+    () => {
+      cleanupOldWebhookLogs().catch((error) => {
+        console.error('Error cleaning up webhook logs:', error);
+      });
+    },
+    24 * 60 * 60 * 1000
+  );
 });
 
 // Graceful shutdown

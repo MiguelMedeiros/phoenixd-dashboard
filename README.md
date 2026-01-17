@@ -57,6 +57,8 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **Celebration Animations** — Confetti, thunder, fireworks, and more on payments
 
+✅ **App Store** — Install third-party integrations (Telegram, Nostr, Donations, etc.)
+
 ✅ **PWA** — Install as native app on any device
 
 ✅ **Desktop App** — Native macOS/Linux app with system tray
@@ -105,6 +107,11 @@ open http://localhost:3000
 - 🔗 [**Tailscale VPN**](docs/mobile-wallet-setup.md) — Private remote access via Tailscale
 - ☁️ [**Cloudflare Tunnel**](docs/cloudflare-tunnel.md) — Public access with custom domain
 - 🧅 [**Tor Hidden Service**](docs/tor-hidden-service.md) — Anonymous access via .onion address
+
+### Apps & Integrations
+
+- 🧩 [**Apps Development**](docs/apps-development.md) — Create apps that integrate with your node
+- 💝 [**Donations App**](apps/donations/README.md) — Accept Lightning donations (example app)
 
 ### Security & API
 

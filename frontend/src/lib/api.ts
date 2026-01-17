@@ -1264,3 +1264,155 @@ export async function testNewPhoenixdConnection(data: {
     body: JSON.stringify(data),
   });
 }
+
+// Apps
+export interface App {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  icon?: string | null;
+  sourceType: string;
+  sourceUrl: string;
+  version?: string | null;
+  containerName?: string | null;
+  containerStatus: string;
+  internalPort: number;
+  envVars?: string | null;
+  webhookEvents?: string | null;
+  webhookSecret?: string | null;
+  webhookPath: string;
+  apiKey?: string | null;
+  apiPermissions?: string | null;
+  isEnabled: boolean;
+  lastHealthCheck?: string | null;
+  healthStatus?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    webhookLogs: number;
+  };
+}
+
+export interface AppWebhookLog {
+  id: string;
+  appId: string;
+  eventType: string;
+  payload: string;
+  statusCode?: number | null;
+  response?: string | null;
+  success: boolean;
+  latencyMs?: number | null;
+  createdAt: string;
+}
+
+export async function getApps(): Promise<App[]> {
+  return request<App[]>('/api/apps');
+}
+
+export async function getApp(id: string): Promise<App> {
+  return request<App>(`/api/apps/${id}`);
+}
+
+export async function installApp(data: {
+  name: string;
+  sourceType: string;
+  sourceUrl: string;
+  description?: string;
+  icon?: string;
+  version?: string;
+  webhookEvents?: string[];
+  apiPermissions?: string[];
+  envVars?: Record<string, string>;
+  internalPort?: number;
+}): Promise<App> {
+  return request<App>('/api/apps', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateApp(
+  id: string,
+  data: {
+    name?: string;
+    description?: string;
+    icon?: string;
+    webhookEvents?: string[];
+    webhookPath?: string;
+    apiPermissions?: string[];
+    envVars?: Record<string, string>;
+    isEnabled?: boolean;
+    internalPort?: number;
+  }
+): Promise<App> {
+  return request<App>(`/api/apps/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function uninstallApp(id: string): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/apps/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function startApp(id: string): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/apps/${id}/start`, {
+    method: 'POST',
+  });
+}
+
+export async function stopApp(id: string): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/apps/${id}/stop`, {
+    method: 'POST',
+  });
+}
+
+export async function restartApp(id: string): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/apps/${id}/restart`, {
+    method: 'POST',
+  });
+}
+
+export async function getAppLogs(id: string, tail?: number): Promise<{ logs: string }> {
+  const query = tail ? `?tail=${tail}` : '';
+  return request<{ logs: string }>(`/api/apps/${id}/logs${query}`);
+}
+
+export async function getAppWebhooks(
+  id: string,
+  limit?: number,
+  offset?: number
+): Promise<AppWebhookLog[]> {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (offset) params.append('offset', offset.toString());
+  const query = params.toString() ? `?${params.toString()}` : '';
+  return request<AppWebhookLog[]>(`/api/apps/${id}/webhooks${query}`);
+}
+
+export async function regenerateAppKey(id: string): Promise<{ apiKey: string }> {
+  return request<{ apiKey: string }>(`/api/apps/${id}/regenerate-key`, {
+    method: 'POST',
+  });
+}
+
+export async function regenerateAppSecret(id: string): Promise<{ webhookSecret: string }> {
+  return request<{ webhookSecret: string }>(`/api/apps/${id}/regenerate-secret`, {
+    method: 'POST',
+  });
+}
+
+export async function getAppStatus(id: string): Promise<{
+  containerStatus: string;
+  healthStatus: string;
+  running: boolean;
+}> {
+  return request<{
+    containerStatus: string;
+    healthStatus: string;
+    running: boolean;
+  }>(`/api/apps/${id}/status`);
+}

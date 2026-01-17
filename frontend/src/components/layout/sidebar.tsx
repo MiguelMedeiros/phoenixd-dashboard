@@ -17,6 +17,7 @@ import {
   Server,
   Lock,
   Users,
+  Box,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getNodeInfo } from '@/lib/api';
@@ -63,6 +64,12 @@ const sidebarNavItems = [
     key: 'lnurl',
     href: '/lnurl',
     icon: Link2,
+  },
+  {
+    key: 'apps',
+    href: '/apps',
+    icon: Box,
+    badge: 'new',
   },
 ];
 
@@ -164,12 +171,13 @@ export function Sidebar() {
         {sidebarNavItems.map((item) => {
           const isActive = pathname === item.href;
           const title = t(item.key);
+          const badge = 'badge' in item ? item.badge : undefined;
 
           return (
             <Link key={item.href} href={item.href} title={expanded ? undefined : title}>
               <div
                 className={cn(
-                  'group flex items-center gap-3 transition-all duration-200',
+                  'group flex items-center gap-3 transition-all duration-200 relative',
                   expanded
                     ? cn(
                         'px-3 py-2.5 rounded-xl',
@@ -189,12 +197,27 @@ export function Sidebar() {
                 {expanded && (
                   <span
                     className={cn(
-                      'text-sm font-medium whitespace-nowrap transition-colors',
+                      'text-sm font-medium whitespace-nowrap transition-colors flex-1',
                       isActive ? 'text-white' : ''
                     )}
                   >
                     {title}
                   </span>
+                )}
+                {badge && expanded && (
+                  <span
+                    className={cn(
+                      'px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full',
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-gradient-to-r from-primary/20 to-accent/20 text-primary'
+                    )}
+                  >
+                    {badge}
+                  </span>
+                )}
+                {badge && !expanded && (
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
                 )}
               </div>
             </Link>

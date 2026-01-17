@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donations - Powered by Phoenixd</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- Background effects -->
+    <div class="bg-gradient"></div>
+    <div class="bg-noise"></div>
+    
+    <!-- Main container -->
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo-container" id="logo-container">
+          <!-- Logo will be inserted here if configured -->
+        </div>
+        <h1 class="title" id="page-title">Support Our Project</h1>
+        <p class="subtitle" id="page-subtitle">Your contribution helps us keep building amazing things</p>
+      </header>
+
+      <!-- Donation form (initial state) -->
+      <section class="card donation-form" id="donation-form">
+        <h2 class="card-title">Make a Donation</h2>
+        
+        <!-- Suggested amounts -->
+        <div class="amount-grid" id="amount-grid">
+          <!-- Amounts will be inserted here -->
+        </div>
+
+        <!-- Custom amount -->
+        <div class="custom-amount">
+          <label for="custom-amount-input">Or enter a custom amount</label>
+          <div class="input-group">
+            <input type="number" id="custom-amount-input" placeholder="0" min="1" />
+            <span class="input-suffix" id="currency-label">sats</span>
+          </div>
+        </div>
+
+        <!-- Donor info (optional) -->
+        <div class="donor-info">
+          <div class="input-field">
+            <label for="donor-name">Your name (optional)</label>
+            <input type="text" id="donor-name" placeholder="Anonymous" maxlength="50" />
+          </div>
+          <div class="input-field">
+            <label for="donor-message">Message (optional)</label>
+            <textarea id="donor-message" placeholder="Leave a message..." maxlength="200" rows="2"></textarea>
+          </div>
+        </div>
+
+        <!-- Submit button -->
+        <button class="btn-primary" id="donate-btn" disabled>
+          <span class="btn-icon">⚡</span>
+          <span id="donate-btn-text">Select an amount</span>
+        </button>
+
+        <!-- BOLT12 option -->
+        <div class="bolt12-option hidden" id="bolt12-option">
+          <div class="divider">
+            <span>or</span>
+          </div>
+          <button class="btn-bolt12" id="show-bolt12-btn">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 6v6l4 2"></path>
+            </svg>
+            Use BOLT12 Offer (any amount)
+          </button>
+          <p class="bolt12-hint">Static QR code that never expires</p>
+        </div>
+      </section>
+
+      <!-- Payment view (after invoice created) -->
+      <section class="card payment-view hidden" id="payment-view">
+        <h2 class="card-title">Scan to Donate</h2>
+        
+        <div class="qr-container">
+          <div class="qr-code" id="qr-code">
+            <!-- QR code will be inserted here -->
+          </div>
+          <div class="amount-display">
+            <span class="amount-value" id="invoice-amount">0</span>
+            <span class="amount-currency" id="invoice-currency">sats</span>
+          </div>
+        </div>
+
+        <button class="btn-copy" id="copy-invoice-btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy Invoice
+        </button>
+
+        <div class="waiting-indicator">
+          <div class="spinner"></div>
+          <span>Waiting for payment...</span>
+        </div>
+
+        <button class="btn-link" id="cancel-btn">Cancel and go back</button>
+      </section>
+
+      <!-- BOLT12 Offer view (static donation link) -->
+      <section class="card bolt12-view hidden" id="bolt12-view">
+        <div class="bolt12-header">
+          <div class="bolt12-badge">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 6v6l4 2"></path>
+            </svg>
+            BOLT12 Offer
+          </div>
+          <span class="bolt12-info">Never expires • Any amount</span>
+        </div>
+
+        <div class="qr-container">
+          <div class="qr-code" id="bolt12-qr-code">
+            <!-- BOLT12 QR code will be inserted here -->
+          </div>
+          <p class="bolt12-description">Scan with a BOLT12-compatible wallet (Phoenix, Core Lightning)</p>
+        </div>
+
+        <button class="btn-copy" id="copy-bolt12-btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy Offer
+        </button>
+
+        <button class="btn-link" id="back-to-form-btn">← Back to donation form</button>
+      </section>
+
+      <!-- Success view -->
+      <section class="card success-view hidden" id="success-view">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9 12l2 2 4-4"></path>
+          </svg>
+        </div>
+        <h2 class="success-title" id="success-message">Thank you!</h2>
+        <p class="success-subtitle">Your donation has been received</p>
+        <div class="success-amount">
+          <span class="amount-value" id="success-amount">0</span>
+          <span class="amount-currency">sats</span>
+        </div>
+        <button class="btn-primary" id="donate-again-btn">
+          <span class="btn-icon">⚡</span>
+          Donate Again
+        </button>
+      </section>
+
+      <!-- Recent donations -->
+      <section class="card recent-donations" id="recent-donations">
+        <h3 class="section-title">Recent Donations</h3>
+        <div class="donations-list" id="donations-list">
+          <p class="empty-state">No donations yet. Be the first!</p>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>Powered by <a href="https://github.com/AustinKelsworthy/phoenixd-dashboard" target="_blank" rel="noopener">Phoenixd Dashboard</a></p>
+        <div class="network-badge" id="network-badge">
+          <span class="badge-dot"></span>
+          <span id="network-label">mainnet</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
