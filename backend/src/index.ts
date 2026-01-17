@@ -24,7 +24,10 @@ import { categoriesRouter } from './routes/categories.js';
 import { paymentMetadataRouter } from './routes/payment-metadata.js';
 import { recurringPaymentsRouter } from './routes/recurring-payments.js';
 import { phoenixdConfigRouter } from './routes/phoenixd-config.js';
-import { phoenixdConnectionsRouter, initializeDockerConnection } from './routes/phoenixd-connections.js';
+import {
+  phoenixdConnectionsRouter,
+  initializeDockerConnection,
+} from './routes/phoenixd-connections.js';
 import { PhoenixdService } from './services/phoenixd.js';
 import { startRecurringPaymentScheduler } from './services/recurring-scheduler.js';
 import { cleanupExpiredSessions, validateSessionFromCookie } from './middleware/auth.js';
@@ -512,7 +515,9 @@ async function connectPhoenixdWebSocket() {
   const phoenixdWsUrl = config.url.replace('http', 'ws') + '/websocket';
   const password = config.password;
 
-  console.log(`Connecting to phoenixd WebSocket at ${phoenixdWsUrl} (${config.isExternal ? 'external' : 'docker'})...`);
+  console.log(
+    `Connecting to phoenixd WebSocket at ${phoenixdWsUrl} (${config.isExternal ? 'external' : 'docker'})...`
+  );
 
   try {
     phoenixdWs = new WebSocket(phoenixdWsUrl, {
@@ -579,7 +584,6 @@ export function reconnectPhoenixdWebSocket() {
   console.log('Forcing phoenixd WebSocket reconnection...');
   connectPhoenixdWebSocket();
 }
-
 
 // Start server
 const PORT = process.env.PORT || 4000;

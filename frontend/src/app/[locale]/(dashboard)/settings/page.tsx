@@ -573,7 +573,8 @@ function NetworkTab() {
   const [testingConnection, setTestingConnection] = useState(false);
   const [activatingConnection, setActivatingConnection] = useState<string | null>(null);
   const [deletingConnection, setDeletingConnection] = useState<string | null>(null);
-  const [dockerContainerStatus, setDockerContainerStatus] = useState<PhoenixdContainerStatus | null>(null);
+  const [dockerContainerStatus, setDockerContainerStatus] =
+    useState<PhoenixdContainerStatus | null>(null);
   const [containerLoading, setContainerLoading] = useState(false);
 
   // Tor state
@@ -608,14 +609,16 @@ function NetworkTab() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const [tor, tailscale, cloudflared, conns, activeConn, containerStatus] = await Promise.all([
-          getTorStatus().catch(() => null),
-          getTailscaleStatus().catch(() => null),
-          getCloudflaredStatus().catch(() => null),
-          getPhoenixdConnections().catch(() => []),
-          getActiveConnection().catch(() => null),
-          getPhoenixdContainerStatus().catch(() => null),
-        ]);
+        const [tor, tailscale, cloudflared, conns, activeConn, containerStatus] = await Promise.all(
+          [
+            getTorStatus().catch(() => null),
+            getTailscaleStatus().catch(() => null),
+            getCloudflaredStatus().catch(() => null),
+            getPhoenixdConnections().catch(() => []),
+            getActiveConnection().catch(() => null),
+            getPhoenixdContainerStatus().catch(() => null),
+          ]
+        );
         if (tor) setTorStatus(tor);
         if (tailscale) {
           setTailscaleStatus(tailscale);
@@ -672,7 +675,9 @@ function NetworkTab() {
         password: newConnectionPassword,
       });
       if (result.success) {
-        setPhoenixdSuccess(`Connected! Node ID: ${result.nodeId?.slice(0, 16)}... (${result.chain})`);
+        setPhoenixdSuccess(
+          `Connected! Node ID: ${result.nodeId?.slice(0, 16)}... (${result.chain})`
+        );
       } else {
         setPhoenixdError(result.error || 'Connection failed');
       }
@@ -788,7 +793,7 @@ function NetworkTab() {
       const status = await getPhoenixdContainerStatus();
       setDockerContainerStatus(status);
       // Wait a bit and refresh connections
-      await new Promise(r => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, 2000));
       await refreshConnections();
       // Notify other components to refresh
       window.dispatchEvent(new CustomEvent('phoenixd:connection-changed'));
@@ -1107,9 +1112,7 @@ function NetworkTab() {
             <div
               className={cn(
                 'h-10 w-10 rounded-lg flex items-center justify-center',
-                activeStatus?.status?.connected
-                  ? 'bg-success/10'
-                  : 'bg-warning/10'
+                activeStatus?.status?.connected ? 'bg-success/10' : 'bg-warning/10'
               )}
             >
               {activeStatus?.status?.connected ? (
@@ -1168,7 +1171,9 @@ function NetworkTab() {
           <div className="p-4 rounded-lg bg-black/5 dark:bg-white/5 space-y-4 border border-black/10 dark:border-white/10">
             <div className="flex items-center justify-between">
               <p className="font-medium">
-                {editingConnection ? (t('editConnection') || 'Edit Connection') : (t('newConnection') || 'New Connection')}
+                {editingConnection
+                  ? t('editConnection') || 'Edit Connection'
+                  : t('newConnection') || 'New Connection'}
               </p>
               <button
                 onClick={handleCancelEdit}
@@ -1221,7 +1226,11 @@ function NetworkTab() {
                       type={showNewConnectionPassword ? 'text' : 'password'}
                       value={newConnectionPassword}
                       onChange={(e) => setNewConnectionPassword(e.target.value)}
-                      placeholder={editingConnection ? '••••••••' : (t('phoenixdPasswordPlaceholder') || 'From phoenix.conf')}
+                      placeholder={
+                        editingConnection
+                          ? '••••••••'
+                          : t('phoenixdPasswordPlaceholder') || 'From phoenix.conf'
+                      }
                       className="w-full px-4 py-2.5 pr-10 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
                       autoComplete="off"
                     />
@@ -1238,9 +1247,10 @@ function NetworkTab() {
                     </button>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {editingConnection 
-                      ? (t('enterNewPasswordToChange') || 'Enter a new password to change it')
-                      : (t('findPasswordIn') || 'Find this in your phoenix.conf file (http-password)')}
+                    {editingConnection
+                      ? t('enterNewPasswordToChange') || 'Enter a new password to change it'
+                      : t('findPasswordIn') ||
+                        'Find this in your phoenix.conf file (http-password)'}
                   </p>
                 </div>
                 <button
@@ -1248,7 +1258,8 @@ function NetworkTab() {
                   disabled={testingConnection || !newConnectionUrl.trim()}
                   className={cn(
                     'w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10',
-                    (testingConnection || !newConnectionUrl.trim()) && 'opacity-50 cursor-not-allowed'
+                    (testingConnection || !newConnectionUrl.trim()) &&
+                      'opacity-50 cursor-not-allowed'
                   )}
                 >
                   {testingConnection && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -1265,10 +1276,17 @@ function NetworkTab() {
               </button>
               <button
                 onClick={handleSaveConnection}
-                disabled={phoenixdLoading || (!editingConnection?.isDocker && (!newConnectionName.trim() || !newConnectionUrl.trim()))}
+                disabled={
+                  phoenixdLoading ||
+                  (!editingConnection?.isDocker &&
+                    (!newConnectionName.trim() || !newConnectionUrl.trim()))
+                }
                 className={cn(
                   'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90',
-                  (phoenixdLoading || (!editingConnection?.isDocker && (!newConnectionName.trim() || !newConnectionUrl.trim()))) && 'opacity-50 cursor-not-allowed'
+                  (phoenixdLoading ||
+                    (!editingConnection?.isDocker &&
+                      (!newConnectionName.trim() || !newConnectionUrl.trim()))) &&
+                    'opacity-50 cursor-not-allowed'
                 )}
               >
                 {phoenixdLoading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -1315,13 +1333,17 @@ function NetworkTab() {
                           </span>
                         )}
                         {conn.isDocker && dockerContainerStatus && (
-                          <span className={cn(
-                            'px-1.5 py-0.5 text-xs rounded',
-                            dockerContainerStatus.running 
-                              ? 'bg-success/10 text-success' 
-                              : 'bg-warning/10 text-warning'
-                          )}>
-                            {dockerContainerStatus.running ? (t('running') || 'Running') : (t('stopped') || 'Stopped')}
+                          <span
+                            className={cn(
+                              'px-1.5 py-0.5 text-xs rounded',
+                              dockerContainerStatus.running
+                                ? 'bg-success/10 text-success'
+                                : 'bg-warning/10 text-warning'
+                            )}
+                          >
+                            {dockerContainerStatus.running
+                              ? t('running') || 'Running'
+                              : t('stopped') || 'Stopped'}
                           </span>
                         )}
                         {conn.isActive && (
@@ -1356,7 +1378,9 @@ function NetworkTab() {
                           activatingConnection === conn.id && 'opacity-50 cursor-not-allowed'
                         )}
                       >
-                        {activatingConnection === conn.id && <Loader2 className="h-3 w-3 animate-spin" />}
+                        {activatingConnection === conn.id && (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        )}
                         {t('activate') || 'Activate'}
                       </button>
                     )}
@@ -1368,13 +1392,21 @@ function NetworkTab() {
                             disabled={containerLoading || conn.isActive}
                             className={cn(
                               'px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1',
-                              conn.isActive 
+                              conn.isActive
                                 ? 'bg-muted text-muted-foreground cursor-not-allowed'
                                 : 'bg-warning/10 text-warning hover:bg-warning/20'
                             )}
-                            title={conn.isActive ? (t('cannotStopActive') || 'Cannot stop active connection') : (t('stopContainer') || 'Stop Container')}
+                            title={
+                              conn.isActive
+                                ? t('cannotStopActive') || 'Cannot stop active connection'
+                                : t('stopContainer') || 'Stop Container'
+                            }
                           >
-                            {containerLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Ban className="h-3 w-3" />}
+                            {containerLoading ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Ban className="h-3 w-3" />
+                            )}
                             {t('stop') || 'Stop'}
                           </button>
                         ) : (
@@ -1386,7 +1418,11 @@ function NetworkTab() {
                               containerLoading && 'opacity-50 cursor-not-allowed'
                             )}
                           >
-                            {containerLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+                            {containerLoading ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Play className="h-3 w-3" />
+                            )}
                             {t('start') || 'Start'}
                           </button>
                         )}
@@ -1425,7 +1461,8 @@ function NetworkTab() {
         </div>
 
         <p className="text-xs text-muted-foreground pt-2 border-t border-black/5 dark:border-white/5">
-          {t('nodeConnectionsDescription') || 'Manage multiple phoenixd instances and quickly switch between them. Docker (Local) is always available as the default option.'}
+          {t('nodeConnectionsDescription') ||
+            'Manage multiple phoenixd instances and quickly switch between them. Docker (Local) is always available as the default option.'}
         </p>
       </div>
 

@@ -1138,14 +1138,21 @@ export async function savePhoenixdConfig(data: {
   useExternalPhoenixd: boolean;
   phoenixdUrl?: string;
   phoenixdPassword?: string;
-}): Promise<{ success: boolean; message: string; useExternalPhoenixd: boolean; phoenixdUrl: string }> {
-  return request<{ success: boolean; message: string; useExternalPhoenixd: boolean; phoenixdUrl: string }>(
-    '/api/phoenixd/config',
-    {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }
-  );
+}): Promise<{
+  success: boolean;
+  message: string;
+  useExternalPhoenixd: boolean;
+  phoenixdUrl: string;
+}> {
+  return request<{
+    success: boolean;
+    message: string;
+    useExternalPhoenixd: boolean;
+    phoenixdUrl: string;
+  }>('/api/phoenixd/config', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 }
 
 export async function testPhoenixdConnection(data: {
@@ -1242,9 +1249,7 @@ export async function activatePhoenixdConnection(
   );
 }
 
-export async function testPhoenixdConnectionById(
-  id: string
-): Promise<PhoenixdTestResult> {
+export async function testPhoenixdConnectionById(id: string): Promise<PhoenixdTestResult> {
   return request<PhoenixdTestResult>(`/api/phoenixd-connections/${id}/test`, {
     method: 'POST',
   });

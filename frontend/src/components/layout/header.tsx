@@ -100,23 +100,23 @@ export function Header({
   useEffect(() => {
     fetchBalance();
     const interval = setInterval(fetchBalance, 30000);
-    
+
     // Listen for connection changing (start loading state)
     const handleConnectionChanging = () => {
       console.log('Connection changing, showing loading state...');
       setLoading(true);
     };
-    
+
     // Listen for connection changes to refresh balance
     const handleConnectionChanged = () => {
       console.log('Connection changed, refreshing balance...');
       // Small delay to allow backend to connect
       setTimeout(fetchBalance, 1500);
     };
-    
+
     window.addEventListener('phoenixd:connection-changing', handleConnectionChanging);
     window.addEventListener('phoenixd:connection-changed', handleConnectionChanged);
-    
+
     return () => {
       clearInterval(interval);
       window.removeEventListener('phoenixd:connection-changing', handleConnectionChanging);

@@ -176,7 +176,9 @@ export default function ChannelsPage() {
         <div className="space-y-4">
           {channels.map((channel) => {
             const balancePercent =
-              (channel.capacitySat || 0) > 0 ? ((channel.balanceSat || 0) / (channel.capacitySat || 1)) * 100 : 0;
+              (channel.capacitySat || 0) > 0
+                ? ((channel.balanceSat || 0) / (channel.capacitySat || 1)) * 100
+                : 0;
 
             return (
               <div key={channel.channelId} className="glass-card rounded-3xl p-6">
@@ -187,7 +189,9 @@ export default function ChannelsPage() {
                       <Activity className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <p className="font-mono font-medium">{channel.channelId?.slice(0, 16) || 'N/A'}...</p>
+                      <p className="font-mono font-medium">
+                        {channel.channelId?.slice(0, 16) || 'N/A'}...
+                      </p>
                       <p className="font-mono text-xs text-muted-foreground">
                         {channel.fundingTxId?.slice(0, 24) || 'N/A'}...
                       </p>

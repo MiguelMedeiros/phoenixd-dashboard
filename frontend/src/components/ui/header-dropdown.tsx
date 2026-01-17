@@ -55,8 +55,8 @@ export function HeaderDropdown({
   return (
     <>
       {/* Backdrop - captures clicks outside dropdown to close it */}
-      <div 
-        className="fixed inset-0 z-40" 
+      <div
+        className="fixed inset-0 z-40"
         onClick={() => onOpenChange(false)}
         style={{ pointerEvents: 'auto' }}
       />
@@ -64,11 +64,7 @@ export function HeaderDropdown({
       {/* Dropdown */}
       <div
         ref={dropdownRef}
-        className={cn(
-          'absolute right-0 top-full mt-2 z-50',
-          widthClasses[width],
-          className
-        )}
+        className={cn('absolute right-0 top-full mt-2 z-50', widthClasses[width], className)}
         style={{ pointerEvents: 'auto' }}
       >
         <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-2xl border border-black/[0.08] dark:border-white/[0.08] animate-scale-in origin-top-right">
@@ -90,15 +86,11 @@ export function HeaderDropdown({
           </div>
 
           {/* Content */}
-          <div className="max-h-[400px] overflow-y-auto">
-            {children}
-          </div>
+          <div className="max-h-[400px] overflow-y-auto">{children}</div>
 
           {/* Footer */}
           {footer && (
-            <div className="px-4 py-3 border-t border-black/10 dark:border-white/10">
-              {footer}
-            </div>
+            <div className="px-4 py-3 border-t border-black/10 dark:border-white/10">{footer}</div>
           )}
         </div>
       </div>
@@ -147,9 +139,7 @@ export function HeaderDropdownItem({
       )}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium">{title}</p>
-        {subtitle && (
-          <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-xs text-muted-foreground truncate">{subtitle}</p>}
       </div>
       {trailing}
     </button>

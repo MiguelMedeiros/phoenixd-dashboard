@@ -142,99 +142,115 @@ dockerRouter.post('/containers/:name/stop', requireAuth, async (req: Request, re
  * GET /api/docker/phoenixd/status
  * Get phoenixd container status specifically
  */
-dockerRouter.get('/phoenixd/status', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
-  try {
-    const containers = await docker.listContainers({ all: true });
-    
-    // First try to find exact match for "phoenixd" container
-    let phoenixdContainer = containers.find((container) => {
-      const names = container.Names || [];
-      return names.some((name) => {
-        const cleanName = name.replace(/^\//, '');
-        return cleanName === 'phoenixd';
-      });
-    });
+dockerRouter.get(
+  '/phoenixd/status',
+  requireAuth,
+  async (_req: AuthenticatedRequest, res: Response) => {
+    try {
+      const containers = await docker.listContainers({ all: true });
 
-    // If not found, try phoenixd-dashboard project container (phoenixd-phoenixd-1 pattern)
-    if (!phoenixdContainer) {
-      phoenixdContainer = containers.find((container) => {
+      // First try to find exact match for "phoenixd" container
+      let phoenixdContainer = containers.find((container) => {
         const names = container.Names || [];
         return names.some((name) => {
           const cleanName = name.replace(/^\//, '');
-          // Match phoenixd-dashboard project containers only
-          return (cleanName.startsWith('phoenixd-') || cleanName.startsWith('phoenixd_')) &&
-                 cleanName.includes('phoenixd') &&
-                 !cleanName.includes('backend') && 
-                 !cleanName.includes('frontend') && 
-                 !cleanName.includes('postgres');
+          return cleanName === 'phoenixd';
         });
       });
-    }
 
-    if (!phoenixdContainer) {
-      return res.json({
-        exists: false,
-        running: false,
-        state: 'not_found',
-        name: null,
+      // If not found, try phoenixd-dashboard project container (phoenixd-phoenixd-1 pattern)
+      if (!phoenixdContainer) {
+        phoenixdContainer = containers.find((container) => {
+          const names = container.Names || [];
+          return names.some((name) => {
+            const cleanName = name.replace(/^\//, '');
+            // Match phoenixd-dashboard project containers only
+            return (
+              (cleanName.startsWith('phoenixd-') || cleanName.startsWith('phoenixd_')) &&
+              cleanName.includes('phoenixd') &&
+              !cleanName.includes('backend') &&
+              !cleanName.includes('frontend') &&
+              !cleanName.includes('postgres')
+            );
+          });
+        });
+      }
+
+      if (!phoenixdContainer) {
+        return res.json({
+          exists: false,
+          running: false,
+          state: 'not_found',
+          name: null,
+        });
+      }
+
+      res.json({
+        exists: true,
+        running: phoenixdContainer.State === 'running',
+        state: phoenixdContainer.State,
+        status: phoenixdContainer.Status,
+        name: (phoenixdContainer.Names[0] || '').replace(/^\//, ''),
+        id: phoenixdContainer.Id.substring(0, 12),
       });
+    } catch (error) {
+      console.error('Error getting phoenixd container status:', error);
+      res.status(500).json({ error: 'Failed to get phoenixd container status' });
     }
-
-    res.json({
-      exists: true,
-      running: phoenixdContainer.State === 'running',
-      state: phoenixdContainer.State,
-      status: phoenixdContainer.Status,
-      name: (phoenixdContainer.Names[0] || '').replace(/^\//, ''),
-      id: phoenixdContainer.Id.substring(0, 12),
-    });
-  } catch (error) {
-    console.error('Error getting phoenixd container status:', error);
-    res.status(500).json({ error: 'Failed to get phoenixd container status' });
   }
-});
+);
 
 /**
  * POST /api/docker/phoenixd/start
  * Start the phoenixd container
  */
-dockerRouter.post('/phoenixd/start', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
-  try {
-    const container = docker.getContainer('phoenixd');
-    await container.start();
-    res.json({ success: true, message: 'Phoenixd container started' });
-  } catch (error: unknown) {
-    // Handle "container already started" (HTTP 304) as success
-    const dockerError = error as { statusCode?: number; reason?: string };
-    if (dockerError.statusCode === 304 || dockerError.reason === 'container already started') {
-      return res.json({ success: true, message: 'Phoenixd container is already running' });
+dockerRouter.post(
+  '/phoenixd/start',
+  requireAuth,
+  async (_req: AuthenticatedRequest, res: Response) => {
+    try {
+      const container = docker.getContainer('phoenixd');
+      await container.start();
+      res.json({ success: true, message: 'Phoenixd container started' });
+    } catch (error: unknown) {
+      // Handle "container already started" (HTTP 304) as success
+      const dockerError = error as { statusCode?: number; reason?: string };
+      if (dockerError.statusCode === 304 || dockerError.reason === 'container already started') {
+        return res.json({ success: true, message: 'Phoenixd container is already running' });
+      }
+      console.error('Error starting phoenixd container:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to start phoenixd container';
+      res.status(500).json({ error: errorMessage });
     }
-    console.error('Error starting phoenixd container:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to start phoenixd container';
-    res.status(500).json({ error: errorMessage });
   }
-});
+);
 
 /**
  * POST /api/docker/phoenixd/stop
  * Stop the phoenixd container
  */
-dockerRouter.post('/phoenixd/stop', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
-  try {
-    const container = docker.getContainer('phoenixd');
-    await container.stop();
-    res.json({ success: true, message: 'Phoenixd container stopped' });
-  } catch (error: unknown) {
-    // Handle "container already stopped" (HTTP 304) as success
-    const dockerError = error as { statusCode?: number; reason?: string };
-    if (dockerError.statusCode === 304 || dockerError.reason === 'container already stopped') {
-      return res.json({ success: true, message: 'Phoenixd container is already stopped' });
+dockerRouter.post(
+  '/phoenixd/stop',
+  requireAuth,
+  async (_req: AuthenticatedRequest, res: Response) => {
+    try {
+      const container = docker.getContainer('phoenixd');
+      await container.stop();
+      res.json({ success: true, message: 'Phoenixd container stopped' });
+    } catch (error: unknown) {
+      // Handle "container already stopped" (HTTP 304) as success
+      const dockerError = error as { statusCode?: number; reason?: string };
+      if (dockerError.statusCode === 304 || dockerError.reason === 'container already stopped') {
+        return res.json({ success: true, message: 'Phoenixd container is already stopped' });
+      }
+      console.error('Error stopping phoenixd container:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to stop phoenixd container';
+      res.status(500).json({ error: errorMessage });
     }
-    console.error('Error stopping phoenixd container:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to stop phoenixd container';
-    res.status(500).json({ error: errorMessage });
   }
-});
+);
 
 /**
  * Validate container name belongs to project

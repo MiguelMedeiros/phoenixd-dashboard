@@ -187,9 +187,7 @@ export function NetworkStatusButton() {
         <div className="py-1">
           {/* Tor Status */}
           <HeaderDropdownItem
-            icon={
-              <Shield className={cn('h-4 w-4', getIconColor(torServiceStatus))} />
-            }
+            icon={<Shield className={cn('h-4 w-4', getIconColor(torServiceStatus))} />}
             title="Tor"
             subtitle={getServiceStatusLabel(torServiceStatus)}
             trailing={

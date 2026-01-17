@@ -191,7 +191,10 @@ router.put('/:id', requireAuth, async (req: AuthenticatedRequest, res: Response)
     const newUrl = url || existing.url;
     const newPassword = password !== undefined ? password : existing.password;
 
-    if ((url && url !== existing.url) || (password !== undefined && password !== existing.password)) {
+    if (
+      (url && url !== existing.url) ||
+      (password !== undefined && password !== existing.password)
+    ) {
       try {
         const testResult = await phoenixd.testConnection(newUrl, newPassword || '');
         nodeId = testResult.nodeId;
@@ -257,7 +260,9 @@ router.delete('/:id', requireAuth, async (req: AuthenticatedRequest, res: Respon
     }
 
     if (existing.isActive) {
-      return res.status(400).json({ error: 'Cannot delete the active connection. Switch to another connection first.' });
+      return res.status(400).json({
+        error: 'Cannot delete the active connection. Switch to another connection first.',
+      });
     }
 
     await prisma.phoenixdConnection.delete({
@@ -290,7 +295,7 @@ router.post('/:id/activate', requireAuth, async (req: AuthenticatedRequest, res:
     // Test connection first
     try {
       const testResult = await phoenixd.testConnection(connection.url, connection.password || '');
-      
+
       // Update connection with latest node info
       await prisma.phoenixdConnection.update({
         where: { id },
@@ -430,7 +435,7 @@ export async function initializeDockerConnection(): Promise<void> {
 
     if (!dockerConnection) {
       console.log('Creating default Docker connection...');
-      
+
       // Check if any connections exist
       const connectionCount = await prisma.phoenixdConnection.count();
 
@@ -458,7 +463,7 @@ export async function initializeDockerConnection(): Promise<void> {
 
       if (!existingConnection) {
         console.log('Migrating external phoenixd configuration from Settings...');
-        
+
         // Deactivate Docker connection
         await prisma.phoenixdConnection.updateMany({
           where: { isDocker: true },
@@ -485,7 +490,11 @@ export async function initializeDockerConnection(): Promise<void> {
 
     if (activeConnection) {
       console.log(`Using active connection: ${activeConnection.name} (${activeConnection.url})`);
-      phoenixd.updateConfig(activeConnection.url, activeConnection.password || '', !activeConnection.isDocker);
+      phoenixd.updateConfig(
+        activeConnection.url,
+        activeConnection.password || '',
+        !activeConnection.isDocker
+      );
     } else {
       // If no active connection, activate Docker
       const docker = await prisma.phoenixdConnection.findFirst({

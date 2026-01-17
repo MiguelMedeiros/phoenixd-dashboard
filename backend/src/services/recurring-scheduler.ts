@@ -437,7 +437,9 @@ export async function processDuePayments(): Promise<void> {
       return;
     }
 
-    console.log(`[Recurring] Processing ${duePayments.length} due payment(s) for connection: ${activeConnection.name}`);
+    console.log(
+      `[Recurring] Processing ${duePayments.length} due payment(s) for connection: ${activeConnection.name}`
+    );
 
     // Execute each payment sequentially to avoid overwhelming the node
     for (const payment of duePayments) {

@@ -1333,7 +1333,8 @@ export default function ContactsPage() {
                                               className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400"
                                               title={`Node: ${recurring.connection.name}`}
                                             >
-                                              {recurring.connection.isDocker ? '🐳' : '🌐'} {recurring.connection.name}
+                                              {recurring.connection.isDocker ? '🐳' : '🌐'}{' '}
+                                              {recurring.connection.name}
                                             </span>
                                           )}
                                           {recurring.lastError && (

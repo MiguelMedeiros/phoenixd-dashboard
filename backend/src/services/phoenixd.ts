@@ -26,7 +26,9 @@ export class PhoenixdService {
       password: password || PhoenixdService.defaultPassword,
       isExternal,
     };
-    console.log(`PhoenixdService config updated: ${isExternal ? 'external' : 'docker'} at ${this.config.url}`);
+    console.log(
+      `PhoenixdService config updated: ${isExternal ? 'external' : 'docker'} at ${this.config.url}`
+    );
   }
 
   /**
@@ -116,7 +118,10 @@ export class PhoenixdService {
    * Test connection to phoenixd with given credentials
    * Returns node info if successful, throws error if not
    */
-  async testConnection(url: string, password: string): Promise<{
+  async testConnection(
+    url: string,
+    password: string
+  ): Promise<{
     nodeId: string;
     chain?: string;
     version?: string;
@@ -136,7 +141,7 @@ export class PhoenixdService {
       throw new Error(`Connection failed: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json() as { nodeId: string; chain?: string; version?: string };
+    const data = (await response.json()) as { nodeId: string; chain?: string; version?: string };
     return {
       nodeId: data.nodeId,
       chain: data.chain,

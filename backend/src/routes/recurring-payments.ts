@@ -136,13 +136,16 @@ recurringPaymentsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, 
     }
 
     const recurringPayments = await prisma.recurringPayment.findMany({
-      where: showAll === 'true' ? where : {
-        ...where,
-        OR: [
-          { connectionId: activeConnection?.id },
-          { connectionId: null }, // Legacy payments without connection
-        ],
-      },
+      where:
+        showAll === 'true'
+          ? where
+          : {
+              ...where,
+              OR: [
+                { connectionId: activeConnection?.id },
+                { connectionId: null }, // Legacy payments without connection
+              ],
+            },
       include: {
         contact: {
           include: {

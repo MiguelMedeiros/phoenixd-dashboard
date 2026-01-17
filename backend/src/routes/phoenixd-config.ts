@@ -42,7 +42,9 @@ router.put('/config', requireAuth, async (req: AuthenticatedRequest, res: Respon
     // Validate URL if using external phoenixd
     if (useExternalPhoenixd) {
       if (!phoenixdUrl || typeof phoenixdUrl !== 'string') {
-        return res.status(400).json({ error: 'Phoenixd URL is required when using external connection' });
+        return res
+          .status(400)
+          .json({ error: 'Phoenixd URL is required when using external connection' });
       }
 
       // Basic URL validation
@@ -59,23 +61,19 @@ router.put('/config', requireAuth, async (req: AuthenticatedRequest, res: Respon
       update: {
         useExternalPhoenixd: !!useExternalPhoenixd,
         phoenixdUrl: useExternalPhoenixd ? phoenixdUrl : null,
-        phoenixdPassword: useExternalPhoenixd ? (phoenixdPassword || null) : null,
+        phoenixdPassword: useExternalPhoenixd ? phoenixdPassword || null : null,
       },
       create: {
         id: 'singleton',
         useExternalPhoenixd: !!useExternalPhoenixd,
         phoenixdUrl: useExternalPhoenixd ? phoenixdUrl : null,
-        phoenixdPassword: useExternalPhoenixd ? (phoenixdPassword || null) : null,
+        phoenixdPassword: useExternalPhoenixd ? phoenixdPassword || null : null,
       },
     });
 
     // Update the phoenixd service configuration
     if (settings.useExternalPhoenixd && settings.phoenixdUrl) {
-      phoenixd.updateConfig(
-        settings.phoenixdUrl,
-        settings.phoenixdPassword || '',
-        true
-      );
+      phoenixd.updateConfig(settings.phoenixdUrl, settings.phoenixdPassword || '', true);
     } else {
       phoenixd.resetToDefault();
     }
@@ -127,9 +125,9 @@ router.post('/test-connection', requireAuth, async (req: AuthenticatedRequest, r
   } catch (error) {
     console.error('Error testing phoenixd connection:', error);
     const errorMessage = error instanceof Error ? error.message : 'Connection failed';
-    res.status(400).json({ 
+    res.status(400).json({
       success: false,
-      error: errorMessage 
+      error: errorMessage,
     });
   }
 });
@@ -158,7 +156,7 @@ router.post('/reconnect', requireAuth, async (_req: AuthenticatedRequest, res: R
 router.get('/connection-status', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
   try {
     const config = phoenixd.getConfig();
-    
+
     // Try to get node info to verify connection is working
     let connected = false;
     let nodeId: string | null = null;
