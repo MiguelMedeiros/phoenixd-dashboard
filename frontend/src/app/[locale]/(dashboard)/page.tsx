@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Zap,
   ArrowDownToLine,
@@ -68,45 +68,62 @@ export default function OverviewPage() {
   const { toast } = useToast();
   const { copy: copyToClipboard } = useCopyToClipboard();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [info, bal, ch, incoming, outgoing, contactsList, recurring] = await Promise.all([
-          getNodeInfo(),
-          getBalance(),
-          listChannels(),
-          getIncomingPayments({ limit: 100 }),
-          getOutgoingPayments({ limit: 100 }),
-          getContacts(),
-          getRecurringPayments({ status: 'active' }),
-        ]);
-        setNodeInfo(info);
-        setBalance(bal);
-        setChannels(ch);
-        setAllIncoming(incoming || []);
-        setAllOutgoing(outgoing || []);
-        setContacts(contactsList || []);
-        setRecurringPayments(recurring || []);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [info, bal, ch, incoming, outgoing, contactsList, recurring] = await Promise.all([
+        getNodeInfo(),
+        getBalance(),
+        listChannels(),
+        getIncomingPayments({ limit: 100 }),
+        getOutgoingPayments({ limit: 100 }),
+        getContacts(),
+        getRecurringPayments({ status: 'active' }),
+      ]);
+      setNodeInfo(info);
+      setBalance(bal);
+      // Filter out invalid channels
+      const validChannels = (ch || []).filter(
+        (c) => c && c.channelId && c.state && typeof c.capacitySat === 'number'
+      );
+      setChannels(validChannels);
+      setAllIncoming(incoming || []);
+      setAllOutgoing(outgoing || []);
+      setContacts(contactsList || []);
+      setRecurringPayments(recurring || []);
 
-        // Combine and sort recent payments - more for mobile
-        const allPayments = [...(incoming || []), ...(outgoing || [])];
-        allPayments.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        setRecentPayments(allPayments.slice(0, 10));
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        toast({
-          variant: 'destructive',
-          title: tc('error'),
-          description: t('loadError'),
-        });
-      } finally {
-        setLoading(false);
-      }
+      // Combine and sort recent payments - more for mobile
+      const allPayments = [...(incoming || []), ...(outgoing || [])];
+      allPayments.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      setRecentPayments(allPayments.slice(0, 10));
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      toast({
+        variant: 'destructive',
+        title: tc('error'),
+        description: t('loadError'),
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast, tc, t]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Listen for phoenixd connection changes
+  useEffect(() => {
+    const handleConnectionChange = () => {
+      console.log('Phoenixd connection changed, refreshing overview data...');
+      // Small delay to let backend connect to new phoenixd
+      setTimeout(fetchData, 1500);
     };
 
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]);
+    window.addEventListener('phoenixd:connection-changed', handleConnectionChange);
+    return () => window.removeEventListener('phoenixd:connection-changed', handleConnectionChange);
+  }, [fetchData]);
 
   const totalCapacity = channels.reduce((acc, ch) => acc + (ch.capacitySat || 0), 0);
   const totalInbound = channels.reduce((acc, ch) => acc + (ch.inboundLiquiditySat || 0), 0);

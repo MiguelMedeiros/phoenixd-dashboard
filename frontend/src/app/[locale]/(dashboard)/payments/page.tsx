@@ -94,56 +94,68 @@ export default function PaymentsPage() {
     null
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [incoming, outgoing, nodeInfo, cats] = await Promise.all([
-          getIncomingPayments({ limit: PAGE_SIZE }),
-          getOutgoingPayments({ limit: PAGE_SIZE }),
-          getNodeInfo(),
-          getCategories(),
-        ]);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [incoming, outgoing, nodeInfo, cats] = await Promise.all([
+        getIncomingPayments({ limit: PAGE_SIZE }),
+        getOutgoingPayments({ limit: PAGE_SIZE }),
+        getNodeInfo(),
+        getCategories(),
+      ]);
 
-        // Sort by newest first
-        const sortedIncoming = sortByNewest(incoming || []);
-        const sortedOutgoing = sortByNewest(outgoing || []);
+      // Sort by newest first
+      const sortedIncoming = sortByNewest(incoming || []);
+      const sortedOutgoing = sortByNewest(outgoing || []);
 
-        setIncomingPayments(sortedIncoming);
-        setOutgoingPayments(sortedOutgoing);
-        setChain(nodeInfo.chain || 'mainnet');
-        setCategories(cats || []);
+      setIncomingPayments(sortedIncoming);
+      setOutgoingPayments(sortedOutgoing);
+      setChain(nodeInfo.chain || 'mainnet');
+      setCategories(cats || []);
 
-        // Set hasMore flags
-        setHasMoreIncoming((incoming || []).length >= PAGE_SIZE);
-        setHasMoreOutgoing((outgoing || []).length >= PAGE_SIZE);
+      // Set hasMore flags
+      setHasMoreIncoming((incoming || []).length >= PAGE_SIZE);
+      setHasMoreOutgoing((outgoing || []).length >= PAGE_SIZE);
 
-        // Fetch metadata for all payments
-        const paymentHashes = (incoming || []).map((p) => p.paymentHash).filter(Boolean);
-        const paymentIds = (outgoing || []).map((p) => p.paymentId).filter(Boolean);
+      // Fetch metadata for all payments
+      const paymentHashes = (incoming || []).map((p) => p.paymentHash).filter(Boolean);
+      const paymentIds = (outgoing || []).map((p) => p.paymentId).filter(Boolean);
 
-        if (paymentHashes.length > 0 || paymentIds.length > 0) {
-          try {
-            const metadata = await batchGetPaymentMetadata({ paymentHashes, paymentIds });
-            setPaymentMetadataMap(metadata);
-          } catch {
-            // Ignore metadata fetch errors - it's optional
-          }
+      if (paymentHashes.length > 0 || paymentIds.length > 0) {
+        try {
+          const metadata = await batchGetPaymentMetadata({ paymentHashes, paymentIds });
+          setPaymentMetadataMap(metadata);
+        } catch {
+          // Ignore metadata fetch errors - it's optional
         }
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        toast({
-          variant: 'destructive',
-          title: tc('error'),
-          description: te('failedToLoadPayments'),
-        });
-      } finally {
-        setLoading(false);
       }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      toast({
+        variant: 'destructive',
+        title: tc('error'),
+        description: te('failedToLoadPayments'),
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast, tc, te]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Listen for phoenixd connection changes
+  useEffect(() => {
+    const handleConnectionChange = () => {
+      console.log('Phoenixd connection changed, refreshing payments data...');
+      setTimeout(fetchData, 1500);
     };
 
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]);
+    window.addEventListener('phoenixd:connection-changed', handleConnectionChange);
+    return () => window.removeEventListener('phoenixd:connection-changed', handleConnectionChange);
+  }, [fetchData]);
 
   // Load more incoming payments
   const loadMoreIncoming = useCallback(async () => {

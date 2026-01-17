@@ -152,6 +152,7 @@ interface RecurringPaymentWithContact {
   id: string;
   contactId: string;
   addressId: string;
+  connectionId: string | null;
   amountSat: number;
   frequency: string;
   dayOfWeek: number | null;
@@ -173,6 +174,10 @@ interface RecurringPaymentWithContact {
       type: string;
     }>;
   };
+  connection?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface ExecutionResult {
@@ -384,23 +389,45 @@ export async function executeRecurringPayment(
 
 /**
  * Check and execute all due recurring payments
+ * Only processes payments tied to the currently active connection
  */
 export async function processDuePayments(): Promise<void> {
   const now = new Date();
 
   try {
-    // Find all active recurring payments that are due
+    // Get the active connection
+    const activeConnection = await prisma.phoenixdConnection.findFirst({
+      where: { isActive: true },
+    });
+
+    if (!activeConnection) {
+      console.log('[Recurring] No active connection, skipping payment processing');
+      return;
+    }
+
+    // Find all active recurring payments that are due AND tied to the active connection
+    // Also include legacy payments (connectionId = null) for backwards compatibility
     const duePayments = await prisma.recurringPayment.findMany({
       where: {
         status: 'active',
         nextRunAt: {
           lte: now,
         },
+        OR: [
+          { connectionId: activeConnection.id },
+          { connectionId: null }, // Legacy payments without connection
+        ],
       },
       include: {
         contact: {
           include: {
             addresses: true,
+          },
+        },
+        connection: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
@@ -410,13 +437,13 @@ export async function processDuePayments(): Promise<void> {
       return;
     }
 
-    console.log(`[Recurring] Processing ${duePayments.length} due payment(s)`);
+    console.log(`[Recurring] Processing ${duePayments.length} due payment(s) for connection: ${activeConnection.name}`);
 
     // Execute each payment sequentially to avoid overwhelming the node
     for (const payment of duePayments) {
       try {
         console.log(
-          `[Recurring] Executing payment ${payment.id} for ${payment.contact.name} (${payment.amountSat} sats)`
+          `[Recurring] Executing payment ${payment.id} for ${payment.contact.name} (${payment.amountSat} sats) via ${payment.connection?.name || 'legacy'}`
         );
         const result = await executeRecurringPayment(payment);
         if (result.success) {

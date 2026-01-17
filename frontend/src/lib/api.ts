@@ -680,6 +680,32 @@ export async function getContainers(): Promise<ContainerInfo[]> {
   return request<ContainerInfo[]>('/api/docker/containers');
 }
 
+// Phoenixd Container Control
+export interface PhoenixdContainerStatus {
+  exists: boolean;
+  running: boolean;
+  state: string;
+  status?: string;
+  name: string | null;
+  id?: string;
+}
+
+export async function getPhoenixdContainerStatus(): Promise<PhoenixdContainerStatus> {
+  return request<PhoenixdContainerStatus>('/api/docker/phoenixd/status');
+}
+
+export async function startPhoenixdContainer(): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>('/api/docker/phoenixd/start', {
+    method: 'POST',
+  });
+}
+
+export async function stopPhoenixdContainer(): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>('/api/docker/phoenixd/stop', {
+    method: 'POST',
+  });
+}
+
 // Contacts
 export type ContactType = 'lightning_address' | 'node_id' | 'bolt12_offer';
 
@@ -957,6 +983,7 @@ export interface RecurringPayment {
   id: string;
   contactId: string;
   addressId: string;
+  connectionId?: string | null; // PhoenixdConnection ID - which node executes this payment
   amountSat: number;
   frequency: RecurringPaymentFrequency;
   dayOfWeek?: number | null;
@@ -974,6 +1001,11 @@ export interface RecurringPayment {
   updatedAt: string;
   contact?: Contact;
   category?: PaymentCategory | null;
+  connection?: {
+    id: string;
+    name: string;
+    isDocker: boolean;
+  } | null;
   executions?: RecurringPaymentExecution[];
   _count?: {
     executions: number;
@@ -1068,5 +1100,162 @@ export async function executeRecurringPaymentNow(id: string): Promise<{
     error?: string;
   }>(`/api/recurring-payments/${id}/execute`, {
     method: 'POST',
+  });
+}
+
+// Phoenixd Connection Configuration
+export interface PhoenixdConfig {
+  useExternalPhoenixd: boolean;
+  phoenixdUrl: string;
+  hasPassword: boolean;
+  activeUrl: string;
+  activeIsExternal: boolean;
+  activeHasPassword: boolean;
+}
+
+export interface PhoenixdConnectionStatus {
+  connected: boolean;
+  nodeId: string | null;
+  error: string | null;
+  url: string;
+  isExternal: boolean;
+}
+
+export interface PhoenixdTestResult {
+  success: boolean;
+  message?: string;
+  nodeId?: string;
+  chain?: string;
+  version?: string;
+  error?: string;
+}
+
+export async function getPhoenixdConfig(): Promise<PhoenixdConfig> {
+  return request<PhoenixdConfig>('/api/phoenixd/config');
+}
+
+export async function savePhoenixdConfig(data: {
+  useExternalPhoenixd: boolean;
+  phoenixdUrl?: string;
+  phoenixdPassword?: string;
+}): Promise<{ success: boolean; message: string; useExternalPhoenixd: boolean; phoenixdUrl: string }> {
+  return request<{ success: boolean; message: string; useExternalPhoenixd: boolean; phoenixdUrl: string }>(
+    '/api/phoenixd/config',
+    {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }
+  );
+}
+
+export async function testPhoenixdConnection(data: {
+  url: string;
+  password?: string;
+}): Promise<PhoenixdTestResult> {
+  return request<PhoenixdTestResult>('/api/phoenixd/test-connection', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getPhoenixdConnectionStatus(): Promise<PhoenixdConnectionStatus> {
+  return request<PhoenixdConnectionStatus>('/api/phoenixd/connection-status');
+}
+
+export async function reconnectPhoenixd(): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>('/api/phoenixd/reconnect', {
+    method: 'POST',
+  });
+}
+
+// Phoenixd Connections (Multi-instance management)
+export interface PhoenixdConnection {
+  id: string;
+  name: string;
+  url: string;
+  isDocker: boolean;
+  isActive: boolean;
+  nodeId?: string | null;
+  chain?: string | null;
+  lastConnectedAt?: string | null;
+  createdAt: string;
+}
+
+export interface ActiveConnectionStatus {
+  connection: PhoenixdConnection | null;
+  status: {
+    connected: boolean;
+    nodeId: string | null;
+    error: string | null;
+  };
+}
+
+export async function getPhoenixdConnections(): Promise<PhoenixdConnection[]> {
+  return request<PhoenixdConnection[]>('/api/phoenixd-connections');
+}
+
+export async function getActiveConnection(): Promise<ActiveConnectionStatus> {
+  return request<ActiveConnectionStatus>('/api/phoenixd-connections/active');
+}
+
+export async function createPhoenixdConnection(data: {
+  name: string;
+  url: string;
+  password?: string;
+}): Promise<PhoenixdConnection> {
+  return request<PhoenixdConnection>('/api/phoenixd-connections', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updatePhoenixdConnection(
+  id: string,
+  data: {
+    name?: string;
+    url?: string;
+    password?: string;
+  }
+): Promise<PhoenixdConnection> {
+  return request<PhoenixdConnection>(`/api/phoenixd-connections/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deletePhoenixdConnection(
+  id: string
+): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/phoenixd-connections/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function activatePhoenixdConnection(
+  id: string
+): Promise<{ success: boolean; message: string; connection: PhoenixdConnection }> {
+  return request<{ success: boolean; message: string; connection: PhoenixdConnection }>(
+    `/api/phoenixd-connections/${id}/activate`,
+    {
+      method: 'POST',
+    }
+  );
+}
+
+export async function testPhoenixdConnectionById(
+  id: string
+): Promise<PhoenixdTestResult> {
+  return request<PhoenixdTestResult>(`/api/phoenixd-connections/${id}/test`, {
+    method: 'POST',
+  });
+}
+
+export async function testNewPhoenixdConnection(data: {
+  url: string;
+  password?: string;
+}): Promise<PhoenixdTestResult> {
+  return request<PhoenixdTestResult>('/api/phoenixd-connections/test', {
+    method: 'POST',
+    body: JSON.stringify(data),
   });
 }

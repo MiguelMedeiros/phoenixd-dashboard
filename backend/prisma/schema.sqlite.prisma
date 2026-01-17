@@ -72,6 +72,10 @@ model Settings {
   cloudflaredEnabled Boolean  @default(false) // Cloudflare Tunnel enabled
   cloudflaredToken   String?  // Tunnel token from Cloudflare
   cloudflaredIngress String?  // JSON array stored as string for SQLite compatibility
+  // External Phoenixd connection
+  useExternalPhoenixd Boolean  @default(false) // Use external phoenixd instead of Docker
+  phoenixdUrl         String?  // e.g., "http://192.168.1.100:9740"
+  phoenixdPassword    String?  // API password for external phoenixd
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
@@ -152,29 +156,32 @@ model PaymentMetadata {
 }
 
 model RecurringPayment {
-  id          String   @id @default(cuid())
-  contactId   String
-  contact     Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  addressId   String   // ContactAddress ID to use
-  amountSat   Int      // Amount in satoshis
-  frequency   String   // "every_minute", "every_5_minutes", "every_15_minutes", "every_30_minutes", "hourly", "daily", "weekly", "monthly"
-  dayOfWeek   Int?     // 0-6 for weekly (0=Sunday)
-  dayOfMonth  Int?     // 1-31 for monthly
-  timeOfDay   String   @default("09:00") // HH:mm format (UTC)
-  note        String?  // Optional note for the payment
-  categoryId  String?  // Optional category
-  category    PaymentCategory? @relation(fields: [categoryId], references: [id])
-  status      String   @default("active") // "active", "paused", "cancelled"
-  nextRunAt   DateTime // Next scheduled execution
-  lastRunAt   DateTime? // Last successful execution
-  lastError   String?  // Last error message if failed
-  totalPaid   Int      @default(0) // Total amount paid so far
-  paymentCount Int     @default(0) // Number of successful payments
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  executions  RecurringPaymentExecution[]
+  id           String   @id @default(cuid())
+  contactId    String
+  contact      Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  addressId    String   // ContactAddress ID to use
+  connectionId String?  // PhoenixdConnection ID - which node executes this payment
+  connection   PhoenixdConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+  amountSat    Int      // Amount in satoshis
+  frequency    String   // "every_minute", "every_5_minutes", "every_15_minutes", "every_30_minutes", "hourly", "daily", "weekly", "monthly"
+  dayOfWeek    Int?     // 0-6 for weekly (0=Sunday)
+  dayOfMonth   Int?     // 1-31 for monthly
+  timeOfDay    String   @default("09:00") // HH:mm format (UTC)
+  note         String?  // Optional note for the payment
+  categoryId   String?  // Optional category
+  category     PaymentCategory? @relation(fields: [categoryId], references: [id])
+  status       String   @default("active") // "active", "paused", "cancelled"
+  nextRunAt    DateTime // Next scheduled execution
+  lastRunAt    DateTime? // Last successful execution
+  lastError    String?  // Last error message if failed
+  totalPaid    Int      @default(0) // Total amount paid so far
+  paymentCount Int      @default(0) // Number of successful payments
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  executions   RecurringPaymentExecution[]
 
   @@index([contactId])
+  @@index([connectionId])
   @@index([status])
   @@index([nextRunAt])
 }
@@ -192,4 +199,22 @@ model RecurringPaymentExecution {
 
   @@index([recurringPaymentId])
   @@index([executedAt])
+}
+
+model PhoenixdConnection {
+  id                String    @id @default(cuid())
+  name              String                      // User-friendly name (e.g., "Docker Local", "Mainnet Server")
+  url               String                      // e.g., "http://192.168.1.100:9740"
+  password          String?                     // API password (stored securely)
+  isDocker          Boolean   @default(false)   // True for the default Docker instance
+  isActive          Boolean   @default(false)   // Currently active connection
+  nodeId            String?                     // Cached nodeId after successful connection
+  chain             String?                     // Cached chain (mainnet/testnet)
+  lastConnectedAt   DateTime?                   // Last successful connection
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  recurringPayments RecurringPayment[]          // Payments tied to this connection
+
+  @@index([isActive])
+  @@index([isDocker])
 }

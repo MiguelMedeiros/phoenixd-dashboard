@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Layers,
   ExternalLink,
@@ -32,27 +32,43 @@ export default function ChannelsPage() {
   const [selectedChannelId, setSelectedChannelId] = useState<string>('');
   const { toast } = useToast();
 
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [channelsData, nodeInfo] = await Promise.all([listChannels(), getNodeInfo()]);
+      // Filter out invalid channels (missing required properties)
+      const validChannels = (channelsData || []).filter(
+        (ch) => ch && ch.channelId && ch.state && typeof ch.capacitySat === 'number'
+      );
+      setChannels(validChannels);
+      setChain(nodeInfo.chain || 'mainnet');
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      toast({
+        variant: 'destructive',
+        title: tc('error'),
+        description: te('failedToLoadChannels'),
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast, tc, te]);
+
+  // Initial data fetch
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [channelsData, nodeInfo] = await Promise.all([listChannels(), getNodeInfo()]);
-        setChannels(channelsData || []);
-        setChain(nodeInfo.chain || 'mainnet');
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        toast({
-          variant: 'destructive',
-          title: tc('error'),
-          description: te('failedToLoadChannels'),
-        });
-      } finally {
-        setLoading(false);
-      }
+    fetchData();
+  }, [fetchData]);
+
+  // Listen for phoenixd connection changes
+  useEffect(() => {
+    const handleConnectionChange = () => {
+      console.log('Phoenixd connection changed, refreshing channels data...');
+      setTimeout(fetchData, 1500);
     };
 
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]);
+    window.addEventListener('phoenixd:connection-changed', handleConnectionChange);
+    return () => window.removeEventListener('phoenixd:connection-changed', handleConnectionChange);
+  }, [fetchData]);
 
   const openCloseDialog = (channelId: string) => {
     setSelectedChannelId(channelId);
@@ -82,8 +98,8 @@ export default function ChannelsPage() {
     }
   };
 
-  const getStateColor = (state: string) => {
-    const normalizedState = state.toUpperCase();
+  const getStateColor = (state: string | undefined) => {
+    const normalizedState = (state || '').toUpperCase();
     switch (normalizedState) {
       case 'NORMAL':
         return 'bg-success/10 text-success';
@@ -98,9 +114,9 @@ export default function ChannelsPage() {
     }
   };
 
-  const totalCapacity = channels.reduce((acc, ch) => acc + ch.capacitySat, 0);
-  const totalBalance = channels.reduce((acc, ch) => acc + ch.balanceSat, 0);
-  const totalInbound = channels.reduce((acc, ch) => acc + ch.inboundLiquiditySat, 0);
+  const totalCapacity = channels.reduce((acc, ch) => acc + (ch.capacitySat || 0), 0);
+  const totalBalance = channels.reduce((acc, ch) => acc + (ch.balanceSat || 0), 0);
+  const totalInbound = channels.reduce((acc, ch) => acc + (ch.inboundLiquiditySat || 0), 0);
 
   if (loading) {
     return (
@@ -160,7 +176,7 @@ export default function ChannelsPage() {
         <div className="space-y-4">
           {channels.map((channel) => {
             const balancePercent =
-              channel.capacitySat > 0 ? (channel.balanceSat / channel.capacitySat) * 100 : 0;
+              (channel.capacitySat || 0) > 0 ? ((channel.balanceSat || 0) / (channel.capacitySat || 1)) * 100 : 0;
 
             return (
               <div key={channel.channelId} className="glass-card rounded-3xl p-6">
@@ -171,9 +187,9 @@ export default function ChannelsPage() {
                       <Activity className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <p className="font-mono font-medium">{channel.channelId.slice(0, 16)}...</p>
+                      <p className="font-mono font-medium">{channel.channelId?.slice(0, 16) || 'N/A'}...</p>
                       <p className="font-mono text-xs text-muted-foreground">
-                        {channel.fundingTxId.slice(0, 24)}...
+                        {channel.fundingTxId?.slice(0, 24) || 'N/A'}...
                       </p>
                     </div>
                   </div>
@@ -183,7 +199,7 @@ export default function ChannelsPage() {
                       getStateColor(channel.state)
                     )}
                   >
-                    {channel.state}
+                    {channel.state || 'UNKNOWN'}
                   </span>
                 </div>
 
@@ -199,7 +215,7 @@ export default function ChannelsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-semibold">
-                        {formatValue(channel.inboundLiquiditySat)}
+                        {formatValue(channel.inboundLiquiditySat || 0)}
                       </span>
                       <span className="text-muted-foreground">{t('inbound')}</span>
                       <div className="h-2 w-2 rounded-full bg-success" />
@@ -229,7 +245,7 @@ export default function ChannelsPage() {
                     onClick={() => openCloseDialog(channel.channelId)}
                     disabled={
                       closingChannel === channel.channelId ||
-                      channel.state.toUpperCase() !== 'NORMAL'
+                      (channel.state || '').toUpperCase() !== 'NORMAL'
                     }
                     className="glass-button flex items-center justify-center gap-2 text-destructive hover:bg-destructive/10 disabled:opacity-50"
                   >

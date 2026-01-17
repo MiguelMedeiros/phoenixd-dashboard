@@ -389,22 +389,14 @@ export default function ContactsPage() {
     }
   }, []);
 
-  // Fetch all contacts, categories, and recurring payments on mount
-  useEffect(() => {
-    fetchContacts();
-    fetchCategories();
-    fetchAllRecurringPayments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const data = await getCategories();
       setCategories(data);
     } catch (error) {
       console.error('Failed to load categories:', error);
     }
-  };
+  }, []);
 
   const fetchContacts = useCallback(async () => {
     setLoading(true);
@@ -422,6 +414,28 @@ export default function ContactsPage() {
       setLoading(false);
     }
   }, [toast, tc]);
+
+  // Fetch all contacts, categories, and recurring payments on mount
+  useEffect(() => {
+    fetchContacts();
+    fetchCategories();
+    fetchAllRecurringPayments();
+  }, [fetchContacts, fetchCategories, fetchAllRecurringPayments]);
+
+  // Listen for phoenixd connection changes
+  useEffect(() => {
+    const handleConnectionChange = () => {
+      console.log('Phoenixd connection changed, refreshing contacts data...');
+      setTimeout(() => {
+        fetchContacts();
+        fetchCategories();
+        fetchAllRecurringPayments();
+      }, 1500);
+    };
+
+    window.addEventListener('phoenixd:connection-changed', handleConnectionChange);
+    return () => window.removeEventListener('phoenixd:connection-changed', handleConnectionChange);
+  }, [fetchContacts, fetchCategories, fetchAllRecurringPayments]);
 
   // Listen for recurring payment executions to refresh stats
   useEffect(() => {
@@ -1314,6 +1328,14 @@ export default function ContactsPage() {
                                           >
                                             {tr(recurring.status)}
                                           </span>
+                                          {recurring.connection && (
+                                            <span
+                                              className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400"
+                                              title={`Node: ${recurring.connection.name}`}
+                                            >
+                                              {recurring.connection.isDocker ? '🐳' : '🌐'} {recurring.connection.name}
+                                            </span>
+                                          )}
                                           {recurring.lastError && (
                                             <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">
                                               Error

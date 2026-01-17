@@ -23,6 +23,8 @@ import { contactsRouter } from './routes/contacts.js';
 import { categoriesRouter } from './routes/categories.js';
 import { paymentMetadataRouter } from './routes/payment-metadata.js';
 import { recurringPaymentsRouter } from './routes/recurring-payments.js';
+import { phoenixdConfigRouter } from './routes/phoenixd-config.js';
+import { phoenixdConnectionsRouter, initializeDockerConnection } from './routes/phoenixd-connections.js';
 import { PhoenixdService } from './services/phoenixd.js';
 import { startRecurringPaymentScheduler } from './services/recurring-scheduler.js';
 import { cleanupExpiredSessions, validateSessionFromCookie } from './middleware/auth.js';
@@ -173,6 +175,8 @@ app.use('/api/docker', dockerRouter);
 app.use('/api/contacts', contactsRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/recurring-payments', recurringPaymentsRouter);
+app.use('/api/phoenixd', phoenixdConfigRouter); // Mount phoenixd config routes (they have their own paths like /config)
+app.use('/api/phoenixd-connections', phoenixdConnectionsRouter);
 
 // WebSocket clients
 const clients = new Set<WebSocket>();
@@ -482,25 +486,46 @@ wssTerminal.on(
   }
 );
 
+// Phoenixd WebSocket connection state
+let phoenixdWs: WebSocket | null = null;
+let phoenixdWsReconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+let shouldReconnect = true;
+
 // Connect to phoenixd WebSocket for payment notifications
 async function connectPhoenixdWebSocket() {
-  const phoenixdWsUrl = process.env.PHOENIXD_URL?.replace('http', 'ws') + '/websocket';
-  const password = process.env.PHOENIXD_PASSWORD || '';
+  // Clear any pending reconnect timeout
+  if (phoenixdWsReconnectTimeout) {
+    clearTimeout(phoenixdWsReconnectTimeout);
+    phoenixdWsReconnectTimeout = null;
+  }
 
-  console.log('Connecting to phoenixd WebSocket...');
+  // Close existing connection if any
+  if (phoenixdWs) {
+    shouldReconnect = false; // Prevent auto-reconnect during manual close
+    phoenixdWs.close();
+    phoenixdWs = null;
+  }
+  shouldReconnect = true;
+
+  // Get current config from PhoenixdService
+  const config = phoenixd.getFullConfig();
+  const phoenixdWsUrl = config.url.replace('http', 'ws') + '/websocket';
+  const password = config.password;
+
+  console.log(`Connecting to phoenixd WebSocket at ${phoenixdWsUrl} (${config.isExternal ? 'external' : 'docker'})...`);
 
   try {
-    const ws = new WebSocket(phoenixdWsUrl, {
+    phoenixdWs = new WebSocket(phoenixdWsUrl, {
       headers: {
         Authorization: 'Basic ' + Buffer.from(`:${password}`).toString('base64'),
       },
     });
 
-    ws.on('open', () => {
+    phoenixdWs.on('open', () => {
       console.log('Connected to phoenixd WebSocket');
     });
 
-    ws.on('message', async (data) => {
+    phoenixdWs.on('message', async (data) => {
       try {
         const event = JSON.parse(data.toString());
         console.log('Received phoenixd event:', event);
@@ -529,27 +554,41 @@ async function connectPhoenixdWebSocket() {
       }
     });
 
-    ws.on('close', () => {
-      console.log('Disconnected from phoenixd WebSocket, reconnecting in 5s...');
-      setTimeout(connectPhoenixdWebSocket, 5000);
+    phoenixdWs.on('close', () => {
+      console.log('Disconnected from phoenixd WebSocket');
+      phoenixdWs = null;
+      if (shouldReconnect) {
+        console.log('Reconnecting in 5s...');
+        phoenixdWsReconnectTimeout = setTimeout(connectPhoenixdWebSocket, 5000);
+      }
     });
 
-    ws.on('error', (error) => {
+    phoenixdWs.on('error', (error) => {
       console.error('Phoenixd WebSocket error:', error);
     });
   } catch (error) {
     console.error('Failed to connect to phoenixd WebSocket:', error);
-    setTimeout(connectPhoenixdWebSocket, 5000);
+    if (shouldReconnect) {
+      phoenixdWsReconnectTimeout = setTimeout(connectPhoenixdWebSocket, 5000);
+    }
   }
 }
+
+// Force reconnect the phoenixd WebSocket (called when config changes)
+export function reconnectPhoenixdWebSocket() {
+  console.log('Forcing phoenixd WebSocket reconnection...');
+  connectPhoenixdWebSocket();
+}
+
 
 // Start server
 const PORT = process.env.PORT || 4000;
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`Backend server running on port ${PORT}`);
 
-  // Connect to phoenixd WebSocket after a delay
+  // Initialize phoenixd connections and connect to WebSocket
+  await initializeDockerConnection();
   setTimeout(connectPhoenixdWebSocket, 3000);
 
   // Cleanup expired sessions every hour

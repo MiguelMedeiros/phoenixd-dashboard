@@ -120,21 +120,35 @@ function NodeInfoTab() {
     },
   ];
 
-  useEffect(() => {
-    const fetchNodeInfo = async () => {
-      try {
-        setLoading(true);
-        const data = await getNodeInfo();
-        setNodeInfo(data);
-      } catch (err) {
-        console.error('Failed to fetch node info:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load node info');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchNodeInfo();
+  const fetchNodeInfo = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getNodeInfo();
+      setNodeInfo(data);
+    } catch (err) {
+      console.error('Failed to fetch node info:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load node info');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchNodeInfo();
+  }, [fetchNodeInfo]);
+
+  // Listen for phoenixd connection changes
+  useEffect(() => {
+    const handleConnectionChange = () => {
+      console.log('Phoenixd connection changed, refreshing node info...');
+      setTimeout(fetchNodeInfo, 1500);
+    };
+
+    window.addEventListener('phoenixd:connection-changed', handleConnectionChange);
+    return () => window.removeEventListener('phoenixd:connection-changed', handleConnectionChange);
+  }, [fetchNodeInfo]);
 
   if (loading) {
     return (

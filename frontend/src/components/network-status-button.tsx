@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Wifi, WifiOff, Network, Loader2, Cloud, CloudOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -14,6 +14,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useDesktopMode } from '@/hooks/use-desktop-mode';
+import { HeaderDropdown, HeaderDropdownItem } from '@/components/ui/header-dropdown';
 
 type ServiceStatus = 'healthy' | 'starting' | 'disabled' | 'error';
 
@@ -41,6 +42,19 @@ function getStatusColor(status: ServiceStatus): string {
   }
 }
 
+function getIconColor(status: ServiceStatus): string {
+  switch (status) {
+    case 'healthy':
+      return 'text-success';
+    case 'starting':
+      return 'text-warning';
+    case 'disabled':
+      return 'text-muted-foreground';
+    case 'error':
+      return 'text-destructive';
+  }
+}
+
 export function NetworkStatusButton() {
   const t = useTranslations('common');
   const { isDesktopMode } = useDesktopMode();
@@ -49,18 +63,6 @@ export function NetworkStatusButton() {
   const [tailscaleStatus, setTailscaleStatus] = useState<TailscaleStatus | null>(null);
   const [cloudflaredStatus, setCloudflaredStatus] = useState<CloudflaredStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Fetch network status (skip in desktop mode)
   useEffect(() => {
@@ -145,7 +147,7 @@ export function NetworkStatusButton() {
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="icon-circle !w-9 !h-9 md:!w-11 md:!h-11 relative group"
@@ -160,169 +162,99 @@ export function NetworkStatusButton() {
         {!loading && (
           <span
             className={cn(
-              'absolute -top-0.5 -right-0.5 h-2.5 w-2.5 md:h-3 md:w-3 rounded-full border-2 border-background',
+              'absolute -top-0.5 -right-0.5 h-2 w-2 md:h-3 md:w-3 rounded-full border-2 border-background',
               getStatusColor(overallStatus)
             )}
           />
         )}
       </button>
 
-      {isOpen && (
-        <div
-          className={cn(
-            'absolute py-3 w-64 rounded-xl bg-background/95 backdrop-blur-xl border border-white/10 shadow-2xl z-50 animate-in fade-in-0 zoom-in-95',
-            'right-0 mt-2 slide-in-from-top-2'
-          )}
-        >
-          <div className="px-4 pb-3 mb-2 border-b border-white/5">
-            <p className="text-sm font-medium">{t('networkStatus')}</p>
-          </div>
-
+      <HeaderDropdown
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title={t('networkStatus')}
+        width="sm"
+        footer={
+          <Link
+            href="/settings#network"
+            onClick={() => setIsOpen(false)}
+            className="text-xs text-primary hover:underline"
+          >
+            {t('manageNetwork')} →
+          </Link>
+        }
+      >
+        <div className="py-1">
           {/* Tor Status */}
-          <div className="px-4 py-2.5 hover:bg-white/5 transition-colors">
-            <div className="flex items-center gap-3">
-              <Shield
-                className={cn(
-                  'h-5 w-5 flex-shrink-0',
-                  torServiceStatus === 'healthy'
-                    ? 'text-success'
-                    : torServiceStatus === 'starting'
-                      ? 'text-warning'
-                      : torServiceStatus === 'error'
-                        ? 'text-destructive'
-                        : 'text-muted-foreground'
-                )}
-              />
-              <div className="flex-1">
-                <p className="text-sm font-medium">Tor</p>
-                <p
-                  className={cn(
-                    'text-xs',
-                    torServiceStatus === 'healthy'
-                      ? 'text-success'
-                      : torServiceStatus === 'starting'
-                        ? 'text-warning'
-                        : torServiceStatus === 'error'
-                          ? 'text-destructive'
-                          : 'text-muted-foreground'
-                  )}
-                >
-                  {getServiceStatusLabel(torServiceStatus)}
-                </p>
-              </div>
+          <HeaderDropdownItem
+            icon={
+              <Shield className={cn('h-4 w-4', getIconColor(torServiceStatus))} />
+            }
+            title="Tor"
+            subtitle={getServiceStatusLabel(torServiceStatus)}
+            trailing={
               <span
                 className={cn(
-                  'h-2.5 w-2.5 min-h-2.5 min-w-2.5 rounded-full flex-shrink-0',
+                  'h-2.5 w-2.5 rounded-full flex-shrink-0',
                   getStatusColor(torServiceStatus)
                 )}
               />
-            </div>
-          </div>
+            }
+          />
 
           {/* Tailscale Status */}
-          <div className="px-4 py-2.5 hover:bg-white/5 transition-colors">
-            <div className="flex items-center gap-3">
-              {tailscaleServiceStatus === 'disabled' ? (
-                <WifiOff className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+          <HeaderDropdownItem
+            icon={
+              tailscaleServiceStatus === 'disabled' ? (
+                <WifiOff className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <Wifi
-                  className={cn(
-                    'h-5 w-5 flex-shrink-0',
-                    tailscaleServiceStatus === 'healthy'
-                      ? 'text-success'
-                      : tailscaleServiceStatus === 'starting'
-                        ? 'text-warning'
-                        : 'text-destructive'
-                  )}
-                />
-              )}
-              <div className="flex-1">
-                <p className="text-sm font-medium">Tailscale</p>
-                <p
-                  className={cn(
-                    'text-xs',
-                    tailscaleServiceStatus === 'healthy'
-                      ? 'text-success'
-                      : tailscaleServiceStatus === 'starting'
-                        ? 'text-warning'
-                        : tailscaleServiceStatus === 'error'
-                          ? 'text-destructive'
-                          : 'text-muted-foreground'
-                  )}
-                >
-                  {tailscaleStatus?.dnsName
-                    ? tailscaleStatus.dnsName
-                    : getServiceStatusLabel(tailscaleServiceStatus)}
-                </p>
-              </div>
+                <Wifi className={cn('h-4 w-4', getIconColor(tailscaleServiceStatus))} />
+              )
+            }
+            title="Tailscale"
+            subtitle={
+              tailscaleStatus?.dnsName
+                ? tailscaleStatus.dnsName
+                : getServiceStatusLabel(tailscaleServiceStatus)
+            }
+            trailing={
               <span
                 className={cn(
-                  'h-2.5 w-2.5 min-h-2.5 min-w-2.5 rounded-full flex-shrink-0',
+                  'h-2.5 w-2.5 rounded-full flex-shrink-0',
                   getStatusColor(tailscaleServiceStatus)
                 )}
               />
-            </div>
-          </div>
+            }
+          />
 
           {/* Cloudflare Tunnel Status */}
-          <div className="px-4 py-2.5 hover:bg-white/5 transition-colors">
-            <div className="flex items-center gap-3">
-              {cloudflaredServiceStatus === 'disabled' ? (
-                <CloudOff className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+          <HeaderDropdownItem
+            icon={
+              cloudflaredServiceStatus === 'disabled' ? (
+                <CloudOff className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <Cloud
-                  className={cn(
-                    'h-5 w-5 flex-shrink-0',
-                    cloudflaredServiceStatus === 'healthy'
-                      ? 'text-success'
-                      : cloudflaredServiceStatus === 'starting'
-                        ? 'text-warning'
-                        : 'text-destructive'
-                  )}
-                />
-              )}
-              <div className="flex-1">
-                <p className="text-sm font-medium">Cloudflare</p>
-                <p
-                  className={cn(
-                    'text-xs',
-                    cloudflaredServiceStatus === 'healthy'
-                      ? 'text-success'
-                      : cloudflaredServiceStatus === 'starting'
-                        ? 'text-warning'
-                        : cloudflaredServiceStatus === 'error'
-                          ? 'text-destructive'
-                          : 'text-muted-foreground'
-                  )}
-                >
-                  {cloudflaredStatus?.ingress &&
-                  cloudflaredStatus.ingress.length > 0 &&
-                  cloudflaredServiceStatus === 'healthy'
-                    ? cloudflaredStatus.ingress[0].hostname
-                    : getServiceStatusLabel(cloudflaredServiceStatus)}
-                </p>
-              </div>
+                <Cloud className={cn('h-4 w-4', getIconColor(cloudflaredServiceStatus))} />
+              )
+            }
+            title="Cloudflare"
+            subtitle={
+              cloudflaredStatus?.ingress &&
+              cloudflaredStatus.ingress.length > 0 &&
+              cloudflaredServiceStatus === 'healthy'
+                ? cloudflaredStatus.ingress[0].hostname
+                : getServiceStatusLabel(cloudflaredServiceStatus)
+            }
+            trailing={
               <span
                 className={cn(
-                  'h-2.5 w-2.5 min-h-2.5 min-w-2.5 rounded-full flex-shrink-0',
+                  'h-2.5 w-2.5 rounded-full flex-shrink-0',
                   getStatusColor(cloudflaredServiceStatus)
                 )}
               />
-            </div>
-          </div>
-
-          {/* Settings Link */}
-          <div className="px-4 pt-3 mt-2 border-t border-white/5">
-            <Link
-              href="/settings#network"
-              onClick={() => setIsOpen(false)}
-              className="text-xs text-primary hover:underline"
-            >
-              {t('manageNetwork')}
-            </Link>
-          </div>
+            }
+          />
         </div>
-      )}
+      </HeaderDropdown>
     </div>
   );
 }

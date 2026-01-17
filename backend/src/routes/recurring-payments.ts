@@ -105,14 +105,20 @@ function calculateNextRunAt(
   return next;
 }
 
-// List all recurring payments
+// List all recurring payments (filtered by active connection)
 recurringPaymentsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { status, contactId } = req.query;
+    const { status, contactId, showAll } = req.query;
+
+    // Get active connection
+    const activeConnection = await prisma.phoenixdConnection.findFirst({
+      where: { isActive: true },
+    });
 
     const where: {
       status?: string;
       contactId?: string;
+      connectionId?: string | null;
     } = {};
 
     if (status && typeof status === 'string') {
@@ -123,8 +129,20 @@ recurringPaymentsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, 
       where.contactId = contactId;
     }
 
+    // Only filter by connection if not requesting all
+    // Also include payments without connectionId (legacy/migrated payments)
+    if (showAll !== 'true' && activeConnection) {
+      // Show payments for active connection OR payments without a connection (legacy)
+    }
+
     const recurringPayments = await prisma.recurringPayment.findMany({
-      where,
+      where: showAll === 'true' ? where : {
+        ...where,
+        OR: [
+          { connectionId: activeConnection?.id },
+          { connectionId: null }, // Legacy payments without connection
+        ],
+      },
       include: {
         contact: {
           include: {
@@ -132,6 +150,13 @@ recurringPaymentsRouter.get('/', requireAuth, async (req: AuthenticatedRequest, 
           },
         },
         category: true,
+        connection: {
+          select: {
+            id: true,
+            name: true,
+            isDocker: true,
+          },
+        },
         _count: {
           select: { executions: true },
         },
@@ -163,6 +188,13 @@ recurringPaymentsRouter.get(
             },
           },
           category: true,
+          connection: {
+            select: {
+              id: true,
+              name: true,
+              isDocker: true,
+            },
+          },
           executions: {
             orderBy: { executedAt: 'desc' },
             take: 20,
@@ -257,6 +289,11 @@ recurringPaymentsRouter.post('/', requireAuth, async (req: AuthenticatedRequest,
       }
     }
 
+    // Get active connection to tie this payment to
+    const activeConnection = await prisma.phoenixdConnection.findFirst({
+      where: { isActive: true },
+    });
+
     // Calculate next run date
     const time = timeOfDay || '09:00';
     const nextRunAt = calculateNextRunAt(
@@ -270,6 +307,7 @@ recurringPaymentsRouter.post('/', requireAuth, async (req: AuthenticatedRequest,
       data: {
         contactId,
         addressId,
+        connectionId: activeConnection?.id || null, // Tie to active connection
         amountSat,
         frequency,
         dayOfWeek: frequency === 'weekly' ? (dayOfWeek ?? 1) : null,
@@ -287,6 +325,13 @@ recurringPaymentsRouter.post('/', requireAuth, async (req: AuthenticatedRequest,
           },
         },
         category: true,
+        connection: {
+          select: {
+            id: true,
+            name: true,
+            isDocker: true,
+          },
+        },
       },
     });
 
@@ -449,6 +494,13 @@ recurringPaymentsRouter.put(
             },
           },
           category: true,
+          connection: {
+            select: {
+              id: true,
+              name: true,
+              isDocker: true,
+            },
+          },
         },
       });
 

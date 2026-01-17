@@ -1,16 +1,69 @@
 interface PhoenixdConfig {
   url: string;
   password: string;
+  isExternal: boolean;
 }
 
 export class PhoenixdService {
   private config: PhoenixdConfig;
+  private static defaultUrl = process.env.PHOENIXD_URL || 'http://phoenixd:9740';
+  private static defaultPassword = process.env.PHOENIXD_PASSWORD || '';
 
   constructor() {
     this.config = {
-      url: process.env.PHOENIXD_URL || 'http://phoenixd:9740',
-      password: process.env.PHOENIXD_PASSWORD || '',
+      url: PhoenixdService.defaultUrl,
+      password: PhoenixdService.defaultPassword,
+      isExternal: false,
     };
+  }
+
+  /**
+   * Update the phoenixd configuration dynamically
+   */
+  updateConfig(url: string, password: string, isExternal: boolean): void {
+    this.config = {
+      url: url || PhoenixdService.defaultUrl,
+      password: password || PhoenixdService.defaultPassword,
+      isExternal,
+    };
+    console.log(`PhoenixdService config updated: ${isExternal ? 'external' : 'docker'} at ${this.config.url}`);
+  }
+
+  /**
+   * Reset to default (Docker) configuration
+   */
+  resetToDefault(): void {
+    this.config = {
+      url: PhoenixdService.defaultUrl,
+      password: PhoenixdService.defaultPassword,
+      isExternal: false,
+    };
+    console.log('PhoenixdService config reset to default');
+  }
+
+  /**
+   * Get current configuration (password masked for security)
+   */
+  getConfig(): { url: string; isExternal: boolean; hasPassword: boolean } {
+    return {
+      url: this.config.url,
+      isExternal: this.config.isExternal,
+      hasPassword: !!this.config.password,
+    };
+  }
+
+  /**
+   * Get the full configuration including password (for internal use only)
+   */
+  getFullConfig(): PhoenixdConfig {
+    return { ...this.config };
+  }
+
+  /**
+   * Get WebSocket URL for phoenixd connection
+   */
+  getWebSocketUrl(): string {
+    return this.config.url.replace('http', 'ws') + '/websocket';
   }
 
   private getAuthHeader(): string {
@@ -59,6 +112,38 @@ export class PhoenixdService {
     return (await response.text()) as unknown as T;
   }
 
+  /**
+   * Test connection to phoenixd with given credentials
+   * Returns node info if successful, throws error if not
+   */
+  async testConnection(url: string, password: string): Promise<{
+    nodeId: string;
+    chain?: string;
+    version?: string;
+  }> {
+    const testUrl = `${url}/getinfo`;
+    const authHeader = 'Basic ' + Buffer.from(`:${password}`).toString('base64');
+
+    const response = await fetch(testUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: authHeader,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Connection failed: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json() as { nodeId: string; chain?: string; version?: string };
+    return {
+      nodeId: data.nodeId,
+      chain: data.chain,
+      version: data.version,
+    };
+  }
+
   // Node Management
   async getInfo() {
     return this.request<{
@@ -84,8 +169,13 @@ export class PhoenixdService {
   async listChannels() {
     // Use /getinfo instead of /listchannels because /listchannels returns a complex nested structure
     // that doesn't match our expected Channel interface
-    const info = await this.getInfo();
-    return info.channels;
+    try {
+      const info = await this.getInfo();
+      return info?.channels || [];
+    } catch (error) {
+      console.error('Error listing channels:', error);
+      return [];
+    }
   }
 
   async closeChannel(params: { channelId: string; address: string; feerateSatByte: number }) {

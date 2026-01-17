@@ -84,10 +84,25 @@ export default function SendPage() {
   const tcat = useTranslations('paymentLabels');
 
   // Fetch node info to get current chain
-  useEffect(() => {
+  const fetchNodeChain = () => {
     getNodeInfo()
       .then((info) => setChain(info.chain || 'mainnet'))
       .catch(() => setChain('mainnet'));
+  };
+
+  useEffect(() => {
+    fetchNodeChain();
+  }, []);
+
+  // Listen for phoenixd connection changes
+  useEffect(() => {
+    const handleConnectionChange = () => {
+      console.log('Phoenixd connection changed, refreshing send page data...');
+      setTimeout(fetchNodeChain, 1500);
+    };
+
+    window.addEventListener('phoenixd:connection-changed', handleConnectionChange);
+    return () => window.removeEventListener('phoenixd:connection-changed', handleConnectionChange);
   }, []);
 
   // Fetch categories

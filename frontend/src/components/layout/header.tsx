@@ -26,6 +26,7 @@ import { NotificationsPopover, type Notification } from '@/components/notificati
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { CurrencySwitcher } from '@/components/currency-switcher';
 import { NetworkStatusButton } from '@/components/network-status-button';
+import { ConnectionSwitcher } from '@/components/connection-switcher';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 
@@ -99,7 +100,28 @@ export function Header({
   useEffect(() => {
     fetchBalance();
     const interval = setInterval(fetchBalance, 30000);
-    return () => clearInterval(interval);
+    
+    // Listen for connection changing (start loading state)
+    const handleConnectionChanging = () => {
+      console.log('Connection changing, showing loading state...');
+      setLoading(true);
+    };
+    
+    // Listen for connection changes to refresh balance
+    const handleConnectionChanged = () => {
+      console.log('Connection changed, refreshing balance...');
+      // Small delay to allow backend to connect
+      setTimeout(fetchBalance, 1500);
+    };
+    
+    window.addEventListener('phoenixd:connection-changing', handleConnectionChanging);
+    window.addEventListener('phoenixd:connection-changed', handleConnectionChanged);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('phoenixd:connection-changing', handleConnectionChanging);
+      window.removeEventListener('phoenixd:connection-changed', handleConnectionChanged);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -197,7 +219,7 @@ export function Header({
         </div>
       )}
 
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 py-3 md:py-6 bg-background/80 backdrop-blur-xl border-b border-white/5">
+      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 py-3 md:py-6 bg-background/95 backdrop-blur-xl border-b border-white/5">
         {/* Left - Menu Button (mobile) / Title (desktop) */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Mobile menu button */}
@@ -234,6 +256,9 @@ export function Header({
           >
             <Search className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
+
+          {/* Connection Switcher - Switch between Phoenixd nodes */}
+          <ConnectionSwitcher />
 
           {/* Network Status - Tor and Tailscale */}
           <NetworkStatusButton />
