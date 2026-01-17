@@ -57,7 +57,7 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **Celebration Animations** — Confetti, thunder, fireworks, and more on payments
 
-✅ **App Store** — Install third-party integrations (Telegram, Nostr, Donations, etc.)
+✅ **Apps** — Built-in Donations page + install custom apps via Docker/GitHub
 
 ✅ **PWA** — Install as native app on any device
 

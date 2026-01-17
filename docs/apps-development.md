@@ -6,7 +6,6 @@ This guide explains how to create apps that integrate with Phoenixd Dashboard. A
 
 - [Overview](#overview)
 - [Quick Start](#quick-start)
-- [App Store](#app-store)
 - [Environment Variables](#environment-variables)
 - [Webhook Events](#webhook-events)
 - [API Gateway](#api-gateway)
@@ -41,8 +40,8 @@ Apps in Phoenixd Dashboard can:
 │  ┌─────────────────────────────────────────────────────────────┐│
 │  │                    Apps (Docker Containers)                  ││
 │  │  ┌───────────┐  ┌───────────┐  ┌───────────┐               ││
-│  │  │ Telegram  │  │  Discord  │  │  Nostr    │  ...          ││
-│  │  │   Bot     │  │   Bot     │  │  Zapper   │               ││
+│  │  │ Donations │  │  Custom   │  │  Custom   │  ...          ││
+│  │  │   Page    │  │   App 1   │  │   App 2   │               ││
 │  │  └───────────┘  └───────────┘  └───────────┘               ││
 │  └─────────────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────────────┘
@@ -330,6 +329,8 @@ When installing an app, you can configure which API permissions it has:
 
 ## Example Apps
 
+These are examples to help you understand how to build apps for Phoenixd Dashboard.
+
 ### Telegram Notification Bot
 
 A simple bot that sends Telegram messages when payments are received.
@@ -455,46 +456,6 @@ app.listen(3000);
 4. Select "Docker Image" and enter your image URL
 5. Configure webhook events and environment variables
 6. Click Install
-
-## App Store
-
-The Phoenixd Dashboard includes a built-in App Store with pre-configured apps that can be installed with one click.
-
-### Pre-installed Apps
-
-| App | Description | Features |
-|-----|-------------|----------|
-| **Donations Page** | Accept Lightning donations | BOLT11 invoices, BOLT12 offers, customizable UI |
-| **Telegram Notifications** | Get payment alerts on Telegram | Real-time notifications |
-| **Nostr Zapper** | Auto-zap on Nostr | Zap receipts, NIP-57 support |
-
-### Adding Your App to the Marketplace
-
-To add your app to the marketplace, submit a PR to the repository with:
-
-1. Your Docker image on a public registry
-2. App metadata (name, description, icon, required env vars)
-3. Documentation
-
-Edit `frontend/src/components/app-install-dialog.tsx` and add your app to the `MARKETPLACE_APPS` array:
-
-```typescript
-const MARKETPLACE_APPS: MarketplaceApp[] = [
-  {
-    id: 'your-app',
-    name: 'Your App Name',
-    description: 'What your app does',
-    icon: YourIcon,  // Lucide icon
-    sourceUrl: 'your-registry/your-app:latest',
-    webhookEvents: ['payment_received'],
-    envVars: {
-      YOUR_CONFIG: 'default_value',
-    },
-    featured: false,
-  },
-  // ...
-];
-```
 
 ## BOLT12 Offers
 
