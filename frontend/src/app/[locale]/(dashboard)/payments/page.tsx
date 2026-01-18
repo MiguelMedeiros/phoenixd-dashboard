@@ -472,7 +472,6 @@ export default function PaymentsPage() {
                 id: 'incoming',
                 label: t('incoming'),
                 icon: ArrowDownToLine,
-                count: incomingPayments.length,
                 activeClassName:
                   'bg-gradient-to-r from-success to-emerald-600 text-white shadow-lg shadow-success/25',
               },
@@ -480,7 +479,6 @@ export default function PaymentsPage() {
                 id: 'outgoing',
                 label: t('outgoing'),
                 icon: ArrowUpFromLine,
-                count: outgoingPayments.length,
                 activeClassName:
                   'bg-gradient-to-r from-primary to-orange-600 text-white shadow-lg shadow-primary/25',
               },

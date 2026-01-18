@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   AreaChart,
   Area,
@@ -16,21 +16,25 @@ import {
   subDays,
   subWeeks,
   subMonths,
+  subHours,
   startOfDay,
   startOfWeek,
   startOfMonth,
+  startOfHour,
   isSameDay,
   isSameWeek,
   isSameMonth,
+  isSameHour,
   eachDayOfInterval,
   eachWeekOfInterval,
   eachMonthOfInterval,
+  eachHourOfInterval,
 } from 'date-fns';
 import { BarChart3, TrendingUp, Calendar } from 'lucide-react';
 import type { IncomingPayment, OutgoingPayment } from '@/lib/api';
 import { useTranslations } from 'next-intl';
 
-type Period = 'daily' | 'weekly' | 'monthly';
+type Period = 'hourly' | 'daily' | 'weekly' | 'monthly';
 
 interface PaymentsChartProps {
   incomingPayments: IncomingPayment[];
@@ -44,8 +48,9 @@ interface ChartData {
   sent: number;
 }
 
-// Period configuration - days/weeks/months values used in chart calculations
+// Period configuration - hours/days/weeks/months values used in chart calculations
 const _periodConfig = {
+  hourly: { hours: 24 },
   daily: { days: 14 },
   weekly: { weeks: 8 },
   monthly: { months: 6 },
@@ -89,10 +94,26 @@ const CustomTooltip = ({
   return null;
 };
 
+const PERIOD_STORAGE_KEY = 'phoenixd-chart-period';
+
 export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsChartProps) {
   const t = useTranslations('overview');
   const tc = useTranslations('common');
   const [period, setPeriod] = useState<Period>('daily');
+
+  // Load saved period from localStorage on mount
+  useEffect(() => {
+    const savedPeriod = localStorage.getItem(PERIOD_STORAGE_KEY) as Period | null;
+    if (savedPeriod && ['hourly', 'daily', 'weekly', 'monthly'].includes(savedPeriod)) {
+      setPeriod(savedPeriod);
+    }
+  }, []);
+
+  // Save period to localStorage when it changes
+  const handlePeriodChange = (newPeriod: Period) => {
+    setPeriod(newPeriod);
+    localStorage.setItem(PERIOD_STORAGE_KEY, newPeriod);
+  };
 
   const tooltipTranslations = {
     received: t('received'),
@@ -109,7 +130,27 @@ export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsCh
     const now = new Date();
     const data: ChartData[] = [];
 
-    if (period === 'daily') {
+    if (period === 'hourly') {
+      const hours = 24;
+      const startDate = subHours(now, hours - 1);
+      const intervals = eachHourOfInterval({ start: startDate, end: now });
+
+      intervals.forEach((date) => {
+        const hourStart = startOfHour(date);
+        const dateStr = format(hourStart, 'yyyy-MM-dd HH:00');
+        const dateLabel = format(hourStart, 'HH:mm');
+
+        const received = incomingPayments
+          .filter((p) => p.isPaid && isSameHour(new Date(p.completedAt || p.createdAt), hourStart))
+          .reduce((sum, p) => sum + p.receivedSat, 0);
+
+        const sent = outgoingPayments
+          .filter((p) => p.isPaid && isSameHour(new Date(p.completedAt || p.createdAt), hourStart))
+          .reduce((sum, p) => sum + p.sent, 0);
+
+        data.push({ date: dateStr, dateLabel, received, sent });
+      });
+    } else if (period === 'daily') {
       const days = 14;
       const startDate = subDays(now, days - 1);
       const intervals = eachDayOfInterval({ start: startDate, end: now });
@@ -202,7 +243,7 @@ export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsCh
             </div>
             {t('paymentActivity')}
           </h3>
-          <PeriodSelector period={period} onChange={setPeriod} t={t} />
+          <PeriodSelector period={period} onChange={handlePeriodChange} t={t} />
         </div>
         <div className="flex flex-col items-center justify-center h-[200px] text-center">
           <div className="h-14 w-14 rounded-2xl bg-black/5 dark:bg-white/5 flex items-center justify-center mb-3">
@@ -224,7 +265,7 @@ export function PaymentsChart({ incomingPayments, outgoingPayments }: PaymentsCh
           </div>
           {t('paymentActivity')}
         </h3>
-        <PeriodSelector period={period} onChange={setPeriod} t={t} />
+        <PeriodSelector period={period} onChange={handlePeriodChange} t={t} />
       </div>
 
       <div className="h-[240px] w-full">
@@ -301,15 +342,17 @@ function PeriodSelector({
   onChange: (period: Period) => void;
   t: (key: string) => string;
 }) {
-  const periods: Period[] = ['daily', 'weekly', 'monthly'];
+  const periods: Period[] = ['hourly', 'daily', 'weekly', 'monthly'];
 
   const labels: Record<Period, string> = {
+    hourly: t('hourly'),
     daily: t('daily'),
     weekly: t('weekly'),
     monthly: t('monthly'),
   };
 
   const shortLabels: Record<Period, string> = {
+    hourly: 'H',
     daily: 'D',
     weekly: 'W',
     monthly: 'M',

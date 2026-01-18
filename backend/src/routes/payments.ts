@@ -8,14 +8,29 @@ export const paymentsRouter = Router();
 paymentsRouter.get('/incoming', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { from, to, limit, offset, all, externalId } = req.query;
-    const result = await phoenixd.listIncomingPayments({
+    // Fetch a large number of payments to sort properly (phoenixd returns oldest first)
+    const allPayments = await phoenixd.listIncomingPayments({
       from: from ? parseInt(from as string) : undefined,
       to: to ? parseInt(to as string) : undefined,
-      limit: limit ? parseInt(limit as string) : undefined,
-      offset: offset ? parseInt(offset as string) : undefined,
+      limit: 10000, // Fetch up to 10k payments for proper sorting
       all: all === 'true',
       externalId: externalId as string | undefined,
     });
+
+    // Sort by newest first (phoenixd returns oldest first by default)
+    const sorted = sortByNewest(allPayments as Array<{ completedAt?: number; createdAt: number }>);
+
+    // Apply pagination after sorting
+    const parsedLimit = limit ? parseInt(limit as string) : undefined;
+    const parsedOffset = offset ? parseInt(offset as string) : 0;
+
+    let result = sorted;
+    if (parsedLimit !== undefined) {
+      result = sorted.slice(parsedOffset, parsedOffset + parsedLimit);
+    }
+
+    // Add total count header
+    res.setHeader('X-Total-Count', sorted.length.toString());
     res.json(result);
   } catch (error) {
     console.error('Error listing incoming payments:', error);
@@ -39,17 +54,42 @@ paymentsRouter.get(
   }
 );
 
+// Helper to sort payments by newest first
+function sortByNewest<T extends { completedAt?: number; createdAt: number }>(payments: T[]): T[] {
+  return [...payments].sort((a, b) => {
+    const aTime = a.completedAt || a.createdAt;
+    const bTime = b.completedAt || b.createdAt;
+    return bTime - aTime; // Descending order (newest first)
+  });
+}
+
 // List Outgoing Payments
 paymentsRouter.get('/outgoing', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { from, to, limit, offset, all } = req.query;
-    const result = await phoenixd.listOutgoingPayments({
+    // Fetch a large number of payments to sort properly (phoenixd returns oldest first)
+    // We need to fetch enough to cover the requested page after sorting by newest
+    const allPayments = await phoenixd.listOutgoingPayments({
       from: from ? parseInt(from as string) : undefined,
       to: to ? parseInt(to as string) : undefined,
-      limit: limit ? parseInt(limit as string) : undefined,
-      offset: offset ? parseInt(offset as string) : undefined,
+      limit: 10000, // Fetch up to 10k payments for proper sorting
       all: all === 'true',
     });
+
+    // Sort by newest first (phoenixd returns oldest first by default)
+    const sorted = sortByNewest(allPayments as Array<{ completedAt?: number; createdAt: number }>);
+
+    // Apply pagination after sorting
+    const parsedLimit = limit ? parseInt(limit as string) : undefined;
+    const parsedOffset = offset ? parseInt(offset as string) : 0;
+
+    let result = sorted;
+    if (parsedLimit !== undefined) {
+      result = sorted.slice(parsedOffset, parsedOffset + parsedLimit);
+    }
+
+    // Add total count header
+    res.setHeader('X-Total-Count', sorted.length.toString());
     res.json(result);
   } catch (error) {
     console.error('Error listing outgoing payments:', error);

@@ -91,8 +91,7 @@ describe('Payments Routes', () => {
       expect(mockPhoenixd.listIncomingPayments).toHaveBeenCalledWith({
         from: 1000,
         to: 2000,
-        limit: 10,
-        offset: 0,
+        limit: 10000,
         all: true,
         externalId: 'ext-123',
       });
@@ -106,8 +105,7 @@ describe('Payments Routes', () => {
       expect(mockPhoenixd.listIncomingPayments).toHaveBeenCalledWith({
         from: undefined,
         to: undefined,
-        limit: undefined,
-        offset: undefined,
+        limit: 10000,
         all: false,
         externalId: undefined,
       });
@@ -177,8 +175,7 @@ describe('Payments Routes', () => {
       expect(mockPhoenixd.listOutgoingPayments).toHaveBeenCalledWith({
         from: undefined,
         to: undefined,
-        limit: 5,
-        offset: 10,
+        limit: 10000,
         all: false,
       });
     });

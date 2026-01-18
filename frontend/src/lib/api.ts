@@ -276,6 +276,81 @@ export async function getIncomingPayments(params?: {
   return request<IncomingPayment[]>(`/api/payments/incoming${query ? `?${query}` : ''}`);
 }
 
+// Payments with total count
+export interface PaymentsWithTotal<T> {
+  data: T[];
+  total: number;
+}
+
+export async function getIncomingPaymentsWithTotal(params?: {
+  from?: number;
+  to?: number;
+  limit?: number;
+  offset?: number;
+  all?: boolean;
+  externalId?: string;
+}): Promise<PaymentsWithTotal<IncomingPayment>> {
+  const API_URL = getApiUrl();
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParams.append(key, String(value));
+      }
+    });
+  }
+  const query = queryParams.toString();
+  const url = `${API_URL}/api/payments/incoming${query ? `?${query}` : ''}`;
+
+  const response = await fetch(url, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(error.error || 'Request failed');
+  }
+
+  const data = await response.json();
+  const total = parseInt(response.headers.get('X-Total-Count') || '0', 10);
+
+  return { data, total };
+}
+
+export async function getOutgoingPaymentsWithTotal(params?: {
+  from?: number;
+  to?: number;
+  limit?: number;
+  offset?: number;
+  all?: boolean;
+}): Promise<PaymentsWithTotal<OutgoingPayment>> {
+  const API_URL = getApiUrl();
+  const queryParams = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParams.append(key, String(value));
+      }
+    });
+  }
+  const query = queryParams.toString();
+  const url = `${API_URL}/api/payments/outgoing${query ? `?${query}` : ''}`;
+
+  const response = await fetch(url, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(error.error || 'Request failed');
+  }
+
+  const data = await response.json();
+  const total = parseInt(response.headers.get('X-Total-Count') || '0', 10);
+
+  return { data, total };
+}
+
 export async function getIncomingPayment(paymentHash: string) {
   return request<IncomingPayment>(`/api/payments/incoming/${paymentHash}`);
 }

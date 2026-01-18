@@ -19,6 +19,9 @@ import {
   Users,
   RefreshCw,
   Clock,
+  BarChart3,
+  Repeat,
+  Box,
 } from 'lucide-react';
 import { PaymentList } from '@/components/payment-list';
 import {
@@ -92,9 +95,14 @@ export default function OverviewPage() {
       setContacts(contactsList || []);
       setRecurringPayments(recurring || []);
 
-      // Combine and sort recent payments - more for mobile
+      // Combine and sort recent payments by most recent activity
+      // Use completedAt for paid payments, createdAt for pending
       const allPayments = [...(incoming || []), ...(outgoing || [])];
-      allPayments.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      allPayments.sort((a, b) => {
+        const aTime = a.completedAt || a.createdAt || 0;
+        const bTime = b.completedAt || b.createdAt || 0;
+        return bTime - aTime;
+      });
       setRecentPayments(allPayments.slice(0, 10));
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -259,7 +267,7 @@ export default function OverviewPage() {
         <PaymentsChart incomingPayments={allIncoming} outgoingPayments={allOutgoing} />
 
         {/* Quick Actions Grid */}
-        <div className="grid gap-3 grid-cols-6">
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9">
           <Link
             href="/receive"
             className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
@@ -283,6 +291,17 @@ export default function OverviewPage() {
           </Link>
 
           <Link
+            href="/analytics"
+            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <BarChart3 className="h-5 w-5 text-blue-500" />
+            </div>
+            <p className="font-medium text-sm">{tc('analytics')}</p>
+            <p className="text-xs text-muted-foreground">{t('viewInsights')}</p>
+          </Link>
+
+          <Link
             href="/contacts"
             className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
           >
@@ -291,6 +310,17 @@ export default function OverviewPage() {
             </div>
             <p className="font-medium text-sm">{tc('contacts')}</p>
             <p className="text-xs text-muted-foreground">{t('manageContacts')}</p>
+          </Link>
+
+          <Link
+            href="/recurring"
+            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <Repeat className="h-5 w-5 text-purple-500" />
+            </div>
+            <p className="font-medium text-sm">{tc('recurring')}</p>
+            <p className="text-xs text-muted-foreground">{t('autoPayments')}</p>
           </Link>
 
           <Link
@@ -324,6 +354,17 @@ export default function OverviewPage() {
             </div>
             <p className="font-medium text-sm">{tc('lnurl')}</p>
             <p className="text-xs text-muted-foreground">{t('payAndAuth')}</p>
+          </Link>
+
+          <Link
+            href="/apps"
+            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
+          >
+            <div className="h-10 w-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <Box className="h-5 w-5 text-rose-500" />
+            </div>
+            <p className="font-medium text-sm">{tc('apps')}</p>
+            <p className="text-xs text-muted-foreground">{t('extendFunctions')}</p>
           </Link>
         </div>
 

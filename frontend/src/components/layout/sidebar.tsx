@@ -19,6 +19,7 @@ import {
   Users,
   Box,
   Repeat,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getNodeInfo } from '@/lib/api';
@@ -32,6 +33,12 @@ const sidebarNavItems = [
     icon: Home,
   },
   {
+    key: 'analytics',
+    href: '/analytics',
+    icon: BarChart3,
+    badge: 'new',
+  },
+  {
     key: 'contacts',
     href: '/contacts',
     icon: Users,
@@ -40,7 +47,6 @@ const sidebarNavItems = [
     key: 'recurring',
     href: '/recurring',
     icon: Repeat,
-    badge: 'new',
   },
   {
     key: 'receive',

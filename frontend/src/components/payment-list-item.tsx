@@ -182,7 +182,11 @@ export function PaymentListItem({
           <span
             className={cn(
               'text-[10px] md:text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full font-medium',
-              payment.isPaid ? 'bg-success/10 text-success' : 'bg-yellow-500/10 text-yellow-500'
+              payment.isPaid
+                ? isIncoming
+                  ? 'bg-success/10 text-success'
+                  : 'bg-primary/10 text-primary'
+                : 'bg-yellow-500/10 text-yellow-500'
             )}
           >
             {payment.isPaid ? (isIncoming ? t('received') : t('sent')) : tc('pending')}
