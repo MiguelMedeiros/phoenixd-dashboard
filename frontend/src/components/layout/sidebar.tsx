@@ -20,13 +20,20 @@ import {
   Box,
   Repeat,
   BarChart3,
+  Sparkles,
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { getNodeInfo } from '@/lib/api';
 import { useTranslations } from 'next-intl';
 import { useAuthContext } from '@/components/auth-provider';
 
-const sidebarNavItems = [
+const sidebarNavItems: {
+  key: string;
+  href: string;
+  icon: typeof Home;
+  isNew?: boolean;
+}[] = [
   {
     key: 'overview',
     href: '/',
@@ -36,7 +43,7 @@ const sidebarNavItems = [
     key: 'analytics',
     href: '/analytics',
     icon: BarChart3,
-    badge: 'new',
+    isNew: true,
   },
   {
     key: 'contacts',
@@ -82,7 +89,7 @@ const sidebarNavItems = [
     key: 'apps',
     href: '/apps',
     icon: Box,
-    badge: 'new',
+    isNew: true,
   },
 ];
 
@@ -180,63 +187,69 @@ export function Sidebar() {
       </Link>
 
       {/* Navigation */}
-      <nav className={cn('flex flex-1 flex-col gap-1.5', expanded ? '' : 'items-center')}>
-        {sidebarNavItems.map((item) => {
-          const isActive = pathname === item.href;
-          const title = t(item.key);
-          const badge = 'badge' in item ? item.badge : undefined;
+      <TooltipProvider delayDuration={100}>
+        <nav className={cn('flex flex-1 flex-col gap-1.5', expanded ? '' : 'items-center')}>
+          {sidebarNavItems.map((item) => {
+            const isActive = pathname === item.href;
+            const title = t(item.key);
 
-          return (
-            <Link key={item.href} href={item.href} title={expanded ? undefined : title}>
-              <div
-                className={cn(
-                  'group flex items-center gap-3 transition-all duration-200 relative',
-                  expanded
-                    ? cn(
-                        'px-3 py-2.5 rounded-xl',
-                        isActive
-                          ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                          : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
-                      )
-                    : cn('icon-circle', isActive && 'active')
-                )}
-              >
-                <item.icon
+            return (
+              <Link key={item.href} href={item.href} title={expanded ? undefined : title}>
+                <div
                   className={cn(
-                    'h-5 w-5 flex-shrink-0 transition-all duration-200',
-                    isActive ? 'text-white' : 'text-muted-foreground group-hover:text-foreground'
+                    'group flex items-center gap-3 transition-all duration-200 relative',
+                    expanded
+                      ? cn(
+                          'px-3 py-2.5 rounded-xl',
+                          isActive
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                            : 'hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground'
+                        )
+                      : cn('icon-circle', isActive && 'active')
                   )}
-                />
-                {expanded && (
-                  <span
+                >
+                  <item.icon
                     className={cn(
-                      'text-sm font-medium whitespace-nowrap transition-colors flex-1',
-                      isActive ? 'text-white' : ''
+                      'h-5 w-5 flex-shrink-0 transition-all duration-200',
+                      isActive ? 'text-white' : 'text-muted-foreground group-hover:text-foreground'
                     )}
-                  >
-                    {title}
-                  </span>
-                )}
-                {badge && expanded && (
-                  <span
-                    className={cn(
-                      'px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full',
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-gradient-to-r from-primary/20 to-accent/20 text-primary'
-                    )}
-                  >
-                    {badge}
-                  </span>
-                )}
-                {badge && !expanded && (
-                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
-                )}
-              </div>
-            </Link>
-          );
-        })}
-      </nav>
+                  />
+                  {expanded && (
+                    <span
+                      className={cn(
+                        'text-sm font-medium whitespace-nowrap transition-colors flex-1',
+                        isActive ? 'text-white' : ''
+                      )}
+                    >
+                      {title}
+                    </span>
+                  )}
+                  {item.isNew && expanded && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span
+                          className={cn(
+                            'ml-auto flex items-center justify-center',
+                            isActive ? 'text-white/70' : 'text-primary'
+                          )}
+                        >
+                          <Sparkles className="h-3.5 w-3.5" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" sideOffset={8}>
+                        <p className="text-xs">New feature</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {item.isNew && !expanded && (
+                    <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary))]" />
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+      </TooltipProvider>
 
       {/* Bottom Actions */}
       <div

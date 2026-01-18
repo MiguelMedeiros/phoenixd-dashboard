@@ -391,7 +391,7 @@ export default function RecurringPage() {
         categoryId: data.categoryIds?.[0],
       };
       await createRecurringPayment(backendData);
-      toast({ title: tc('success'), description: t('created') });
+      toast({ title: tc('success'), description: t('createdToast') });
       setShowForm(false);
       setSelectedContactForForm(null);
       fetchRecurringPayments();
@@ -414,7 +414,7 @@ export default function RecurringPage() {
       await updateRecurringPayment(recurring.id, { status: newStatus });
       toast({
         title: tc('success'),
-        description: newStatus === 'paused' ? t('paused') : t('resumed'),
+        description: newStatus === 'paused' ? t('pausedToast') : t('resumedToast'),
       });
       fetchRecurringPayments();
     } catch (error) {
@@ -454,7 +454,7 @@ export default function RecurringPage() {
         categoryId: data.categoryIds?.[0],
       };
       await updateRecurringPayment(editingRecurring.id, backendData);
-      toast({ title: tc('success'), description: t('updated') });
+      toast({ title: tc('success'), description: t('updatedToast') });
       setEditingRecurring(null);
       fetchRecurringPayments();
     } catch (error) {
@@ -474,7 +474,7 @@ export default function RecurringPage() {
     if (!confirm(t('confirmDelete'))) return;
     try {
       await deleteRecurringPayment(id);
-      toast({ title: tc('success'), description: t('deleted') });
+      toast({ title: tc('success'), description: t('deletedToast') });
       fetchRecurringPayments();
     } catch (error) {
       console.error('Failed to delete recurring payment:', error);

@@ -23,6 +23,8 @@ import { ActivityHeatmap } from '@/components/charts/activity-heatmap';
 import { FeesComparisonChart } from '@/components/charts/fees-comparison-chart';
 import { MonthlyComparisonChart } from '@/components/charts/monthly-comparison-chart';
 import { TopContactsChart } from '@/components/charts/top-contacts-chart';
+import { PaymentsChart } from '@/components/payments-chart';
+import { PaymentDistributionChart } from '@/components/charts/payment-distribution-chart';
 
 export default function AnalyticsPage() {
   const t = useTranslations('analytics');
@@ -151,10 +153,19 @@ export default function AnalyticsPage() {
         />
       </StatCardGrid>
 
+      {/* Payment Activity Chart - Full Width */}
+      <PaymentsChart incomingPayments={incomingPayments} outgoingPayments={outgoingPayments} />
+
+      {/* Activity Heatmap - Full Width */}
+      <ActivityHeatmap incomingPayments={incomingPayments} outgoingPayments={outgoingPayments} />
+
       {/* Charts Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Activity Heatmap */}
-        <ActivityHeatmap incomingPayments={incomingPayments} outgoingPayments={outgoingPayments} />
+        {/* Payment Distribution Pie Chart */}
+        <PaymentDistributionChart
+          incomingPayments={incomingPayments}
+          outgoingPayments={outgoingPayments}
+        />
 
         {/* Fees Comparison */}
         <FeesComparisonChart outgoingPayments={outgoingPayments} />

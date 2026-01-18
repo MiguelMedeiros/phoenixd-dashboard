@@ -19,6 +19,7 @@ import { useCallback, useRef, useState } from 'react';
 import { type Notification } from '@/components/notifications-popover';
 import { useTranslations } from 'next-intl';
 import { wsEvents, WS_EVENTS } from '@/lib/websocket-events';
+import { ArrowDownToLine, Repeat, Globe } from 'lucide-react';
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
@@ -69,7 +70,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       // Show toast
       toast({
-        title: `⚡ ${tt('paymentReceived')}`,
+        icon: <ArrowDownToLine className="h-5 w-5 text-success" />,
+        title: tt('paymentReceived'),
         description: `${formatValue(amount)} ${tt('received')}${
           event.payerNote ? ` - "${event.payerNote}"` : ''
         }`,
@@ -108,7 +110,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       // Show toast for recurring payment
       toast({
-        title: `🔄 ${tt('recurringPaymentSent')}`,
+        icon: <Repeat className="h-5 w-5 text-primary" />,
+        title: tt('recurringPaymentSent'),
         description: `${formatValue(amount)} ${tt('sentTo')} ${event.contactName}`,
         variant: 'default',
       });
@@ -147,7 +150,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       // Handle service connection/disconnection events
       if (event.type === 'cloudflared:connected') {
         toast({
-          title: `☁️ ${tt('cloudflareConnected')}`,
+          icon: <Globe className="h-5 w-5 text-success" />,
+          title: tt('cloudflareConnected'),
           description: tt('tunnelConnected'),
           variant: 'default',
         });
@@ -159,7 +163,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         });
       } else if (event.type === 'cloudflared:disconnected') {
         toast({
-          title: `☁️ ${tt('cloudflareDisconnected')}`,
+          icon: <Globe className="h-5 w-5 text-muted-foreground" />,
+          title: tt('cloudflareDisconnected'),
           description: tt('tunnelDisconnected'),
           variant: 'default',
         });
@@ -171,7 +176,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         });
       } else if (event.type === 'cloudflared:error') {
         toast({
-          title: `☁️ ${tt('cloudflareError')}`,
+          icon: <Globe className="h-5 w-5 text-destructive" />,
+          title: tt('cloudflareError'),
           description: event.message || tt('tunnelError'),
           variant: 'destructive',
         });

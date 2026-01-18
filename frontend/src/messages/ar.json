@@ -122,6 +122,7 @@
     "manageLiquidity": "إدارة السيولة",
     "decodeAndFees": "فك التشفير والرسوم",
     "payAndAuth": "الدفع والمصادقة",
+    "viewHistory": "عرض السجل",
     "viewInsights": "عرض الإحصائيات",
     "autoPayments": "المدفوعات التلقائية",
     "extendFunctions": "توسيع الوظائف",
@@ -842,10 +843,6 @@
     "executionSuccess": "تم إرسال الدفعة بنجاح!",
     "executionFailed": "فشل الدفع",
     "confirmDelete": "هل أنت متأكد من حذف هذه الدفعة المتكررة؟",
-    "deleted": "تم حذف الدفعة المتكررة",
-    "created": "تم إنشاء الدفعة المتكررة",
-    "updated": "تم تحديث الدفعة المتكررة",
-    "resumed": "تم استئناف الدفعة المتكررة",
     "executions": "سجل الدفعات",
     "noExecutions": "لم يتم تنفيذ أي دفعات بعد",
     "success": "نجاح",
@@ -857,7 +854,12 @@
     "everyMonth": "كل شهر",
     "editingFor": "Editing recurring payment for {contact}",
     "runningNow": "Running now...",
-    "selectContact": "اختر جهة اتصال"
+    "selectContact": "اختر جهة اتصال",
+    "deletedToast": "Recurring payment deleted",
+    "createdToast": "Recurring payment created",
+    "updatedToast": "Recurring payment updated",
+    "pausedToast": "Recurring payment paused",
+    "resumedToast": "Recurring payment resumed"
   },
   "analytics": {
     "title": "التحليلات",
@@ -881,7 +883,15 @@
     "volume": "الحجم",
     "payments": "المدفوعات",
     "less": "أقل",
-    "more": "أكثر"
+    "more": "أكثر",
+    "incoming": "وارد",
+    "outgoing": "صادر",
+    "fees": "رسوم",
+    "noPayments": "لا توجد مدفوعات",
+    "paymentDistribution": "توزيع المدفوعات",
+    "noDistributionData": "لا توجد بيانات توزيع",
+    "received": "مستلم",
+    "sent": "مرسل"
   },
   "apps": {
     "title": "التطبيقات",
@@ -956,5 +966,22 @@
     "featured": "Featured",
     "appConfiguration": "Configuration",
     "openApp": "Open App"
+  },
+  "network": {
+    "title": "Bitcoin Network",
+    "unavailable": "Network data unavailable",
+    "retry": "Retry",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "fast": "Fast",
+    "halfHour": "30 min",
+    "hour": "1 hour",
+    "economy": "Economy",
+    "blockHeight": "Block Height",
+    "mempoolSize": "Mempool Size",
+    "congestion": "Congestion",
+    "congestion_low": "Low",
+    "congestion_medium": "Medium",
+    "congestion_high": "High"
   }
 }

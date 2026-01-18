@@ -122,6 +122,7 @@
     "manageLiquidity": "管理流动性",
     "decodeAndFees": "解码与费用",
     "payAndAuth": "支付与认证",
+    "viewHistory": "查看历史",
     "viewInsights": "查看统计",
     "autoPayments": "自动支付",
     "extendFunctions": "扩展功能",
@@ -842,10 +843,6 @@
     "executionSuccess": "付款发送成功！",
     "executionFailed": "付款失败",
     "confirmDelete": "确定要删除此定期付款吗？",
-    "deleted": "定期付款已删除",
-    "created": "定期付款已创建",
-    "updated": "定期付款已更新",
-    "resumed": "定期付款已恢复",
     "executions": "付款历史",
     "noExecutions": "尚无付款记录",
     "success": "成功",
@@ -857,7 +854,12 @@
     "everyMonth": "每月",
     "editingFor": "Editing recurring payment for {contact}",
     "runningNow": "Running now...",
-    "selectContact": "选择联系人"
+    "selectContact": "选择联系人",
+    "deletedToast": "Recurring payment deleted",
+    "createdToast": "Recurring payment created",
+    "updatedToast": "Recurring payment updated",
+    "pausedToast": "Recurring payment paused",
+    "resumedToast": "Recurring payment resumed"
   },
   "analytics": {
     "title": "数据分析",
@@ -881,7 +883,15 @@
     "volume": "交易量",
     "payments": "交易",
     "less": "较少",
-    "more": "较多"
+    "more": "较多",
+    "incoming": "收入",
+    "outgoing": "支出",
+    "fees": "费用",
+    "noPayments": "无支付记录",
+    "paymentDistribution": "支付分布",
+    "noDistributionData": "暂无分布数据",
+    "received": "收到",
+    "sent": "发送"
   },
   "apps": {
     "title": "应用",
@@ -956,5 +966,22 @@
     "featured": "Featured",
     "appConfiguration": "Configuration",
     "openApp": "Open App"
+  },
+  "network": {
+    "title": "Bitcoin Network",
+    "unavailable": "Network data unavailable",
+    "retry": "Retry",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "fast": "Fast",
+    "halfHour": "30 min",
+    "hour": "1 hour",
+    "economy": "Economy",
+    "blockHeight": "Block Height",
+    "mempoolSize": "Mempool Size",
+    "congestion": "Congestion",
+    "congestion_low": "Low",
+    "congestion_medium": "Medium",
+    "congestion_high": "High"
   }
 }

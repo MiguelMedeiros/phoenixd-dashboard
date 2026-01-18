@@ -26,6 +26,7 @@ import { NotificationsPopover, type Notification } from '@/components/notificati
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { CurrencySwitcher } from '@/components/currency-switcher';
 import { NetworkStatusButton } from '@/components/network-status-button';
+import { BitcoinNetworkButton } from '@/components/bitcoin-network-button';
 import { ConnectionSwitcher } from '@/components/connection-switcher';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
@@ -238,32 +239,35 @@ export function Header({
 
         {/* Right - Actions */}
         <div className="flex items-center gap-1.5 md:gap-2">
-          {/* Currency Switcher - Hidden on mobile and small tablets */}
+          {/* Currency Switcher - Desktop only */}
           <div className="hidden lg:block">
             <CurrencySwitcher />
           </div>
 
-          {/* Language Switcher - Hidden on mobile and small tablets */}
+          {/* Language Switcher - Desktop only */}
           <div className="hidden lg:block">
             <LanguageSwitcher />
           </div>
 
-          {/* Search - Hidden on mobile and small tablets */}
+          {/* Search - Tablet and up */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="hidden lg:flex icon-circle group"
+            className="hidden md:flex icon-circle group"
             title={t('search')}
           >
             <Search className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
 
-          {/* Connection Switcher - Switch between Phoenixd nodes */}
-          <ConnectionSwitcher />
+          {/* Bitcoin Network - Desktop only */}
+          <BitcoinNetworkButton className="hidden lg:block" />
 
-          {/* Network Status - Tor and Tailscale */}
-          <NetworkStatusButton />
+          {/* Connection Switcher - Tablet and up (component handles null when only 1 connection) */}
+          <ConnectionSwitcher className="hidden md:block" />
 
-          {/* Notifications */}
+          {/* Network Status - Tablet and up */}
+          <NetworkStatusButton className="hidden md:block" />
+
+          {/* Notifications - Always visible */}
           <div className="relative">
             <button
               onClick={() => setNotificationsOpen(!notificationsOpen)}

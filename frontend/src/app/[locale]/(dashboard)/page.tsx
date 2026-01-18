@@ -9,8 +9,6 @@ import {
   Copy,
   TrendingUp,
   ChevronRight,
-  Wrench,
-  Link2,
   ScrollText,
   Terminal,
   Server,
@@ -19,9 +17,6 @@ import {
   Users,
   RefreshCw,
   Clock,
-  BarChart3,
-  Repeat,
-  Box,
 } from 'lucide-react';
 import { PaymentList } from '@/components/payment-list';
 import {
@@ -265,108 +260,6 @@ export default function OverviewPage() {
 
         {/* Payment Activity Chart */}
         <PaymentsChart incomingPayments={allIncoming} outgoingPayments={allOutgoing} />
-
-        {/* Quick Actions Grid */}
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9">
-          <Link
-            href="/receive"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-success/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <ArrowDownToLine className="h-5 w-5 text-success" />
-            </div>
-            <p className="font-medium text-sm">{tc('receive')}</p>
-            <p className="text-xs text-muted-foreground">{t('createInvoice')}</p>
-          </Link>
-
-          <Link
-            href="/send"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <ArrowUpFromLine className="h-5 w-5 text-primary" />
-            </div>
-            <p className="font-medium text-sm">{tc('send')}</p>
-            <p className="text-xs text-muted-foreground">{t('payInvoice')}</p>
-          </Link>
-
-          <Link
-            href="/analytics"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <BarChart3 className="h-5 w-5 text-blue-500" />
-            </div>
-            <p className="font-medium text-sm">{tc('analytics')}</p>
-            <p className="text-xs text-muted-foreground">{t('viewInsights')}</p>
-          </Link>
-
-          <Link
-            href="/contacts"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Users className="h-5 w-5 text-cyan-500" />
-            </div>
-            <p className="font-medium text-sm">{tc('contacts')}</p>
-            <p className="text-xs text-muted-foreground">{t('manageContacts')}</p>
-          </Link>
-
-          <Link
-            href="/recurring"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Repeat className="h-5 w-5 text-purple-500" />
-            </div>
-            <p className="font-medium text-sm">{tc('recurring')}</p>
-            <p className="text-xs text-muted-foreground">{t('autoPayments')}</p>
-          </Link>
-
-          <Link
-            href="/channels"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-bitcoin/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Layers className="h-5 w-5 text-bitcoin" />
-            </div>
-            <p className="font-medium text-sm">{tc('channels')}</p>
-            <p className="text-xs text-muted-foreground">{t('manageLiquidity')}</p>
-          </Link>
-
-          <Link
-            href="/tools"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Wrench className="h-5 w-5 text-accent" />
-            </div>
-            <p className="font-medium text-sm">{tc('tools')}</p>
-            <p className="text-xs text-muted-foreground">{t('decodeAndFees')}</p>
-          </Link>
-
-          <Link
-            href="/lnurl"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-lightning/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Link2 className="h-5 w-5 text-lightning" />
-            </div>
-            <p className="font-medium text-sm">{tc('lnurl')}</p>
-            <p className="text-xs text-muted-foreground">{t('payAndAuth')}</p>
-          </Link>
-
-          <Link
-            href="/apps"
-            className="glass-card rounded-2xl p-4 hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="h-10 w-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <Box className="h-5 w-5 text-rose-500" />
-            </div>
-            <p className="font-medium text-sm">{tc('apps')}</p>
-            <p className="text-xs text-muted-foreground">{t('extendFunctions')}</p>
-          </Link>
-        </div>
 
         {/* Contacts & Recurring Payments Grid */}
         <div className="grid gap-4 lg:grid-cols-2">
@@ -673,8 +566,8 @@ export default function OverviewPage() {
           </div>
 
           {/* Recent Payments */}
-          <div className="lg:col-span-3 glass-card rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-3">
+          <div className="lg:col-span-3 glass-card rounded-2xl p-4 flex flex-col max-h-[380px]">
+            <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <h3 className="font-semibold text-sm">{t('recentPayments')}</h3>
               <Link
                 href="/payments"
@@ -684,18 +577,20 @@ export default function OverviewPage() {
               </Link>
             </div>
 
-            <PaymentList
-              payments={recentPayments}
-              formatValue={formatValue}
-              variant="compact"
-              limit={5}
-              showCategories={false}
-              showFees={false}
-              showArrow={true}
-              showDetailsDialog={true}
-              emptyIcon="zap"
-              emptyMessage={t('noPayments')}
-            />
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <PaymentList
+                payments={recentPayments}
+                formatValue={formatValue}
+                variant="compact"
+                limit={15}
+                showCategories={false}
+                showFees={false}
+                showArrow={true}
+                showDetailsDialog={true}
+                emptyIcon="zap"
+                emptyMessage={t('noPayments')}
+              />
+            </div>
           </div>
         </div>
       </div>

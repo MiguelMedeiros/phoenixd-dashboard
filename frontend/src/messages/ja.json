@@ -122,6 +122,7 @@
     "manageLiquidity": "流動性管理",
     "decodeAndFees": "デコード＆手数料",
     "payAndAuth": "支払い＆認証",
+    "viewHistory": "履歴を見る",
     "viewInsights": "インサイトを見る",
     "autoPayments": "自動支払い",
     "extendFunctions": "機能を拡張",
@@ -842,10 +843,6 @@
     "executionSuccess": "支払いが送信されました！",
     "executionFailed": "支払いに失敗しました",
     "confirmDelete": "この定期支払いを削除してもよろしいですか？",
-    "deleted": "定期支払いを削除しました",
-    "created": "定期支払いを作成しました",
-    "updated": "定期支払いを更新しました",
-    "resumed": "定期支払いを再開しました",
     "executions": "支払い履歴",
     "noExecutions": "まだ支払いがありません",
     "success": "成功",
@@ -857,7 +854,12 @@
     "everyMonth": "毎月",
     "editingFor": "Editing recurring payment for {contact}",
     "runningNow": "Running now...",
-    "selectContact": "連絡先を選択"
+    "selectContact": "連絡先を選択",
+    "deletedToast": "Recurring payment deleted",
+    "createdToast": "Recurring payment created",
+    "updatedToast": "Recurring payment updated",
+    "pausedToast": "Recurring payment paused",
+    "resumedToast": "Recurring payment resumed"
   },
   "analytics": {
     "title": "分析",
@@ -881,7 +883,15 @@
     "volume": "取引量",
     "payments": "支払い",
     "less": "少ない",
-    "more": "多い"
+    "more": "多い",
+    "incoming": "受信",
+    "outgoing": "送信",
+    "fees": "手数料",
+    "noPayments": "支払いなし",
+    "paymentDistribution": "支払い分布",
+    "noDistributionData": "分布データなし",
+    "received": "受信済み",
+    "sent": "送信済み"
   },
   "apps": {
     "title": "アプリ",
@@ -956,5 +966,22 @@
     "featured": "Featured",
     "appConfiguration": "Configuration",
     "openApp": "Open App"
+  },
+  "network": {
+    "title": "Bitcoin Network",
+    "unavailable": "Network data unavailable",
+    "retry": "Retry",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "fast": "Fast",
+    "halfHour": "30 min",
+    "hour": "1 hour",
+    "economy": "Economy",
+    "blockHeight": "Block Height",
+    "mempoolSize": "Mempool Size",
+    "congestion": "Congestion",
+    "congestion_low": "Low",
+    "congestion_medium": "Medium",
+    "congestion_high": "High"
   }
 }

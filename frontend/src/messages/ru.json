@@ -122,6 +122,7 @@
     "manageLiquidity": "Управление ликвидностью",
     "decodeAndFees": "Декодирование и комиссии",
     "payAndAuth": "Оплата и авторизация",
+    "viewHistory": "Просмотр истории",
     "viewInsights": "Просмотр статистики",
     "autoPayments": "Автоплатежи",
     "extendFunctions": "Расширить функции",
@@ -842,10 +843,6 @@
     "executionSuccess": "Платёж успешно отправлен!",
     "executionFailed": "Ошибка платежа",
     "confirmDelete": "Вы уверены, что хотите удалить этот регулярный платёж?",
-    "deleted": "Регулярный платёж удалён",
-    "created": "Регулярный платёж создан",
-    "updated": "Регулярный платёж обновлён",
-    "resumed": "Регулярный платёж возобновлён",
     "executions": "История платежей",
     "noExecutions": "Платежи ещё не выполнялись",
     "success": "Успех",
@@ -857,7 +854,12 @@
     "everyMonth": "Каждый месяц",
     "editingFor": "Editing recurring payment for {contact}",
     "runningNow": "Running now...",
-    "selectContact": "Выбрать контакт"
+    "selectContact": "Выбрать контакт",
+    "deletedToast": "Recurring payment deleted",
+    "createdToast": "Recurring payment created",
+    "updatedToast": "Recurring payment updated",
+    "pausedToast": "Recurring payment paused",
+    "resumedToast": "Recurring payment resumed"
   },
   "analytics": {
     "title": "Аналитика",
@@ -881,7 +883,15 @@
     "volume": "Объём",
     "payments": "Платежи",
     "less": "Меньше",
-    "more": "Больше"
+    "more": "Больше",
+    "incoming": "Входящие",
+    "outgoing": "Исходящие",
+    "fees": "Комиссии",
+    "noPayments": "Нет платежей",
+    "paymentDistribution": "Распределение платежей",
+    "noDistributionData": "Нет данных о распределении",
+    "received": "Получено",
+    "sent": "Отправлено"
   },
   "apps": {
     "title": "Приложения",
@@ -956,5 +966,22 @@
     "featured": "Featured",
     "appConfiguration": "Configuration",
     "openApp": "Open App"
+  },
+  "network": {
+    "title": "Bitcoin Network",
+    "unavailable": "Network data unavailable",
+    "retry": "Retry",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "fast": "Fast",
+    "halfHour": "30 min",
+    "hour": "1 hour",
+    "economy": "Economy",
+    "blockHeight": "Block Height",
+    "mempoolSize": "Mempool Size",
+    "congestion": "Congestion",
+    "congestion_low": "Low",
+    "congestion_medium": "Medium",
+    "congestion_high": "High"
   }
 }

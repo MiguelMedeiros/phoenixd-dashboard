@@ -26,6 +26,7 @@ interface ChartData {
   monthLabel: string;
   received: number;
   sent: number;
+  fees: number;
 }
 
 // Custom tooltip component
@@ -38,12 +39,13 @@ const CustomTooltip = ({
   active?: boolean;
   payload?: Array<{ value: number; dataKey: string; color: string }>;
   label?: string;
-  translations: { received: string; sent: string; sats: string };
+  translations: { received: string; sent: string; fees: string; sats: string };
 }) => {
   if (active && payload && payload.length) {
     const keyLabels: Record<string, string> = {
       received: translations.received,
       sent: translations.sent,
+      fees: translations.fees,
     };
 
     return (
@@ -76,12 +78,14 @@ export function MonthlyComparisonChart({
   const tooltipTranslations = {
     received: tc('received'),
     sent: tc('sent'),
+    fees: tc('fees'),
     sats: tc('sats'),
   };
 
   const legendLabels: Record<string, string> = {
     received: tc('received'),
     sent: tc('sent'),
+    fees: tc('fees'),
   };
 
   const chartData = useMemo(() => {
@@ -100,17 +104,22 @@ export function MonthlyComparisonChart({
         .filter((p) => p.isPaid && isSameMonth(new Date(p.completedAt || p.createdAt), monthStart))
         .reduce((sum, p) => sum + p.receivedSat, 0);
 
-      const sent = outgoingPayments
-        .filter((p) => p.isPaid && isSameMonth(new Date(p.completedAt || p.createdAt), monthStart))
-        .reduce((sum, p) => sum + p.sent, 0);
+      const monthOutgoing = outgoingPayments.filter(
+        (p) => p.isPaid && isSameMonth(new Date(p.completedAt || p.createdAt), monthStart)
+      );
 
-      data.push({ month: monthStr, monthLabel, received, sent });
+      const sent = monthOutgoing.reduce((sum, p) => sum + p.sent, 0);
+
+      // Fees are in millisats, convert to sats
+      const fees = Math.floor(monthOutgoing.reduce((sum, p) => sum + p.fees, 0) / 1000);
+
+      data.push({ month: monthStr, monthLabel, received, sent, fees });
     });
 
     return data;
   }, [incomingPayments, outgoingPayments]);
 
-  const hasData = chartData.some((d) => d.received > 0 || d.sent > 0);
+  const hasData = chartData.some((d) => d.received > 0 || d.sent > 0 || d.fees > 0);
 
   if (!hasData) {
     return (
@@ -171,6 +180,7 @@ export function MonthlyComparisonChart({
             />
             <Bar dataKey="received" fill="#22c55e" radius={[4, 4, 0, 0]} animationDuration={1000} />
             <Bar dataKey="sent" fill="#f97316" radius={[4, 4, 0, 0]} animationDuration={1000} />
+            <Bar dataKey="fees" fill="#eab308" radius={[4, 4, 0, 0]} animationDuration={1000} />
           </BarChart>
         </ResponsiveContainer>
       </div>

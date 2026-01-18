@@ -10,8 +10,13 @@ import {
 import { useTranslations } from 'next-intl';
 import { HeaderDropdown, HeaderDropdownItem } from '@/components/ui/header-dropdown';
 import { Link } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
 
-export function ConnectionSwitcher() {
+interface ConnectionSwitcherProps {
+  className?: string;
+}
+
+export function ConnectionSwitcher({ className }: ConnectionSwitcherProps) {
   const t = useTranslations('settings');
   const tc = useTranslations('common');
   const [open, setOpen] = useState(false);
@@ -62,7 +67,7 @@ export function ConnectionSwitcher() {
 
   if (loading) {
     return (
-      <div className="icon-circle !w-9 !h-9 md:!w-11 md:!h-11">
+      <div className={cn('icon-circle !w-9 !h-9 md:!w-11 md:!h-11', className)}>
         <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin text-muted-foreground" />
       </div>
     );
@@ -74,7 +79,7 @@ export function ConnectionSwitcher() {
   }
 
   return (
-    <div className="relative">
+    <div className={cn('relative', className)}>
       <button
         onClick={() => setOpen(!open)}
         className="icon-circle !w-9 !h-9 md:!w-11 md:!h-11 relative group"

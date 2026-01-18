@@ -2,55 +2,111 @@
 
 import { useMemo } from 'react';
 import { Grid3X3 } from 'lucide-react';
+import { ActivityCalendar, type Activity } from 'react-activity-calendar';
 import type { IncomingPayment, OutgoingPayment } from '@/lib/api';
 import { useTranslations } from 'next-intl';
+import { Tooltip as ReactTooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 interface ActivityHeatmapProps {
   incomingPayments: IncomingPayment[];
   outgoingPayments: OutgoingPayment[];
 }
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-
-function getColorIntensity(count: number, maxCount: number): string {
-  if (count === 0) return 'bg-white/5';
-  const intensity = Math.min(count / Math.max(maxCount, 1), 1);
-  if (intensity < 0.25) return 'bg-primary/20';
-  if (intensity < 0.5) return 'bg-primary/40';
-  if (intensity < 0.75) return 'bg-primary/60';
-  return 'bg-primary/80';
+interface DayData {
+  date: string;
+  count: number;
+  incomingCount: number;
+  outgoingCount: number;
+  incomingAmount: number;
+  outgoingAmount: number;
 }
+
+// Custom theme matching our dashboard colors (orange/primary gradient)
+// First color is for empty days - using a visible gray for better contrast
+const customTheme = {
+  dark: ['#3d3d3d', '#5a3a20', '#7a4a28', '#a55a28', '#f97316'], // Dark mode: visible gray to bright orange
+};
 
 export function ActivityHeatmap({ incomingPayments, outgoingPayments }: ActivityHeatmapProps) {
   const t = useTranslations('analytics');
 
-  const { heatmapData, maxCount } = useMemo(() => {
-    const allPayments = [...incomingPayments, ...outgoingPayments].filter((p) => p.isPaid);
-    const data: Record<string, number> = {};
-    let max = 0;
+  const { calendarData, dayDataMap } = useMemo(() => {
+    const dataMap: Record<string, DayData> = {};
 
-    // Initialize all slots with 0
-    DAYS.forEach((_, dayIndex) => {
-      HOURS.forEach((hour) => {
-        data[`${dayIndex}-${hour}`] = 0;
+    // Get date range (last 365 days)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 365);
+
+    // Initialize all days in range
+    const current = new Date(startDate);
+    while (current <= endDate) {
+      const dateStr = current.toISOString().split('T')[0];
+      dataMap[dateStr] = {
+        date: dateStr,
+        count: 0,
+        incomingCount: 0,
+        outgoingCount: 0,
+        incomingAmount: 0,
+        outgoingAmount: 0,
+      };
+      current.setDate(current.getDate() + 1);
+    }
+
+    // Process incoming payments
+    incomingPayments
+      .filter((p) => p.isPaid)
+      .forEach((payment) => {
+        const date = new Date(payment.completedAt || payment.createdAt);
+        const dateStr = date.toISOString().split('T')[0];
+        if (dataMap[dateStr]) {
+          dataMap[dateStr].count += 1;
+          dataMap[dateStr].incomingCount += 1;
+          dataMap[dateStr].incomingAmount += payment.receivedSat || 0;
+        }
       });
-    });
 
-    // Count payments per slot
-    allPayments.forEach((payment) => {
-      const date = new Date(payment.completedAt || payment.createdAt);
-      const day = date.getDay();
-      const hour = date.getHours();
-      const key = `${day}-${hour}`;
-      data[key] = (data[key] || 0) + 1;
-      if (data[key] > max) max = data[key];
-    });
+    // Process outgoing payments
+    outgoingPayments
+      .filter((p) => p.isPaid)
+      .forEach((payment) => {
+        const date = new Date(payment.completedAt || payment.createdAt);
+        const dateStr = date.toISOString().split('T')[0];
+        if (dataMap[dateStr]) {
+          dataMap[dateStr].count += 1;
+          dataMap[dateStr].outgoingCount += 1;
+          dataMap[dateStr].outgoingAmount += payment.sent || 0;
+        }
+      });
 
-    return { heatmapData: data, maxCount: max };
+    // Find max count for level calculation
+    const maxCount = Math.max(...Object.values(dataMap).map((d) => d.count), 1);
+
+    // Convert to Activity format with levels
+    const activities: Activity[] = Object.values(dataMap).map((day) => ({
+      date: day.date,
+      count: day.count,
+      level:
+        day.count === 0
+          ? 0
+          : (Math.min(Math.ceil((day.count / maxCount) * 4), 4) as 0 | 1 | 2 | 3 | 4),
+    }));
+
+    return { calendarData: activities, dayDataMap: dataMap };
   }, [incomingPayments, outgoingPayments]);
 
-  const hasData = Object.values(heatmapData).some((count) => count > 0);
+  const hasData = calendarData.some((day) => day.count > 0);
+
+  const formatSats = (amount: number): string => {
+    if (amount >= 1000000) {
+      return `${(amount / 1000000).toFixed(2)}M`;
+    }
+    if (amount >= 1000) {
+      return `${(amount / 1000).toFixed(1)}k`;
+    }
+    return amount.toLocaleString();
+  };
 
   if (!hasData) {
     return (
@@ -81,56 +137,56 @@ export function ActivityHeatmap({ incomingPayments, outgoingPayments }: Activity
         <h3 className="font-semibold">{t('activityHeatmap')}</h3>
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="min-w-[600px]">
-          {/* Hours header */}
-          <div className="flex mb-2">
-            <div className="w-12" /> {/* Spacer for day labels */}
-            {HOURS.filter((h) => h % 3 === 0).map((hour) => (
-              <div
-                key={hour}
-                className="flex-1 text-center text-xs text-muted-foreground"
-                style={{ minWidth: '20px' }}
-              >
-                {hour.toString().padStart(2, '0')}
-              </div>
-            ))}
-          </div>
+      <div className="overflow-x-auto flex justify-center">
+        <ActivityCalendar
+          data={calendarData}
+          theme={customTheme}
+          colorScheme="dark"
+          blockSize={12}
+          blockMargin={3}
+          blockRadius={2}
+          fontSize={11}
+          showWeekdayLabels
+          showTotalCount={false}
+          labels={{
+            totalCount: '{{count}} payments in {{year}}',
+            legend: {
+              less: t('less'),
+              more: t('more'),
+            },
+          }}
+          renderBlock={(block, activity) => {
+            const dayData = dayDataMap[activity.date];
+            const tooltipContent =
+              dayData && dayData.count > 0
+                ? `<div class="text-left">
+                  <div class="font-medium mb-1">${new Date(activity.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                  <div class="text-sm">${t('payments')}: ${dayData.count}</div>
+                  ${dayData.incomingCount > 0 ? `<div class="text-sm text-emerald-400">↓ ${dayData.incomingCount} received (${formatSats(dayData.incomingAmount)} sats)</div>` : ''}
+                  ${dayData.outgoingCount > 0 ? `<div class="text-sm text-orange-400">↑ ${dayData.outgoingCount} sent (${formatSats(dayData.outgoingAmount)} sats)</div>` : ''}
+                </div>`
+                : `<div>${new Date(activity.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}<br/>${t('noPayments')}</div>`;
 
-          {/* Grid */}
-          <div className="space-y-1">
-            {DAYS.map((day, dayIndex) => (
-              <div key={day} className="flex items-center gap-1">
-                <div className="w-12 text-xs text-muted-foreground">{day}</div>
-                <div className="flex-1 flex gap-0.5">
-                  {HOURS.map((hour) => {
-                    const count = heatmapData[`${dayIndex}-${hour}`] || 0;
-                    return (
-                      <div
-                        key={`${dayIndex}-${hour}`}
-                        className={`flex-1 h-6 rounded-sm transition-colors cursor-default ${getColorIntensity(count, maxCount)}`}
-                        title={`${day} ${hour}:00 - ${count} ${count === 1 ? 'payment' : 'payments'}`}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center justify-end gap-2 mt-4">
-            <span className="text-xs text-muted-foreground">{t('less')}</span>
-            <div className="flex gap-0.5">
-              <div className="w-4 h-4 rounded-sm bg-white/5" />
-              <div className="w-4 h-4 rounded-sm bg-primary/20" />
-              <div className="w-4 h-4 rounded-sm bg-primary/40" />
-              <div className="w-4 h-4 rounded-sm bg-primary/60" />
-              <div className="w-4 h-4 rounded-sm bg-primary/80" />
-            </div>
-            <span className="text-xs text-muted-foreground">{t('more')}</span>
-          </div>
-        </div>
+            return (
+              <g>
+                {block}
+                <rect
+                  x={block.props.x}
+                  y={block.props.y}
+                  width={block.props.width}
+                  height={block.props.height}
+                  fill="transparent"
+                  data-tooltip-id="activity-tooltip"
+                  data-tooltip-html={tooltipContent}
+                />
+              </g>
+            );
+          }}
+        />
+        <ReactTooltip
+          id="activity-tooltip"
+          className="!bg-background/95 !backdrop-blur-sm !border !border-border !shadow-xl !rounded-lg !px-3 !py-2 !text-foreground"
+        />
       </div>
     </div>
   );

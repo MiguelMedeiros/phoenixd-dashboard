@@ -131,10 +131,10 @@ export class AppDockerService {
         return;
       }
 
-      // Container exists but not running - start it
-      console.log(`Starting existing container: ${app.containerName}`);
-      await container.start();
-      return;
+      // Container exists but not running - remove it and recreate fresh
+      // This ensures we always have the latest config/env vars
+      console.log(`Removing stopped container: ${app.containerName}`);
+      await container.remove({ force: true });
     } catch (error: unknown) {
       const dockerError = error as { statusCode?: number };
       if (dockerError.statusCode !== 404) {
@@ -154,36 +154,85 @@ export class AppDockerService {
     // Get environment variables
     const envVars = await this.getAppEnvVars(app);
 
-    // Create container
-    const container = await docker.createContainer({
-      name: app.containerName,
-      Image: imageName,
-      Env: envVars,
-      Labels: {
-        [`${APP_LABEL_PREFIX}`]: 'true',
-        [`${APP_LABEL_PREFIX}.id`]: app.id,
-        [`${APP_LABEL_PREFIX}.slug`]: app.slug,
-        'com.docker.compose.project': 'phoenixd-dashboard',
-      },
-      HostConfig: {
-        NetworkMode: PHOENIXD_NETWORK,
-        RestartPolicy: { Name: 'unless-stopped' },
-        // Resource limits
-        Memory: 512 * 1024 * 1024, // 512MB
-        NanoCpus: 1000000000, // 1 CPU
-      },
-      // Healthcheck for the app
-      Healthcheck: {
-        Test: ['CMD-SHELL', `curl -f http://localhost:${app.internalPort}/health || exit 1`],
-        Interval: 30000000000, // 30s in nanoseconds
-        Timeout: 10000000000, // 10s
-        Retries: 3,
-        StartPeriod: 30000000000, // 30s
-      },
-    });
+    // Create container with retry on conflict
+    try {
+      const container = await docker.createContainer({
+        name: app.containerName,
+        Image: imageName,
+        Env: envVars,
+        Labels: {
+          [`${APP_LABEL_PREFIX}`]: 'true',
+          [`${APP_LABEL_PREFIX}.id`]: app.id,
+          [`${APP_LABEL_PREFIX}.slug`]: app.slug,
+          'com.docker.compose.project': 'phoenixd-dashboard',
+        },
+        HostConfig: {
+          NetworkMode: PHOENIXD_NETWORK,
+          RestartPolicy: { Name: 'unless-stopped' },
+          // Resource limits
+          Memory: 512 * 1024 * 1024, // 512MB
+          NanoCpus: 1000000000, // 1 CPU
+        },
+        // Healthcheck for the app
+        Healthcheck: {
+          Test: ['CMD-SHELL', `curl -f http://localhost:${app.internalPort}/health || exit 1`],
+          Interval: 30000000000, // 30s in nanoseconds
+          Timeout: 10000000000, // 10s
+          Retries: 3,
+          StartPeriod: 30000000000, // 30s
+        },
+      });
 
-    await container.start();
-    console.log(`Container ${app.containerName} started successfully`);
+      await container.start();
+      console.log(`Container ${app.containerName} started successfully`);
+    } catch (error: unknown) {
+      const dockerError = error as { statusCode?: number; message?: string };
+      // Handle 409 Conflict - container name already in use
+      if (dockerError.statusCode === 409) {
+        console.log(
+          `Container ${app.containerName} already exists (409 conflict), removing and retrying...`
+        );
+        // Force remove the existing container
+        try {
+          const existingContainer = docker.getContainer(app.containerName);
+          await existingContainer.stop({ t: 5 }).catch(() => {}); // Ignore stop errors
+          await existingContainer.remove({ force: true });
+        } catch {
+          // Ignore removal errors
+        }
+
+        // Retry creating the container
+        const container = await docker.createContainer({
+          name: app.containerName,
+          Image: imageName,
+          Env: envVars,
+          Labels: {
+            [`${APP_LABEL_PREFIX}`]: 'true',
+            [`${APP_LABEL_PREFIX}.id`]: app.id,
+            [`${APP_LABEL_PREFIX}.slug`]: app.slug,
+            'com.docker.compose.project': 'phoenixd-dashboard',
+          },
+          HostConfig: {
+            NetworkMode: PHOENIXD_NETWORK,
+            RestartPolicy: { Name: 'unless-stopped' },
+            Memory: 512 * 1024 * 1024,
+            NanoCpus: 1000000000,
+          },
+          Healthcheck: {
+            Test: ['CMD-SHELL', `curl -f http://localhost:${app.internalPort}/health || exit 1`],
+            Interval: 30000000000,
+            Timeout: 10000000000,
+            Retries: 3,
+            StartPeriod: 30000000000,
+          },
+        });
+
+        await container.start();
+        console.log(`Container ${app.containerName} started successfully after retry`);
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**

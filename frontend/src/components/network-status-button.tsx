@@ -55,7 +55,11 @@ function getIconColor(status: ServiceStatus): string {
   }
 }
 
-export function NetworkStatusButton() {
+interface NetworkStatusButtonProps {
+  className?: string;
+}
+
+export function NetworkStatusButton({ className }: NetworkStatusButtonProps) {
   const t = useTranslations('common');
   const { isDesktopMode } = useDesktopMode();
   const [isOpen, setIsOpen] = useState(false);
@@ -147,7 +151,7 @@ export function NetworkStatusButton() {
   };
 
   return (
-    <div className="relative">
+    <div className={cn('relative', className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="icon-circle !w-9 !h-9 md:!w-11 md:!h-11 relative group"

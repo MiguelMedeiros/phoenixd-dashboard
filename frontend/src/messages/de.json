@@ -122,6 +122,7 @@
     "manageLiquidity": "Liquidität verwalten",
     "decodeAndFees": "Dekodieren & Gebühren",
     "payAndAuth": "Bezahlen & Auth",
+    "viewHistory": "Verlauf anzeigen",
     "viewInsights": "Einblicke anzeigen",
     "autoPayments": "Auto-Zahlungen",
     "extendFunctions": "Funktionen erweitern",
@@ -842,10 +843,6 @@
     "executionSuccess": "Zahlung erfolgreich gesendet!",
     "executionFailed": "Zahlung fehlgeschlagen",
     "confirmDelete": "Sind Sie sicher, dass Sie diese wiederkehrende Zahlung löschen möchten?",
-    "deleted": "Wiederkehrende Zahlung gelöscht",
-    "created": "Wiederkehrende Zahlung erstellt",
-    "updated": "Wiederkehrende Zahlung aktualisiert",
-    "resumed": "Wiederkehrende Zahlung fortgesetzt",
     "executions": "Zahlungsverlauf",
     "noExecutions": "Noch keine Zahlungen durchgeführt",
     "success": "Erfolg",
@@ -857,7 +854,12 @@
     "everyMonth": "Jeden Monat",
     "editingFor": "Editing recurring payment for {contact}",
     "runningNow": "Running now...",
-    "selectContact": "Kontakt auswählen"
+    "selectContact": "Kontakt auswählen",
+    "deletedToast": "Recurring payment deleted",
+    "createdToast": "Recurring payment created",
+    "updatedToast": "Recurring payment updated",
+    "pausedToast": "Recurring payment paused",
+    "resumedToast": "Recurring payment resumed"
   },
   "analytics": {
     "title": "Analytik",
@@ -881,7 +883,15 @@
     "volume": "Volumen",
     "payments": "Zahlungen",
     "less": "Weniger",
-    "more": "Mehr"
+    "more": "Mehr",
+    "incoming": "Eingehend",
+    "outgoing": "Ausgehend",
+    "fees": "Gebühren",
+    "noPayments": "Keine Zahlungen",
+    "paymentDistribution": "Zahlungsverteilung",
+    "noDistributionData": "Keine Verteilungsdaten",
+    "received": "Empfangen",
+    "sent": "Gesendet"
   },
   "apps": {
     "title": "Apps",
@@ -956,5 +966,22 @@
     "featured": "Featured",
     "appConfiguration": "Configuration",
     "openApp": "Open App"
+  },
+  "network": {
+    "title": "Bitcoin Network",
+    "unavailable": "Network data unavailable",
+    "retry": "Retry",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "fast": "Fast",
+    "halfHour": "30 min",
+    "hour": "1 hour",
+    "economy": "Economy",
+    "blockHeight": "Block Height",
+    "mempoolSize": "Mempool Size",
+    "congestion": "Congestion",
+    "congestion_low": "Low",
+    "congestion_medium": "Medium",
+    "congestion_high": "High"
   }
 }

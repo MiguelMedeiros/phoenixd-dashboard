@@ -122,6 +122,7 @@
     "manageLiquidity": "유동성 관리",
     "decodeAndFees": "디코드 및 수수료",
     "payAndAuth": "결제 및 인증",
+    "viewHistory": "기록 보기",
     "viewInsights": "인사이트 보기",
     "autoPayments": "자동 결제",
     "extendFunctions": "기능 확장",
@@ -842,10 +843,6 @@
     "executionSuccess": "결제가 완료되었습니다!",
     "executionFailed": "결제 실패",
     "confirmDelete": "이 정기 결제를 삭제하시겠습니까?",
-    "deleted": "정기 결제 삭제됨",
-    "created": "정기 결제 생성됨",
-    "updated": "정기 결제 업데이트됨",
-    "resumed": "정기 결제 재개됨",
     "executions": "결제 내역",
     "noExecutions": "아직 결제 내역이 없습니다",
     "success": "성공",
@@ -857,7 +854,12 @@
     "everyMonth": "매월",
     "editingFor": "Editing recurring payment for {contact}",
     "runningNow": "Running now...",
-    "selectContact": "연락처 선택"
+    "selectContact": "연락처 선택",
+    "deletedToast": "Recurring payment deleted",
+    "createdToast": "Recurring payment created",
+    "updatedToast": "Recurring payment updated",
+    "pausedToast": "Recurring payment paused",
+    "resumedToast": "Recurring payment resumed"
   },
   "analytics": {
     "title": "분석",
@@ -881,7 +883,15 @@
     "volume": "거래량",
     "payments": "결제",
     "less": "적음",
-    "more": "많음"
+    "more": "많음",
+    "incoming": "수신",
+    "outgoing": "발신",
+    "fees": "수수료",
+    "noPayments": "결제 없음",
+    "paymentDistribution": "결제 분포",
+    "noDistributionData": "분포 데이터 없음",
+    "received": "받음",
+    "sent": "보냄"
   },
   "apps": {
     "title": "앱",
@@ -956,5 +966,22 @@
     "featured": "Featured",
     "appConfiguration": "Configuration",
     "openApp": "Open App"
+  },
+  "network": {
+    "title": "Bitcoin Network",
+    "unavailable": "Network data unavailable",
+    "retry": "Retry",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "fast": "Fast",
+    "halfHour": "30 min",
+    "hour": "1 hour",
+    "economy": "Economy",
+    "blockHeight": "Block Height",
+    "mempoolSize": "Mempool Size",
+    "congestion": "Congestion",
+    "congestion_low": "Low",
+    "congestion_medium": "Medium",
+    "congestion_high": "High"
   }
 }
