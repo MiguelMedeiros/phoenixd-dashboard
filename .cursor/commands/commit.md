@@ -77,7 +77,7 @@ git push origin HEAD
 ## Important Rules
 
 - ALWAYS show git status and diff before committing
-- ALWAYS ask for confirmation before pushing
+- ALWAYS push automatically after committing (no confirmation needed)
 - NEVER commit sensitive files (.env, credentials, etc.)
 - If there are no changes, show message and stop
 - Generate meaningful commit messages based on actual changes
