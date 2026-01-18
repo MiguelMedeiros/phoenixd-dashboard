@@ -1,6 +1,10 @@
 # /commit - Stage, commit, and push changes
 
-Automatically stage all changes, generate a commit message, and push to the remote repository.
+Automatically stage all changes, generate a commit message, sign with GPG, and push to the remote repository.
+
+## GPG Signing
+
+All commits MUST be signed with GPG key: `819EDEE4673F3EBB` (Miguel Medeiros)
 
 ## Instructions
 
@@ -40,10 +44,10 @@ Format:
 <optional body with details>
 ```
 
-### 4. Create Commit
+### 4. Create Signed Commit
 
 ```bash
-git commit -m "$(cat <<'EOF'
+git commit -S -u 819EDEE4673F3EBB -m "$(cat <<'EOF'
 <generated commit message>
 EOF
 )"
@@ -62,6 +66,7 @@ git push origin HEAD
 
 📝 Message: <commit message>
 📍 Commit: <hash>
+🔐 Signature: GPG signed
 📁 Files changed: <count>
 🔗 <remote URL>
 ```
