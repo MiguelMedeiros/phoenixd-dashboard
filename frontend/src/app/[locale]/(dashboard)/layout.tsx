@@ -228,7 +228,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
         {/* Page Content - Extra padding bottom for mobile nav */}
         <main className="flex-1 px-4 md:px-8 pb-24 md:pb-8">
-          <div className="relative z-10">{children}</div>
+          <div className="relative z-10 max-w-[1440px] mx-auto w-full">{children}</div>
         </main>
       </div>
 

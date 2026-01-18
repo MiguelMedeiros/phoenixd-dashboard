@@ -39,6 +39,8 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **Dashboard** — Real-time balance, channel stats, payment activity charts
 
+✅ **Bitcoin Network** — Live block height, fee estimates, and mempool congestion from mempool.space
+
 ✅ **Analytics** — Activity heatmaps, fees comparison, monthly trends, top contacts
 
 ✅ **History** — Full payment history with filters & CSV export

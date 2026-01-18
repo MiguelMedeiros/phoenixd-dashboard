@@ -101,6 +101,19 @@ When you receive a payment, the dashboard can show a celebration animation:
 
 You can also enable/disable sound effects for animations.
 
+### Bitcoin Network Status
+
+The header displays real-time Bitcoin network information from [mempool.space](https://mempool.space):
+
+- **Block Height** — Current Bitcoin block number
+- **Fee Estimates** — Fast, 30-min, 1-hour, and economy rates (sat/vB)
+- **Mempool Size** — Current mempool size in MB
+- **Congestion Level** — Low, Medium, or High indicator
+
+Click the network button in the header to see full details. Data is cached for 60 seconds to avoid excessive API calls.
+
+> 💡 **Note:** This feature works automatically with no configuration required. It uses the public mempool.space API.
+
 ### Other Settings
 
 - **Password Protection** - Secure your dashboard with a password
