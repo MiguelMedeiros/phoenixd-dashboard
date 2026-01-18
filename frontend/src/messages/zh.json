@@ -571,21 +571,12 @@
       "minimal": {
         "title": "最小化",
         "description": "仅包含基本功能的快速设置",
-        "features": [
-          "密码保护",
-          "本地 Docker phoenixd",
-          "默认主题"
-        ]
+        "features": ["密码保护", "本地 Docker phoenixd", "默认主题"]
       },
       "full": {
         "title": "完整",
         "description": "启用所有功能的完整设置",
-        "features": [
-          "密码保护",
-          "Docker phoenixd",
-          "网络服务",
-          "预装应用"
-        ]
+        "features": ["密码保护", "Docker phoenixd", "网络服务", "预装应用"]
       },
       "custom": {
         "title": "自定义",

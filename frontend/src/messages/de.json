@@ -571,21 +571,12 @@
       "minimal": {
         "title": "Minimal",
         "description": "Schnelle Einrichtung nur mit wesentlichen Funktionen",
-        "features": [
-          "Passwortschutz",
-          "Lokales Docker phoenixd",
-          "Standardthema"
-        ]
+        "features": ["Passwortschutz", "Lokales Docker phoenixd", "Standardthema"]
       },
       "full": {
         "title": "Vollständig",
         "description": "Vollständige Einrichtung mit allen aktivierten Funktionen",
-        "features": [
-          "Passwortschutz",
-          "Docker phoenixd",
-          "Netzwerkdienste",
-          "Vorinstallierte Apps"
-        ]
+        "features": ["Passwortschutz", "Docker phoenixd", "Netzwerkdienste", "Vorinstallierte Apps"]
       },
       "custom": {
         "title": "Benutzerdefiniert",

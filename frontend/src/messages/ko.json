@@ -571,21 +571,12 @@
       "minimal": {
         "title": "최소",
         "description": "필수 기능만 포함된 빠른 설정",
-        "features": [
-          "비밀번호 보호",
-          "로컬 Docker phoenixd",
-          "기본 테마"
-        ]
+        "features": ["비밀번호 보호", "로컬 Docker phoenixd", "기본 테마"]
       },
       "full": {
         "title": "전체",
         "description": "모든 기능이 활성화된 완전한 설정",
-        "features": [
-          "비밀번호 보호",
-          "Docker phoenixd",
-          "네트워크 서비스",
-          "사전 설치 앱"
-        ]
+        "features": ["비밀번호 보호", "Docker phoenixd", "네트워크 서비스", "사전 설치 앱"]
       },
       "custom": {
         "title": "사용자 정의",

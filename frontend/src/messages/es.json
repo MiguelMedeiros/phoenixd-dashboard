@@ -571,11 +571,7 @@
       "minimal": {
         "title": "Mínimo",
         "description": "Configuración rápida solo con características esenciales",
-        "features": [
-          "Protección con contraseña",
-          "Phoenixd Docker local",
-          "Tema predeterminado"
-        ]
+        "features": ["Protección con contraseña", "Phoenixd Docker local", "Tema predeterminado"]
       },
       "full": {
         "title": "Completo",

@@ -571,11 +571,7 @@
       "minimal": {
         "title": "最小",
         "description": "必須機能のみの迅速なセットアップ",
-        "features": [
-          "パスワード保護",
-          "ローカル Docker phoenixd",
-          "デフォルトテーマ"
-        ]
+        "features": ["パスワード保護", "ローカル Docker phoenixd", "デフォルトテーマ"]
       },
       "full": {
         "title": "フル",

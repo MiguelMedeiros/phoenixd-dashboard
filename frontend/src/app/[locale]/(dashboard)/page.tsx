@@ -402,7 +402,17 @@ export default function OverviewPage() {
                           </span>
                           <span>•</span>
                           <span>
-                            {t(recurring.frequency as 'daily' | 'weekly' | 'monthly' | 'hourly' | 'every_minute' | 'every_5_minutes' | 'every_15_minutes' | 'every_30_minutes')}
+                            {t(
+                              recurring.frequency as
+                                | 'daily'
+                                | 'weekly'
+                                | 'monthly'
+                                | 'hourly'
+                                | 'every_minute'
+                                | 'every_5_minutes'
+                                | 'every_15_minutes'
+                                | 'every_30_minutes'
+                            )}
                           </span>
                         </div>
                       </div>

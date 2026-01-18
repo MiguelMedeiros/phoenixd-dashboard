@@ -113,7 +113,6 @@
     overflow: hidden;
   }
 
-
   /* Premium Glass Card - Light */
   .glass-card {
     background: linear-gradient(135deg, hsl(0 0% 100% / 0.8) 0%, hsl(0 0% 100% / 0.6) 100%);
@@ -125,7 +124,6 @@
       0 8px 32px hsl(30 20% 20% / 0.08),
       0 2px 8px hsl(30 20% 20% / 0.05);
   }
-
 
   /* Glass Card Hover - Light */
   .glass-card-hover {
@@ -385,7 +383,6 @@
     background: linear-gradient(165deg, hsl(20 18% 8%) 0%, hsl(25 15% 5%) 40%, hsl(20 20% 7%) 100%);
   }
 
-
   /* Premium Glass Card - Dark */
   .dark .glass-card {
     background: linear-gradient(135deg, hsl(30 20% 95% / 0.06) 0%, hsl(30 20% 95% / 0.02) 100%);
@@ -395,7 +392,6 @@
       0 8px 32px hsl(20 20% 5% / 0.4),
       0 2px 8px hsl(20 20% 5% / 0.2);
   }
-
 
   /* Glass Card Hover - Dark */
   .dark .glass-card-hover:hover {
