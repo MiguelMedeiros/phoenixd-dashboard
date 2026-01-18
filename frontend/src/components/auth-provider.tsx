@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { LockScreen } from '@/components/lock-screen';
 import { Zap } from 'lucide-react';
@@ -11,6 +12,7 @@ interface AuthContextType {
   hasPassword: boolean;
   autoLockMinutes: number;
   lockScreenBg: LockScreenBg;
+  setupCompleted: boolean;
   logout: () => Promise<void>;
   lock: () => Promise<void>;
   refreshStatus: () => Promise<void>;
@@ -31,18 +33,32 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const {
     isLoading,
     isAuthenticated,
     hasPassword,
     autoLockMinutes,
     lockScreenBg,
+    setupCompleted,
+    defaultLocale,
     error,
     login,
     logout,
     lock,
     refreshStatus,
   } = useAuth();
+
+  // Redirect to setup wizard if setup is not completed
+  useEffect(() => {
+    if (!isLoading && !setupCompleted) {
+      // Don't redirect if already on setup page
+      if (!pathname.includes('/setup')) {
+        router.replace(`/${defaultLocale}/setup`);
+      }
+    }
+  }, [isLoading, setupCompleted, pathname, router, defaultLocale]);
 
   // Show loading state
   if (isLoading) {
@@ -61,6 +77,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
   }
 
+  // If setup is not completed, show loading while redirecting
+  if (!setupCompleted) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center premium-bg">
+        <div className="text-center">
+          <div className="relative inline-flex items-center justify-center mb-4">
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+            <div className="relative h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/20">
+              <Zap className="h-8 w-8 text-primary animate-pulse" />
+            </div>
+          </div>
+          <p className="text-muted-foreground text-sm">Redirecting to setup...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Show lock screen if not authenticated (and password is configured)
   if (!isAuthenticated && hasPassword) {
     return <LockScreen onUnlock={login} error={error} background={lockScreenBg} />;
@@ -73,6 +106,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         hasPassword,
         autoLockMinutes,
         lockScreenBg,
+        setupCompleted,
         logout,
         lock,
         refreshStatus,

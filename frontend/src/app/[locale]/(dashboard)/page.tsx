@@ -255,6 +255,7 @@ export default function OverviewPage() {
             value={formatValue(balance?.feeCreditSat || 0)}
             icon={Zap}
             variant="warning"
+            tooltip={t('feeCreditTooltip')}
           />
         </StatCardGrid>
 
@@ -401,13 +402,7 @@ export default function OverviewPage() {
                           </span>
                           <span>•</span>
                           <span>
-                            {recurring.frequency === 'daily'
-                              ? 'Daily'
-                              : recurring.frequency === 'weekly'
-                                ? 'Weekly'
-                                : recurring.frequency === 'monthly'
-                                  ? 'Monthly'
-                                  : recurring.frequency}
+                            {t(recurring.frequency as 'daily' | 'weekly' | 'monthly' | 'hourly' | 'every_minute' | 'every_5_minutes' | 'every_15_minutes' | 'every_30_minutes')}
                           </span>
                         </div>
                       </div>
@@ -433,9 +428,9 @@ export default function OverviewPage() {
         </div>
 
         {/* Bottom Row: Node Info + Recent Payments */}
-        <div className="grid gap-4 lg:grid-cols-5">
+        <div className="grid gap-4 lg:grid-cols-2">
           {/* Node Info */}
-          <div className="lg:col-span-2 glass-card rounded-2xl p-4">
+          <div className="glass-card rounded-2xl p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -566,7 +561,7 @@ export default function OverviewPage() {
           </div>
 
           {/* Recent Payments */}
-          <div className="lg:col-span-3 glass-card rounded-2xl p-4 flex flex-col max-h-[380px]">
+          <div className="glass-card rounded-2xl p-4 flex flex-col max-h-[380px]">
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <h3 className="font-semibold text-sm">{t('recentPayments')}</h3>
               <Link

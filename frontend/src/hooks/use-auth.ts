@@ -15,6 +15,8 @@ interface UseAuthReturn {
   hasPassword: boolean;
   autoLockMinutes: number;
   lockScreenBg: LockScreenBg;
+  setupCompleted: boolean;
+  defaultLocale: string;
   error: string | null;
   login: (password: string) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -149,6 +151,8 @@ export function useAuth(): UseAuthReturn {
     hasPassword: status?.hasPassword ?? false,
     autoLockMinutes: status?.autoLockMinutes ?? 0,
     lockScreenBg: status?.lockScreenBg ?? 'lightning',
+    setupCompleted: status?.setupCompleted ?? false,
+    defaultLocale: status?.defaultLocale ?? 'en',
     error,
     login,
     logout,

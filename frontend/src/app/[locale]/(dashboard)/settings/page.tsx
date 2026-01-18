@@ -545,6 +545,168 @@ function SecurityTab() {
           </button>
         </div>
       </div>
+
+      {/* Reset Setup Wizard */}
+      <ResetWizardSection />
+    </div>
+  );
+}
+
+// Reset wizard section component
+function ResetWizardSection() {
+  const t = useTranslations('settings');
+  const router = useRouter();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Reset options - what to keep during reset
+  const [keepContacts, setKeepContacts] = useState(true);
+  const [keepRecurring, setKeepRecurring] = useState(true);
+  const [keepPhoenixdConnections, setKeepPhoenixdConnections] = useState(true);
+
+  const handleReset = async () => {
+    if (!password) {
+      setError(t('passwordRequired'));
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { resetSetup } = await import('@/lib/api');
+      await resetSetup(password, {
+        keepContacts,
+        keepRecurring,
+        keepPhoenixdConnections,
+      });
+      // Redirect to setup
+      router.replace('/setup');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('resetFailed'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="glass-card rounded-xl p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
+            <AlertTriangle className="h-5 w-5 text-warning" />
+          </div>
+          <div>
+            <p className="font-medium">{t('resetWizard')}</p>
+            <p className="text-sm text-muted-foreground">{t('resetWizardDesc')}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowConfirm(!showConfirm)}
+          className="px-4 py-2 rounded-lg bg-warning/10 text-warning hover:bg-warning/20 text-sm font-medium transition-colors"
+        >
+          {t('resetToWizard')}
+        </button>
+      </div>
+
+      {showConfirm && (
+        <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-4">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
+            <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-warning">{t('resetWizardWarning')}</p>
+          </div>
+
+          {/* Reset Options - What to keep */}
+          <div className="space-y-3 p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
+            <p className="text-sm font-medium">{t('resetKeepDataTitle')}</p>
+            <div className="space-y-2">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={keepContacts}
+                  onChange={(e) => setKeepContacts(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm">{t('resetKeepContacts')}</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={keepRecurring}
+                  onChange={(e) => setKeepRecurring(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm">{t('resetKeepRecurring')}</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={keepPhoenixdConnections}
+                  onChange={(e) => setKeepPhoenixdConnections(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm">{t('resetKeepPhoenixd')}</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t('enterPasswordToConfirm')}
+              className="w-full px-4 py-2.5 pr-10 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-warning/50"
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4 text-muted-foreground" />
+              ) : (
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 text-sm text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                setShowConfirm(false);
+                setPassword('');
+                setError(null);
+              }}
+              className="flex-1 py-2.5 px-4 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 text-sm font-medium transition-colors"
+            >
+              {t('cancel')}
+            </button>
+            <button
+              onClick={handleReset}
+              disabled={loading || !password}
+              className={cn(
+                'flex-1 py-2.5 px-4 rounded-lg bg-warning text-warning-foreground hover:bg-warning/90 text-sm font-medium transition-colors flex items-center justify-center gap-2',
+                (loading || !password) && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {t('confirmReset')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

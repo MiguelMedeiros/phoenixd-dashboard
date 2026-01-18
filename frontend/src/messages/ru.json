@@ -137,7 +137,12 @@
     "manageContacts": "Manage contacts",
     "recurringActive": "Recurring",
     "upcomingPayments": "Upcoming Payments",
-    "unknownContact": "Unknown contact"
+    "unknownContact": "Unknown contact",
+    "every_minute": "Every minute",
+    "every_5_minutes": "Every 5 min",
+    "every_15_minutes": "Every 15 min",
+    "every_30_minutes": "Every 30 min",
+    "feeCreditTooltip": "Fee Credit is a reserve used to pay for channel operations. When you receive small payments without enough inbound liquidity, part of the amount is set aside as credit toward future channel fees. This ensures payments are never rejected due to insufficient liquidity."
   },
   "receive": {
     "title": "Получить платёж",
@@ -532,7 +537,166 @@
     "passwordSaved": "Password saved",
     "enterNewPasswordToChange": "Enter a new password to change it",
     "testConnection": "Test Connection",
-    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker."
+    "nodeConnectionDescription": "Подключитесь к собственному экземпляру phoenixd, работающему на вашей машине или в сети. Полезно, если phoenixd уже работает вне Docker.",
+    "resetWizard": "Сбросить мастер настройки",
+    "resetWizardDesc": "Перезапустить мастер настройки для перенастройки панели управления",
+    "resetToWizard": "Сбросить к мастеру",
+    "resetWizardWarning": "Это выполнит выход и перезапустит мастер настройки. Ваши данные сохранятся, но потребуется перенастройка параметров.",
+    "enterPasswordToConfirm": "Введите пароль для подтверждения",
+    "confirmReset": "Подтвердить сброс",
+    "resetFailed": "Не удалось сбросить настройку",
+    "resetKeepDataTitle": "Data to keep during reset",
+    "resetKeepContacts": "Keep contacts",
+    "resetKeepRecurring": "Keep recurring payments",
+    "resetKeepPhoenixd": "Keep phoenixd connection settings",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "Настройка Phoenixd Dashboard",
+    "subtitle": "Давайте настроим панель управления вашим Lightning-узлом",
+    "step": "Шаг",
+    "of": "из",
+    "back": "Назад",
+    "next": "Далее",
+    "completeSetup": "Завершить настройку",
+    "completing": "Завершение...",
+    "setupComplete": "Настройка завершена",
+    "welcomeMessage": "Добро пожаловать в Phoenixd Dashboard!",
+    "setupFailed": "Настройка не удалась",
+    "unknownError": "Произошла неизвестная ошибка",
+    "profile": {
+      "title": "Выберите профиль установки",
+      "description": "Выберите способ настройки панели. Вы можете изменить настройки позже.",
+      "recommended": "Рекомендуемый",
+      "minimal": {
+        "title": "Минимальный",
+        "description": "Быстрая настройка только с основными функциями",
+        "features": [
+          "Защита паролем",
+          "Локальный Docker phoenixd",
+          "Тема по умолчанию"
+        ]
+      },
+      "full": {
+        "title": "Полный",
+        "description": "Полная настройка со всеми включенными функциями",
+        "features": [
+          "Защита паролем",
+          "Docker phoenixd",
+          "Сетевые службы",
+          "Предустановленные приложения"
+        ]
+      },
+      "custom": {
+        "title": "Пользовательский",
+        "description": "Настройте каждый параметр вручную пошагово",
+        "features": [
+          "Полный контроль над всеми настройками",
+          "Выбор подключения phoenixd",
+          "Выбор сетевых служб",
+          "Выбор устанавливаемых приложений"
+        ]
+      }
+    },
+    "password": {
+      "title": "Создайте пароль",
+      "description": "Этот пароль защитит доступ к панели управления и кошельку",
+      "securityNote": "Пароль необходим для доступа к панели и просмотра конфиденциальной информации, такой как сид-фраза.",
+      "passwordLabel": "Пароль",
+      "passwordPlaceholder": "Введите надежный пароль",
+      "confirmLabel": "Подтвердите пароль",
+      "confirmPlaceholder": "Подтвердите ваш пароль",
+      "strength": "Надежность",
+      "weak": "Слабый",
+      "fair": "Средний",
+      "good": "Хороший",
+      "strong": "Сильный",
+      "noMatch": "Пароли не совпадают",
+      "minLength": "Минимум 4 символа"
+    },
+    "language": {
+      "title": "Выберите язык",
+      "description": "Выберите язык интерфейса панели управления"
+    },
+    "theme": {
+      "title": "Выберите тему",
+      "description": "Выберите внешний вид панели управления",
+      "light": "Светлая",
+      "dark": "Темная",
+      "system": "Системная",
+      "preview": "Тема применяется в реальном времени как предпросмотр"
+    },
+    "phoenixd": {
+      "title": "Настройка подключения Phoenixd",
+      "description": "Выберите способ подключения к Lightning-узлу phoenixd",
+      "dockerTitle": "Локальный (Docker)",
+      "dockerDesc": "Использовать предустановленный экземпляр phoenixd",
+      "externalTitle": "Внешний",
+      "externalDesc": "Подключиться к собственному серверу phoenixd",
+      "dockerInfo": "Docker phoenixd уже настроен и готов к использованию. Дополнительная настройка не требуется!",
+      "connection": "Подключение",
+      "nameLabel": "Имя подключения",
+      "namePlaceholder": "напр., Мой сервер",
+      "urlLabel": "URL Phoenixd",
+      "passwordLabel": "Пароль API",
+      "passwordPlaceholder": "Из phoenix.conf (http-password)",
+      "testConnection": "Проверить подключение",
+      "testing": "Проверка...",
+      "testFailed": "Проверка подключения не удалась",
+      "addConnection": "Добавить еще подключение"
+    },
+    "network": {
+      "title": "Сетевые службы",
+      "description": "Настройте удаленный доступ к панели управления",
+      "optional": "Сетевые службы необязательны. Вы можете включить их позже в настройках.",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "Безопасный VPN-доступ через Tailscale",
+        "authKeyLabel": "Ключ авторизации",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "Имя хоста"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "Открыть панель через Cloudflare",
+        "tokenLabel": "Токен туннеля",
+        "tokenPlaceholder": "Ваш токен туннеля"
+      },
+      "tor": {
+        "title": "Скрытый сервис Tor",
+        "description": "Доступ к панели через адрес .onion"
+      }
+    },
+    "apps": {
+      "title": "Предустановленные приложения",
+      "description": "Выберите приложения, которые хотите иметь готовыми к использованию",
+      "recommended": "Рекомендуемые",
+      "noApps": "Нет приложений для предустановки",
+      "canChangeLater": "Вы можете установить или удалить приложения позже в разделе Apps"
+    },
+    "review": {
+      "title": "Проверьте конфигурацию",
+      "description": "Вот сводка вашей настройки. Нажмите Завершить для окончания.",
+      "password": "Защита паролем",
+      "passwordSet": "Настроена",
+      "language": "Язык",
+      "theme": "Тема",
+      "themes": {
+        "light": "Светлая",
+        "dark": "Темная",
+        "system": "Системная (Авто)"
+      },
+      "phoenixd": "Подключение Phoenixd",
+      "phoenixdDocker": "Docker (Локальный)",
+      "phoenixdExternal": "{count} внешних подключений",
+      "network": "Сетевые службы",
+      "networkNone": "Не настроены",
+      "apps": "Предустановленные приложения",
+      "appsNone": "Не выбраны",
+      "appsDonations": "Страница пожертвований",
+      "appsCount": "Выбрано {count} приложений",
+      "ready": "Все готово! Нажмите 'Завершить настройку' для окончания."
+    }
   },
   "nodeInfo": {
     "title": "Информация о ноде",

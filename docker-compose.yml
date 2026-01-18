@@ -78,6 +78,9 @@ services:
       - ./services/cloudflared:/cloudflared-config:ro
       - ./data/cloudflared:/cloudflared-data
       - tor_data:/tor-data:ro
+      - ./docker-compose.yml:/project/docker-compose.yml:ro
+      - ./services:/project/services:ro
+      - ./.env:/project/.env:ro
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s

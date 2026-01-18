@@ -50,7 +50,7 @@ function generateSlug(name: string): string {
 
 /**
  * GET /api/apps
- * List all installed apps
+ * List all installed apps with live container status
  */
 appsRouter.get('/', requireAuth, async (_req: AuthenticatedRequest, res: Response) => {
   try {
@@ -63,8 +63,44 @@ appsRouter.get('/', requireAuth, async (_req: AuthenticatedRequest, res: Respons
       },
     });
 
+    // Check actual container status for each app and update database if needed
+    const appsWithLiveStatus = await Promise.all(
+      apps.map(async (app) => {
+        if (app.containerName) {
+          try {
+            const liveStatus = await appDocker.getContainerStatus(app.containerName);
+
+            // Update database if status changed
+            if (
+              liveStatus.containerStatus !== app.containerStatus ||
+              liveStatus.healthStatus !== app.healthStatus
+            ) {
+              await prisma.app.update({
+                where: { id: app.id },
+                data: {
+                  containerStatus: liveStatus.containerStatus,
+                  healthStatus: liveStatus.healthStatus,
+                  lastHealthCheck: new Date(),
+                },
+              });
+
+              return {
+                ...app,
+                containerStatus: liveStatus.containerStatus,
+                healthStatus: liveStatus.healthStatus,
+              };
+            }
+          } catch (error) {
+            console.error(`Error checking status for app ${app.name}:`, error);
+            // Return cached status on error
+          }
+        }
+        return app;
+      })
+    );
+
     // Mask API keys in response
-    const safeApps = apps.map((app) => ({
+    const safeApps = appsWithLiveStatus.map((app) => ({
       ...app,
       apiKey: app.apiKey ? `${app.apiKey.substring(0, 12)}...` : null,
       webhookSecret: app.webhookSecret ? '***' : null,
@@ -98,11 +134,42 @@ appsRouter.get('/:id', requireAuth, async (req: AuthenticatedRequest, res: Respo
       return res.status(404).json({ error: 'App not found' });
     }
 
+    // Check actual container status
+    let liveApp = app;
+    if (app.containerName) {
+      try {
+        const liveStatus = await appDocker.getContainerStatus(app.containerName);
+
+        // Update database if status changed
+        if (
+          liveStatus.containerStatus !== app.containerStatus ||
+          liveStatus.healthStatus !== app.healthStatus
+        ) {
+          await prisma.app.update({
+            where: { id: app.id },
+            data: {
+              containerStatus: liveStatus.containerStatus,
+              healthStatus: liveStatus.healthStatus,
+              lastHealthCheck: new Date(),
+            },
+          });
+
+          liveApp = {
+            ...app,
+            containerStatus: liveStatus.containerStatus,
+            healthStatus: liveStatus.healthStatus,
+          };
+        }
+      } catch (error) {
+        console.error(`Error checking status for app ${app.name}:`, error);
+      }
+    }
+
     // Mask API key in response
     res.json({
-      ...app,
-      apiKey: app.apiKey ? `${app.apiKey.substring(0, 12)}...` : null,
-      webhookSecret: app.webhookSecret ? '***' : null,
+      ...liveApp,
+      apiKey: liveApp.apiKey ? `${liveApp.apiKey.substring(0, 12)}...` : null,
+      webhookSecret: liveApp.webhookSecret ? '***' : null,
     });
   } catch (error) {
     console.error('Error getting app:', error);

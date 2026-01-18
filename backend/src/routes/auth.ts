@@ -50,6 +50,8 @@ router.get('/status', async (req: Request, res: Response) => {
       authenticated,
       autoLockMinutes: settings?.autoLockMinutes || 0,
       lockScreenBg: settings?.lockScreenBg || 'storm-clouds',
+      setupCompleted: settings?.setupCompleted ?? false,
+      defaultLocale: settings?.defaultLocale || 'en',
     });
   } catch (error) {
     console.error('Error checking auth status:', error);

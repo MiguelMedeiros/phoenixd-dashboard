@@ -137,7 +137,12 @@
     "manageContacts": "Manage contacts",
     "recurringActive": "Recurring",
     "upcomingPayments": "Upcoming Payments",
-    "unknownContact": "Unknown contact"
+    "unknownContact": "Unknown contact",
+    "every_minute": "Every minute",
+    "every_5_minutes": "Every 5 min",
+    "every_15_minutes": "Every 15 min",
+    "every_30_minutes": "Every 30 min",
+    "feeCreditTooltip": "Fee Credit is a reserve used to pay for channel operations. When you receive small payments without enough inbound liquidity, part of the amount is set aside as credit toward future channel fees. This ensures payments are never rejected due to insufficient liquidity."
   },
   "receive": {
     "title": "Zahlung empfangen",
@@ -532,7 +537,166 @@
     "passwordSaved": "Password saved",
     "enterNewPasswordToChange": "Enter a new password to change it",
     "testConnection": "Test Connection",
-    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker."
+    "nodeConnectionDescription": "Verbinden Sie sich mit Ihrer eigenen phoenixd-Instanz, die nativ auf Ihrer Maschine oder Ihrem Netzwerk läuft. Nützlich, wenn Sie phoenixd bereits außerhalb von Docker betreiben.",
+    "resetWizard": "Einrichtungsassistent zurücksetzen",
+    "resetWizardDesc": "Starten Sie den Einrichtungsassistenten erneut, um Ihr Dashboard neu zu konfigurieren",
+    "resetToWizard": "Assistent zurücksetzen",
+    "resetWizardWarning": "Dies wird Sie abmelden und den Einrichtungsassistenten neu starten. Ihre Daten werden beibehalten, aber Sie müssen Ihre Einstellungen neu konfigurieren.",
+    "enterPasswordToConfirm": "Geben Sie Ihr Passwort zur Bestätigung ein",
+    "confirmReset": "Zurücksetzen bestätigen",
+    "resetFailed": "Zurücksetzen fehlgeschlagen",
+    "resetKeepDataTitle": "Data to keep during reset",
+    "resetKeepContacts": "Keep contacts",
+    "resetKeepRecurring": "Keep recurring payments",
+    "resetKeepPhoenixd": "Keep phoenixd connection settings",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "Phoenixd Dashboard Einrichtung",
+    "subtitle": "Lassen Sie uns Ihr Lightning-Node-Dashboard konfigurieren",
+    "step": "Schritt",
+    "of": "von",
+    "back": "Zurück",
+    "next": "Weiter",
+    "completeSetup": "Einrichtung abschließen",
+    "completing": "Wird abgeschlossen...",
+    "setupComplete": "Einrichtung abgeschlossen",
+    "welcomeMessage": "Willkommen bei Ihrem Phoenixd Dashboard!",
+    "setupFailed": "Einrichtung fehlgeschlagen",
+    "unknownError": "Ein unbekannter Fehler ist aufgetreten",
+    "profile": {
+      "title": "Installationsprofil wählen",
+      "description": "Wählen Sie, wie Sie Ihr Dashboard konfigurieren möchten. Sie können die Einstellungen später ändern.",
+      "recommended": "Empfohlen",
+      "minimal": {
+        "title": "Minimal",
+        "description": "Schnelle Einrichtung nur mit wesentlichen Funktionen",
+        "features": [
+          "Passwortschutz",
+          "Lokales Docker phoenixd",
+          "Standardthema"
+        ]
+      },
+      "full": {
+        "title": "Vollständig",
+        "description": "Vollständige Einrichtung mit allen aktivierten Funktionen",
+        "features": [
+          "Passwortschutz",
+          "Docker phoenixd",
+          "Netzwerkdienste",
+          "Vorinstallierte Apps"
+        ]
+      },
+      "custom": {
+        "title": "Benutzerdefiniert",
+        "description": "Konfigurieren Sie jede Option manuell Schritt für Schritt",
+        "features": [
+          "Volle Kontrolle über alle Einstellungen",
+          "Wählen Sie Ihre phoenixd-Verbindung",
+          "Wählen Sie Netzwerkdienste",
+          "Wählen Sie zu installierende Apps"
+        ]
+      }
+    },
+    "password": {
+      "title": "Erstellen Sie Ihr Passwort",
+      "description": "Dieses Passwort schützt den Zugang zu Ihrem Dashboard und Wallet",
+      "securityNote": "Ihr Passwort ist erforderlich, um auf das Dashboard zuzugreifen und sensible Informationen wie Ihre Seed-Phrase anzuzeigen.",
+      "passwordLabel": "Passwort",
+      "passwordPlaceholder": "Geben Sie ein sicheres Passwort ein",
+      "confirmLabel": "Passwort bestätigen",
+      "confirmPlaceholder": "Bestätigen Sie Ihr Passwort",
+      "strength": "Stärke",
+      "weak": "Schwach",
+      "fair": "Ausreichend",
+      "good": "Gut",
+      "strong": "Stark",
+      "noMatch": "Passwörter stimmen nicht überein",
+      "minLength": "Mindestens 4 Zeichen"
+    },
+    "language": {
+      "title": "Wählen Sie Ihre Sprache",
+      "description": "Wählen Sie die Sprache für die Dashboard-Oberfläche"
+    },
+    "theme": {
+      "title": "Wählen Sie Ihr Theme",
+      "description": "Wählen Sie, wie das Dashboard aussehen soll",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System",
+      "preview": "Das Theme wird in Echtzeit als Vorschau angewendet"
+    },
+    "phoenixd": {
+      "title": "Phoenixd-Verbindung konfigurieren",
+      "description": "Wählen Sie, wie Sie sich mit Ihrem phoenixd Lightning-Node verbinden möchten",
+      "dockerTitle": "Lokal (Docker)",
+      "dockerDesc": "Verwenden Sie die vorinstallierte phoenixd-Instanz",
+      "externalTitle": "Extern",
+      "externalDesc": "Verbinden Sie sich mit Ihrem eigenen phoenixd-Server",
+      "dockerInfo": "Docker phoenixd ist bereits konfiguriert und einsatzbereit. Keine zusätzliche Einrichtung erforderlich!",
+      "connection": "Verbindung",
+      "nameLabel": "Verbindungsname",
+      "namePlaceholder": "z.B. Mein Server",
+      "urlLabel": "Phoenixd URL",
+      "passwordLabel": "API-Passwort",
+      "passwordPlaceholder": "Aus phoenix.conf (http-password)",
+      "testConnection": "Verbindung testen",
+      "testing": "Teste...",
+      "testFailed": "Verbindungstest fehlgeschlagen",
+      "addConnection": "Weitere Verbindung hinzufügen"
+    },
+    "network": {
+      "title": "Netzwerkdienste",
+      "description": "Konfigurieren Sie, wie Sie remote auf Ihr Dashboard zugreifen möchten",
+      "optional": "Netzwerkdienste sind optional. Sie können sie später in den Einstellungen aktivieren.",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "Sicherer VPN-Zugang über Tailscale",
+        "authKeyLabel": "Auth-Schlüssel",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "Hostname"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "Dashboard über Cloudflare freigeben",
+        "tokenLabel": "Tunnel-Token",
+        "tokenPlaceholder": "Ihr Tunnel-Token"
+      },
+      "tor": {
+        "title": "Tor Hidden Service",
+        "description": "Dashboard über .onion-Adresse erreichen"
+      }
+    },
+    "apps": {
+      "title": "Vorinstallierte Apps",
+      "description": "Wählen Sie, welche Apps Sie sofort einsatzbereit haben möchten",
+      "recommended": "Empfohlen",
+      "noApps": "Keine Apps zur Vorinstallation verfügbar",
+      "canChangeLater": "Sie können Apps später im Apps-Bereich installieren oder entfernen"
+    },
+    "review": {
+      "title": "Überprüfen Sie Ihre Konfiguration",
+      "description": "Hier ist eine Zusammenfassung Ihrer Einrichtung. Klicken Sie auf Abschließen zum Beenden.",
+      "password": "Passwortschutz",
+      "passwordSet": "Konfiguriert",
+      "language": "Sprache",
+      "theme": "Theme",
+      "themes": {
+        "light": "Hell",
+        "dark": "Dunkel",
+        "system": "System (Auto)"
+      },
+      "phoenixd": "Phoenixd-Verbindung",
+      "phoenixdDocker": "Docker (Lokal)",
+      "phoenixdExternal": "{count} externe Verbindung(en)",
+      "network": "Netzwerkdienste",
+      "networkNone": "Keine konfiguriert",
+      "apps": "Vorinstallierte Apps",
+      "appsNone": "Keine ausgewählt",
+      "appsDonations": "Spendenseite",
+      "appsCount": "{count} App(s) ausgewählt",
+      "ready": "Alles bereit! Klicken Sie auf 'Einrichtung abschließen' zum Beenden."
+    }
   },
   "nodeInfo": {
     "title": "Node-Informationen",

@@ -137,7 +137,12 @@
     "manageContacts": "Manage contacts",
     "recurringActive": "Recurring",
     "upcomingPayments": "Upcoming Payments",
-    "unknownContact": "Unknown contact"
+    "unknownContact": "Unknown contact",
+    "every_minute": "Every minute",
+    "every_5_minutes": "Every 5 min",
+    "every_15_minutes": "Every 15 min",
+    "every_30_minutes": "Every 30 min",
+    "feeCreditTooltip": "Fee Credit is a reserve used to pay for channel operations. When you receive small payments without enough inbound liquidity, part of the amount is set aside as credit toward future channel fees. This ensures payments are never rejected due to insufficient liquidity."
   },
   "receive": {
     "title": "收款",
@@ -532,7 +537,166 @@
     "passwordSaved": "Password saved",
     "enterNewPasswordToChange": "Enter a new password to change it",
     "testConnection": "Test Connection",
-    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker."
+    "nodeConnectionDescription": "连接到您自己的 phoenixd 实例。如果您已经在 Docker 之外运行 phoenixd，这将非常有用。",
+    "resetWizard": "重置设置向导",
+    "resetWizardDesc": "重新启动设置向导以重新配置您的仪表板",
+    "resetToWizard": "重置向导",
+    "resetWizardWarning": "这将注销您并重新启动设置向导。您的数据将被保留，但您需要重新配置设置。",
+    "enterPasswordToConfirm": "输入密码确认",
+    "confirmReset": "确认重置",
+    "resetFailed": "重置设置失败",
+    "resetKeepDataTitle": "Data to keep during reset",
+    "resetKeepContacts": "Keep contacts",
+    "resetKeepRecurring": "Keep recurring payments",
+    "resetKeepPhoenixd": "Keep phoenixd connection settings",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "Phoenixd Dashboard 设置",
+    "subtitle": "让我们配置您的闪电节点仪表板",
+    "step": "步骤",
+    "of": "/",
+    "back": "返回",
+    "next": "下一步",
+    "completeSetup": "完成设置",
+    "completing": "正在完成...",
+    "setupComplete": "设置完成",
+    "welcomeMessage": "欢迎使用 Phoenixd Dashboard！",
+    "setupFailed": "设置失败",
+    "unknownError": "发生未知错误",
+    "profile": {
+      "title": "选择安装配置文件",
+      "description": "选择如何配置您的仪表板。您可以稍后更改设置。",
+      "recommended": "推荐",
+      "minimal": {
+        "title": "最小化",
+        "description": "仅包含基本功能的快速设置",
+        "features": [
+          "密码保护",
+          "本地 Docker phoenixd",
+          "默认主题"
+        ]
+      },
+      "full": {
+        "title": "完整",
+        "description": "启用所有功能的完整设置",
+        "features": [
+          "密码保护",
+          "Docker phoenixd",
+          "网络服务",
+          "预装应用"
+        ]
+      },
+      "custom": {
+        "title": "自定义",
+        "description": "逐步手动配置每个选项",
+        "features": [
+          "完全控制所有设置",
+          "选择您的 phoenixd 连接",
+          "选择网络服务",
+          "选择要安装的应用"
+        ]
+      }
+    },
+    "password": {
+      "title": "创建密码",
+      "description": "此密码将保护对您的仪表板和钱包的访问",
+      "securityNote": "需要密码才能访问仪表板和查看敏感信息（如种子短语）。",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "输入安全密码",
+      "confirmLabel": "确认密码",
+      "confirmPlaceholder": "确认您的密码",
+      "strength": "强度",
+      "weak": "弱",
+      "fair": "一般",
+      "good": "好",
+      "strong": "强",
+      "noMatch": "密码不匹配",
+      "minLength": "至少4个字符"
+    },
+    "language": {
+      "title": "选择语言",
+      "description": "选择仪表板界面的语言"
+    },
+    "theme": {
+      "title": "选择主题",
+      "description": "选择仪表板的外观",
+      "light": "浅色",
+      "dark": "深色",
+      "system": "系统",
+      "preview": "主题实时预览"
+    },
+    "phoenixd": {
+      "title": "配置 Phoenixd 连接",
+      "description": "选择如何连接到您的 phoenixd 闪电节点",
+      "dockerTitle": "本地 (Docker)",
+      "dockerDesc": "使用预装的 phoenixd 实例",
+      "externalTitle": "外部",
+      "externalDesc": "连接到您自己的 phoenixd 服务器",
+      "dockerInfo": "Docker phoenixd 已配置并可使用。无需额外设置！",
+      "connection": "连接",
+      "nameLabel": "连接名称",
+      "namePlaceholder": "例如：我的服务器",
+      "urlLabel": "Phoenixd URL",
+      "passwordLabel": "API 密码",
+      "passwordPlaceholder": "来自 phoenix.conf (http-password)",
+      "testConnection": "测试连接",
+      "testing": "测试中...",
+      "testFailed": "连接测试失败",
+      "addConnection": "添加另一个连接"
+    },
+    "network": {
+      "title": "网络服务",
+      "description": "配置如何远程访问您的仪表板",
+      "optional": "网络服务是可选的。您可以稍后在设置中启用它们。",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "通过 Tailscale 安全 VPN 访问",
+        "authKeyLabel": "认证密钥",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "主机名"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "通过 Cloudflare 暴露仪表板",
+        "tokenLabel": "隧道令牌",
+        "tokenPlaceholder": "您的隧道令牌"
+      },
+      "tor": {
+        "title": "Tor 隐藏服务",
+        "description": "通过 .onion 地址访问仪表板"
+      }
+    },
+    "apps": {
+      "title": "预装应用",
+      "description": "选择您想要预装的应用",
+      "recommended": "推荐",
+      "noApps": "没有可预装的应用",
+      "canChangeLater": "您可以稍后在应用部分安装或删除应用"
+    },
+    "review": {
+      "title": "检查您的配置",
+      "description": "这是您设置的摘要。点击完成以结束。",
+      "password": "密码保护",
+      "passwordSet": "已配置",
+      "language": "语言",
+      "theme": "主题",
+      "themes": {
+        "light": "浅色",
+        "dark": "深色",
+        "system": "系统 (自动)"
+      },
+      "phoenixd": "Phoenixd 连接",
+      "phoenixdDocker": "Docker (本地)",
+      "phoenixdExternal": "{count} 个外部连接",
+      "network": "网络服务",
+      "networkNone": "未配置",
+      "apps": "预装应用",
+      "appsNone": "未选择",
+      "appsDonations": "捐赠页面",
+      "appsCount": "已选择 {count} 个应用",
+      "ready": "一切就绪！点击「完成设置」以结束。"
+    }
   },
   "nodeInfo": {
     "title": "节点信息",

@@ -137,7 +137,12 @@
     "manageContacts": "Manage contacts",
     "recurringActive": "Recurring",
     "upcomingPayments": "Upcoming Payments",
-    "unknownContact": "Unknown contact"
+    "unknownContact": "Unknown contact",
+    "every_minute": "Every minute",
+    "every_5_minutes": "Every 5 min",
+    "every_15_minutes": "Every 15 min",
+    "every_30_minutes": "Every 30 min",
+    "feeCreditTooltip": "Fee Credit is a reserve used to pay for channel operations. When you receive small payments without enough inbound liquidity, part of the amount is set aside as credit toward future channel fees. This ensures payments are never rejected due to insufficient liquidity."
   },
   "receive": {
     "title": "भुगतान प्राप्त करें",
@@ -532,7 +537,166 @@
     "passwordSaved": "Password saved",
     "enterNewPasswordToChange": "Enter a new password to change it",
     "testConnection": "Test Connection",
-    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker."
+    "nodeConnectionDescription": "अपनी मशीन या नेटवर्क पर नेटिव रूप से चल रहे अपने phoenixd इंस्टेंस से कनेक्ट करें। यह उपयोगी है यदि आप Docker के बाहर पहले से phoenixd चला रहे हैं।",
+    "resetWizard": "सेटअप विज़ार्ड रीसेट करें",
+    "resetWizardDesc": "अपने डैशबोर्ड को फिर से कॉन्फ़िगर करने के लिए सेटअप विज़ार्ड पुनः प्रारंभ करें",
+    "resetToWizard": "विज़ार्ड पर रीसेट करें",
+    "resetWizardWarning": "इससे आप लॉग आउट हो जाएंगे और सेटअप विज़ार्ड पुनः प्रारंभ होगा। आपका डेटा संरक्षित रहेगा, लेकिन आपको अपनी सेटिंग्स फिर से कॉन्फ़िगर करनी होंगी।",
+    "enterPasswordToConfirm": "पुष्टि के लिए अपना पासवर्ड दर्ज करें",
+    "confirmReset": "रीसेट की पुष्टि करें",
+    "resetFailed": "सेटअप रीसेट करने में विफल",
+    "resetKeepDataTitle": "Data to keep during reset",
+    "resetKeepContacts": "Keep contacts",
+    "resetKeepRecurring": "Keep recurring payments",
+    "resetKeepPhoenixd": "Keep phoenixd connection settings",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "Phoenixd Dashboard सेटअप",
+    "subtitle": "आइए आपके Lightning नोड डैशबोर्ड को कॉन्फ़िगर करें",
+    "step": "चरण",
+    "of": "में से",
+    "back": "पीछे",
+    "next": "आगे",
+    "completeSetup": "सेटअप पूरा करें",
+    "completing": "पूरा हो रहा है...",
+    "setupComplete": "सेटअप पूर्ण",
+    "welcomeMessage": "आपके Phoenixd Dashboard में स्वागत है!",
+    "setupFailed": "सेटअप विफल",
+    "unknownError": "एक अज्ञात त्रुटि हुई",
+    "profile": {
+      "title": "इंस्टॉलेशन प्रोफाइल चुनें",
+      "description": "चुनें कि आप अपने डैशबोर्ड को कैसे कॉन्फ़िगर करना चाहते हैं। आप बाद में सेटिंग्स बदल सकते हैं।",
+      "recommended": "अनुशंसित",
+      "minimal": {
+        "title": "न्यूनतम",
+        "description": "केवल आवश्यक सुविधाओं के साथ त्वरित सेटअप",
+        "features": [
+          "पासवर्ड सुरक्षा",
+          "लोकल Docker phoenixd",
+          "डिफ़ॉल्ट थीम"
+        ]
+      },
+      "full": {
+        "title": "पूर्ण",
+        "description": "सभी सुविधाओं के साथ संपूर्ण सेटअप",
+        "features": [
+          "पासवर्ड सुरक्षा",
+          "Docker phoenixd",
+          "नेटवर्क सेवाएं",
+          "पूर्व-स्थापित ऐप्स"
+        ]
+      },
+      "custom": {
+        "title": "कस्टम",
+        "description": "प्रत्येक विकल्प को चरण-दर-चरण मैन्युअल रूप से कॉन्फ़िगर करें",
+        "features": [
+          "सभी सेटिंग्स पर पूर्ण नियंत्रण",
+          "अपना phoenixd कनेक्शन चुनें",
+          "नेटवर्क सेवाएं चुनें",
+          "इंस्टॉल करने के लिए ऐप्स चुनें"
+        ]
+      }
+    },
+    "password": {
+      "title": "अपना पासवर्ड बनाएं",
+      "description": "यह पासवर्ड आपके डैशबोर्ड और वॉलेट तक पहुंच की रक्षा करेगा",
+      "securityNote": "डैशबोर्ड तक पहुंचने और सीड फ्रेज जैसी संवेदनशील जानकारी देखने के लिए आपके पासवर्ड की आवश्यकता है।",
+      "passwordLabel": "पासवर्ड",
+      "passwordPlaceholder": "एक सुरक्षित पासवर्ड दर्ज करें",
+      "confirmLabel": "पासवर्ड की पुष्टि करें",
+      "confirmPlaceholder": "अपने पासवर्ड की पुष्टि करें",
+      "strength": "ताकत",
+      "weak": "कमज़ोर",
+      "fair": "ठीक",
+      "good": "अच्छा",
+      "strong": "मज़बूत",
+      "noMatch": "पासवर्ड मेल नहीं खाते",
+      "minLength": "कम से कम 4 अक्षर"
+    },
+    "language": {
+      "title": "अपनी भाषा चुनें",
+      "description": "डैशबोर्ड इंटरफ़ेस के लिए भाषा चुनें"
+    },
+    "theme": {
+      "title": "अपनी थीम चुनें",
+      "description": "चुनें कि आप डैशबोर्ड को कैसा दिखाना चाहते हैं",
+      "light": "लाइट",
+      "dark": "डार्क",
+      "system": "सिस्टम",
+      "preview": "थीम प्रीव्यू के रूप में रीयल-टाइम में लागू होती है"
+    },
+    "phoenixd": {
+      "title": "Phoenixd कनेक्शन कॉन्फ़िगर करें",
+      "description": "चुनें कि अपने phoenixd Lightning नोड से कैसे कनेक्ट करना है",
+      "dockerTitle": "लोकल (Docker)",
+      "dockerDesc": "पूर्व-स्थापित phoenixd इंस्टेंस का उपयोग करें",
+      "externalTitle": "बाहरी",
+      "externalDesc": "अपने खुद के phoenixd सर्वर से कनेक्ट करें",
+      "dockerInfo": "Docker phoenixd पहले से कॉन्फ़िगर है और उपयोग के लिए तैयार है। कोई अतिरिक्त सेटअप आवश्यक नहीं!",
+      "connection": "कनेक्शन",
+      "nameLabel": "कनेक्शन नाम",
+      "namePlaceholder": "जैसे, मेरा सर्वर",
+      "urlLabel": "Phoenixd URL",
+      "passwordLabel": "API पासवर्ड",
+      "passwordPlaceholder": "phoenix.conf से (http-password)",
+      "testConnection": "कनेक्शन टेस्ट करें",
+      "testing": "टेस्ट हो रहा है...",
+      "testFailed": "कनेक्शन टेस्ट विफल",
+      "addConnection": "एक और कनेक्शन जोड़ें"
+    },
+    "network": {
+      "title": "नेटवर्क सेवाएं",
+      "description": "कॉन्फ़िगर करें कि आप अपने डैशबोर्ड को दूरस्थ रूप से कैसे एक्सेस करना चाहते हैं",
+      "optional": "नेटवर्क सेवाएं वैकल्पिक हैं। आप उन्हें बाद में सेटिंग्स से सक्षम कर सकते हैं।",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "Tailscale के माध्यम से सुरक्षित VPN एक्सेस",
+        "authKeyLabel": "Auth Key",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "होस्टनाम"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "Cloudflare के माध्यम से डैशबोर्ड एक्सपोज़ करें",
+        "tokenLabel": "टनल टोकन",
+        "tokenPlaceholder": "आपका टनल टोकन"
+      },
+      "tor": {
+        "title": "Tor Hidden Service",
+        "description": ".onion पते के माध्यम से डैशबोर्ड एक्सेस करें"
+      }
+    },
+    "apps": {
+      "title": "पूर्व-स्थापित ऐप्स",
+      "description": "चुनें कि आप कौन से ऐप्स उपयोग के लिए तैयार रखना चाहते हैं",
+      "recommended": "अनुशंसित",
+      "noApps": "पूर्व-स्थापना के लिए कोई ऐप्स उपलब्ध नहीं",
+      "canChangeLater": "आप बाद में Apps सेक्शन से ऐप्स इंस्टॉल या हटा सकते हैं"
+    },
+    "review": {
+      "title": "अपना कॉन्फ़िगरेशन समीक्षा करें",
+      "description": "यहां आपके सेटअप का सारांश है। समाप्त करने के लिए पूर्ण पर क्लिक करें।",
+      "password": "पासवर्ड सुरक्षा",
+      "passwordSet": "कॉन्फ़िगर किया गया",
+      "language": "भाषा",
+      "theme": "थीम",
+      "themes": {
+        "light": "लाइट",
+        "dark": "डार्क",
+        "system": "सिस्टम (ऑटो)"
+      },
+      "phoenixd": "Phoenixd कनेक्शन",
+      "phoenixdDocker": "Docker (लोकल)",
+      "phoenixdExternal": "{count} बाहरी कनेक्शन",
+      "network": "नेटवर्क सेवाएं",
+      "networkNone": "कोई कॉन्फ़िगर नहीं",
+      "apps": "पूर्व-स्थापित ऐप्स",
+      "appsNone": "कोई चयनित नहीं",
+      "appsDonations": "डोनेशन पेज",
+      "appsCount": "{count} ऐप्स चयनित",
+      "ready": "सब तैयार है! समाप्त करने के लिए 'सेटअप पूरा करें' पर क्लिक करें।"
+    }
   },
   "nodeInfo": {
     "title": "नोड जानकारी",

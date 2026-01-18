@@ -137,7 +137,12 @@
     "manageContacts": "Manage contacts",
     "recurringActive": "Recurring",
     "upcomingPayments": "Upcoming Payments",
-    "unknownContact": "Unknown contact"
+    "unknownContact": "Unknown contact",
+    "every_minute": "Every minute",
+    "every_5_minutes": "Every 5 min",
+    "every_15_minutes": "Every 15 min",
+    "every_30_minutes": "Every 30 min",
+    "feeCreditTooltip": "Fee Credit is a reserve used to pay for channel operations. When you receive small payments without enough inbound liquidity, part of the amount is set aside as credit toward future channel fees. This ensures payments are never rejected due to insufficient liquidity."
   },
   "receive": {
     "title": "Recevoir un Paiement",
@@ -532,7 +537,166 @@
     "passwordSaved": "Password saved",
     "enterNewPasswordToChange": "Enter a new password to change it",
     "testConnection": "Test Connection",
-    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker."
+    "nodeConnectionDescription": "Connectez-vous à votre propre instance phoenixd fonctionnant nativement sur votre machine ou réseau. Utile si vous avez déjà phoenixd en dehors de Docker.",
+    "resetWizard": "Réinitialiser l'Assistant de Configuration",
+    "resetWizardDesc": "Redémarrer l'assistant de configuration pour reconfigurer votre tableau de bord",
+    "resetToWizard": "Réinitialiser l'Assistant",
+    "resetWizardWarning": "Cela vous déconnectera et redémarrera l'assistant de configuration. Vos données seront conservées, mais vous devrez reconfigurer vos paramètres.",
+    "enterPasswordToConfirm": "Entrez votre mot de passe pour confirmer",
+    "confirmReset": "Confirmer la Réinitialisation",
+    "resetFailed": "Échec de la réinitialisation",
+    "resetKeepDataTitle": "Data to keep during reset",
+    "resetKeepContacts": "Keep contacts",
+    "resetKeepRecurring": "Keep recurring payments",
+    "resetKeepPhoenixd": "Keep phoenixd connection settings",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "Configuration de Phoenixd Dashboard",
+    "subtitle": "Configurons votre tableau de bord de nœud Lightning",
+    "step": "Étape",
+    "of": "sur",
+    "back": "Retour",
+    "next": "Suivant",
+    "completeSetup": "Terminer la Configuration",
+    "completing": "Finalisation...",
+    "setupComplete": "Configuration Terminée",
+    "welcomeMessage": "Bienvenue sur votre Phoenixd Dashboard!",
+    "setupFailed": "Échec de la Configuration",
+    "unknownError": "Une erreur inconnue s'est produite",
+    "profile": {
+      "title": "Choisir le Profil d'Installation",
+      "description": "Sélectionnez comment vous souhaitez configurer votre tableau de bord. Vous pouvez modifier les paramètres plus tard.",
+      "recommended": "Recommandé",
+      "minimal": {
+        "title": "Minimal",
+        "description": "Configuration rapide avec les fonctionnalités essentielles uniquement",
+        "features": [
+          "Protection par mot de passe",
+          "Phoenixd Docker local",
+          "Thème par défaut"
+        ]
+      },
+      "full": {
+        "title": "Complet",
+        "description": "Configuration complète avec toutes les fonctionnalités activées",
+        "features": [
+          "Protection par mot de passe",
+          "Docker phoenixd",
+          "Services réseau",
+          "Applications préinstallées"
+        ]
+      },
+      "custom": {
+        "title": "Personnalisé",
+        "description": "Configurez manuellement chaque option étape par étape",
+        "features": [
+          "Contrôle total sur tous les paramètres",
+          "Choisissez votre connexion phoenixd",
+          "Sélectionnez les services réseau",
+          "Choisissez les applications à installer"
+        ]
+      }
+    },
+    "password": {
+      "title": "Créez Votre Mot de Passe",
+      "description": "Ce mot de passe protégera l'accès à votre tableau de bord et portefeuille",
+      "securityNote": "Votre mot de passe est requis pour accéder au tableau de bord et voir les informations sensibles comme votre phrase de récupération.",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Entrez un mot de passe sécurisé",
+      "confirmLabel": "Confirmer le Mot de Passe",
+      "confirmPlaceholder": "Confirmez votre mot de passe",
+      "strength": "Force",
+      "weak": "Faible",
+      "fair": "Correct",
+      "good": "Bon",
+      "strong": "Fort",
+      "noMatch": "Les mots de passe ne correspondent pas",
+      "minLength": "Au moins 4 caractères"
+    },
+    "language": {
+      "title": "Sélectionnez Votre Langue",
+      "description": "Choisissez la langue de l'interface du tableau de bord"
+    },
+    "theme": {
+      "title": "Choisissez Votre Thème",
+      "description": "Sélectionnez l'apparence souhaitée du tableau de bord",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système",
+      "preview": "Le thème est appliqué en temps réel en aperçu"
+    },
+    "phoenixd": {
+      "title": "Configurer la Connexion Phoenixd",
+      "description": "Choisissez comment vous connecter à votre nœud Lightning phoenixd",
+      "dockerTitle": "Local (Docker)",
+      "dockerDesc": "Utilisez l'instance phoenixd préinstallée",
+      "externalTitle": "Externe",
+      "externalDesc": "Connectez-vous à votre propre serveur phoenixd",
+      "dockerInfo": "Docker phoenixd est déjà configuré et prêt à l'emploi. Aucune configuration supplémentaire requise!",
+      "connection": "Connexion",
+      "nameLabel": "Nom de la Connexion",
+      "namePlaceholder": "ex., Mon Serveur",
+      "urlLabel": "URL Phoenixd",
+      "passwordLabel": "Mot de passe API",
+      "passwordPlaceholder": "De phoenix.conf (http-password)",
+      "testConnection": "Tester la Connexion",
+      "testing": "Test en cours...",
+      "testFailed": "Échec du test de connexion",
+      "addConnection": "Ajouter une Autre Connexion"
+    },
+    "network": {
+      "title": "Services Réseau",
+      "description": "Configurez comment vous souhaitez accéder à votre tableau de bord à distance",
+      "optional": "Les services réseau sont optionnels. Vous pouvez les activer plus tard dans les Paramètres.",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "Accès VPN sécurisé via Tailscale",
+        "authKeyLabel": "Clé d'Authentification",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "Nom d'hôte"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "Exposer le tableau de bord via Cloudflare",
+        "tokenLabel": "Token du Tunnel",
+        "tokenPlaceholder": "Votre token de tunnel"
+      },
+      "tor": {
+        "title": "Service Caché Tor",
+        "description": "Accéder au tableau de bord via une adresse .onion"
+      }
+    },
+    "apps": {
+      "title": "Applications Préinstallées",
+      "description": "Sélectionnez les applications que vous souhaitez avoir prêtes à utiliser",
+      "recommended": "Recommandé",
+      "noApps": "Aucune application disponible pour la préinstallation",
+      "canChangeLater": "Vous pouvez installer ou supprimer des applications plus tard dans la section Apps"
+    },
+    "review": {
+      "title": "Vérifiez Votre Configuration",
+      "description": "Voici un résumé de votre configuration. Cliquez sur Terminer pour finaliser.",
+      "password": "Protection par Mot de Passe",
+      "passwordSet": "Configurée",
+      "language": "Langue",
+      "theme": "Thème",
+      "themes": {
+        "light": "Clair",
+        "dark": "Sombre",
+        "system": "Système (Auto)"
+      },
+      "phoenixd": "Connexion Phoenixd",
+      "phoenixdDocker": "Docker (Local)",
+      "phoenixdExternal": "{count} connexion(s) externe(s)",
+      "network": "Services Réseau",
+      "networkNone": "Aucun configuré",
+      "apps": "Applications Préinstallées",
+      "appsNone": "Aucune sélectionnée",
+      "appsDonations": "Page de Dons",
+      "appsCount": "{count} application(s) sélectionnée(s)",
+      "ready": "Tout est prêt! Cliquez sur 'Terminer la Configuration' pour finaliser."
+    }
   },
   "nodeInfo": {
     "title": "Informations du Nœud",

@@ -1,7 +1,7 @@
 FROM node:20-alpine AS base
 
-# Install netcat and curl for health checks
-RUN apk add --no-cache netcat-openbsd curl
+# Install netcat, curl for health checks, and docker CLI for container management
+RUN apk add --no-cache netcat-openbsd curl docker-cli docker-cli-compose
 
 # Install dependencies only when needed
 FROM base AS deps

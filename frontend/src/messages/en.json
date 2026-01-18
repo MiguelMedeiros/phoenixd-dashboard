@@ -135,9 +135,14 @@
     "daily": "Daily",
     "weekly": "Weekly",
     "monthly": "Monthly",
+    "every_minute": "Every minute",
+    "every_5_minutes": "Every 5 min",
+    "every_15_minutes": "Every 15 min",
+    "every_30_minutes": "Every 30 min",
     "recurringActive": "Recurring",
     "upcomingPayments": "Upcoming Payments",
-    "unknownContact": "Unknown contact"
+    "unknownContact": "Unknown contact",
+    "feeCreditTooltip": "Fee Credit is a reserve used to pay for channel operations. When you receive small payments without enough inbound liquidity, part of the amount is set aside as credit toward future channel fees. This ensures payments are never rejected due to insufficient liquidity."
   },
   "receive": {
     "title": "Receive Payment",
@@ -533,7 +538,162 @@
     "passwordSaved": "Password saved",
     "enterNewPasswordToChange": "Enter a new password to change it",
     "testConnection": "Test Connection",
-    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker."
+    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker.",
+    "resetWizard": "Reset Setup Wizard",
+    "resetWizardDesc": "Factory reset: stops all services and restarts the setup wizard",
+    "resetToWizard": "Reset to Wizard",
+    "resetWizardWarning": "This will stop phoenixd and all network services (Tor, Tailscale, Cloudflared), log you out, and restart the setup wizard.",
+    "enterPasswordToConfirm": "Enter your password to confirm",
+    "confirmReset": "Confirm Reset",
+    "resetFailed": "Failed to reset setup",
+    "resetKeepDataTitle": "Data to keep during reset",
+    "resetKeepContacts": "Keep contacts",
+    "resetKeepRecurring": "Keep recurring payments",
+    "resetKeepPhoenixd": "Keep phoenixd connection settings",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "Phoenixd Dashboard Setup",
+    "subtitle": "Let's get your Lightning node dashboard configured",
+    "step": "Step",
+    "of": "of",
+    "back": "Back",
+    "next": "Next",
+    "completeSetup": "Complete Setup",
+    "completing": "Completing...",
+    "setupComplete": "Setup Complete",
+    "welcomeMessage": "Welcome to your Phoenixd Dashboard!",
+    "setupFailed": "Setup Failed",
+    "unknownError": "An unknown error occurred",
+    "profile": {
+      "title": "Choose Installation Profile",
+      "description": "Select how you want to configure your dashboard. You can always change settings later.",
+      "recommended": "Recommended",
+      "minimal": {
+        "title": "Minimal",
+        "description": "Quick setup with essential features only",
+        "features": ["Password protection", "Local Docker phoenixd", "Default theme"]
+      },
+      "full": {
+        "title": "Full",
+        "description": "Complete setup with all features enabled",
+        "features": [
+          "Password protection",
+          "Docker phoenixd",
+          "Network services",
+          "Pre-installed apps"
+        ]
+      },
+      "custom": {
+        "title": "Custom",
+        "description": "Manually configure every option step by step",
+        "features": [
+          "Full control over all settings",
+          "Choose your phoenixd connection",
+          "Select network services",
+          "Pick which apps to install"
+        ]
+      }
+    },
+    "password": {
+      "title": "Create Your Password",
+      "description": "This password will protect access to your dashboard and wallet",
+      "securityNote": "Your password is required to access the dashboard and view sensitive information like your seed phrase.",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter a secure password",
+      "confirmLabel": "Confirm Password",
+      "confirmPlaceholder": "Confirm your password",
+      "strength": "Strength",
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong",
+      "noMatch": "Passwords do not match",
+      "minLength": "At least 4 characters"
+    },
+    "language": {
+      "title": "Select Your Language",
+      "description": "Choose the language for the dashboard interface"
+    },
+    "theme": {
+      "title": "Choose Your Theme",
+      "description": "Select how you want the dashboard to look",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "preview": "The theme is applied in real-time as a preview"
+    },
+    "phoenixd": {
+      "title": "Configure Phoenixd Connection",
+      "description": "Choose how to connect to your phoenixd Lightning node",
+      "dockerTitle": "Local (Docker)",
+      "dockerDesc": "Use the pre-installed phoenixd instance",
+      "externalTitle": "External",
+      "externalDesc": "Connect to your own phoenixd server",
+      "dockerInfo": "Docker phoenixd is already configured and ready to use. No additional setup required!",
+      "connection": "Connection",
+      "nameLabel": "Connection Name",
+      "namePlaceholder": "e.g., My Server",
+      "urlLabel": "Phoenixd URL",
+      "passwordLabel": "API Password",
+      "passwordPlaceholder": "From phoenix.conf (http-password)",
+      "testConnection": "Test Connection",
+      "testing": "Testing...",
+      "testFailed": "Connection test failed",
+      "addConnection": "Add Another Connection"
+    },
+    "network": {
+      "title": "Network Services",
+      "description": "Configure how you want to access your dashboard remotely",
+      "optional": "Network services are optional. You can enable them later from Settings.",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "Secure VPN access via Tailscale",
+        "authKeyLabel": "Auth Key",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "Hostname"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "Expose dashboard via Cloudflare",
+        "tokenLabel": "Tunnel Token",
+        "tokenPlaceholder": "Your tunnel token"
+      },
+      "tor": {
+        "title": "Tor Hidden Service",
+        "description": "Access dashboard via .onion address"
+      }
+    },
+    "apps": {
+      "title": "Pre-installed Apps",
+      "description": "Select which apps you want to have ready to use",
+      "recommended": "Recommended",
+      "noApps": "No apps available for pre-installation",
+      "canChangeLater": "You can install or remove apps later from the Apps section"
+    },
+    "review": {
+      "title": "Review Your Configuration",
+      "description": "Here's a summary of your setup. Click Complete to finish.",
+      "password": "Password Protection",
+      "passwordSet": "Configured",
+      "language": "Language",
+      "theme": "Theme",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System (Auto)"
+      },
+      "phoenixd": "Phoenixd Connection",
+      "phoenixdDocker": "Docker (Local)",
+      "phoenixdExternal": "{count} external connection(s)",
+      "network": "Network Services",
+      "networkNone": "None configured",
+      "apps": "Pre-installed Apps",
+      "appsNone": "None selected",
+      "appsDonations": "Donations Page",
+      "appsCount": "{count} app(s) selected",
+      "ready": "Everything is ready! Click 'Complete Setup' to finish."
+    }
   },
   "nodeInfo": {
     "title": "Node Information",

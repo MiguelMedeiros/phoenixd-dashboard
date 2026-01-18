@@ -135,9 +135,14 @@
     "daily": "Diário",
     "weekly": "Semanal",
     "monthly": "Mensal",
+    "every_minute": "A cada minuto",
+    "every_5_minutes": "A cada 5 min",
+    "every_15_minutes": "A cada 15 min",
+    "every_30_minutes": "A cada 30 min",
     "recurringActive": "Recorrentes",
     "upcomingPayments": "Próximos Pagamentos",
-    "unknownContact": "Contato desconhecido"
+    "unknownContact": "Contato desconhecido",
+    "feeCreditTooltip": "Crédito de Taxa é uma reserva usada para pagar operações de canal. Quando você recebe pagamentos pequenos sem liquidez de entrada suficiente, parte do valor é reservada como crédito para futuras taxas de canal. Isso garante que pagamentos nunca sejam rejeitados por falta de liquidez."
   },
   "receive": {
     "title": "Receber Pagamento",
@@ -532,7 +537,162 @@
     "passwordSaved": "Senha salva",
     "enterNewPasswordToChange": "Digite uma nova senha para alterá-la",
     "testConnection": "Testar Conexão",
-    "nodeConnectionDescription": "Conecte-se à sua própria instância phoenixd rodando nativamente na sua máquina ou rede. Útil se você já tem o phoenixd rodando fora do Docker."
+    "nodeConnectionDescription": "Conecte-se à sua própria instância phoenixd rodando nativamente na sua máquina ou rede. Útil se você já tem o phoenixd rodando fora do Docker.",
+    "resetWizard": "Reiniciar Assistente de Configuração",
+    "resetWizardDesc": "Reset de fábrica: para todos os serviços e reinicia o assistente de configuração",
+    "resetToWizard": "Reiniciar Assistente",
+    "resetWizardWarning": "Isso irá parar o phoenixd e todos os serviços de rede (Tor, Tailscale, Cloudflared), desconectar você e reiniciar o assistente de configuração.",
+    "enterPasswordToConfirm": "Digite sua senha para confirmar",
+    "confirmReset": "Confirmar Reinício",
+    "resetFailed": "Falha ao reiniciar configuração",
+    "resetKeepDataTitle": "Dados a manter durante o reset",
+    "resetKeepContacts": "Manter contatos",
+    "resetKeepRecurring": "Manter pagamentos recorrentes",
+    "resetKeepPhoenixd": "Manter configurações de conexão phoenixd",
+    "cancel": "Cancelar"
+  },
+  "setup": {
+    "title": "Configuração do Phoenixd Dashboard",
+    "subtitle": "Vamos configurar o painel do seu nó Lightning",
+    "step": "Passo",
+    "of": "de",
+    "back": "Voltar",
+    "next": "Próximo",
+    "completeSetup": "Concluir Configuração",
+    "completing": "Concluindo...",
+    "setupComplete": "Configuração Concluída",
+    "welcomeMessage": "Bem-vindo ao seu Phoenixd Dashboard!",
+    "setupFailed": "Configuração Falhou",
+    "unknownError": "Ocorreu um erro desconhecido",
+    "profile": {
+      "title": "Escolha o Perfil de Instalação",
+      "description": "Selecione como deseja configurar seu painel. Você pode alterar as configurações depois.",
+      "recommended": "Recomendado",
+      "minimal": {
+        "title": "Mínimo",
+        "description": "Configuração rápida apenas com recursos essenciais",
+        "features": ["Proteção por senha", "Phoenixd Docker local", "Tema padrão"]
+      },
+      "full": {
+        "title": "Completo",
+        "description": "Configuração completa com todos os recursos ativados",
+        "features": [
+          "Proteção por senha",
+          "Docker phoenixd",
+          "Serviços de rede",
+          "Apps pré-instalados"
+        ]
+      },
+      "custom": {
+        "title": "Personalizado",
+        "description": "Configure manualmente cada opção passo a passo",
+        "features": [
+          "Controle total sobre todas as configurações",
+          "Escolha sua conexão phoenixd",
+          "Selecione serviços de rede",
+          "Escolha quais apps instalar"
+        ]
+      }
+    },
+    "password": {
+      "title": "Crie Sua Senha",
+      "description": "Esta senha protegerá o acesso ao seu painel e carteira",
+      "securityNote": "Sua senha é necessária para acessar o painel e visualizar informações sensíveis como sua frase semente.",
+      "passwordLabel": "Senha",
+      "passwordPlaceholder": "Digite uma senha segura",
+      "confirmLabel": "Confirmar Senha",
+      "confirmPlaceholder": "Confirme sua senha",
+      "strength": "Força",
+      "weak": "Fraca",
+      "fair": "Razoável",
+      "good": "Boa",
+      "strong": "Forte",
+      "noMatch": "As senhas não coincidem",
+      "minLength": "Pelo menos 4 caracteres"
+    },
+    "language": {
+      "title": "Selecione Seu Idioma",
+      "description": "Escolha o idioma para a interface do painel"
+    },
+    "theme": {
+      "title": "Escolha Seu Tema",
+      "description": "Selecione como deseja que o painel apareça",
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema",
+      "preview": "O tema é aplicado em tempo real como prévia"
+    },
+    "phoenixd": {
+      "title": "Configurar Conexão Phoenixd",
+      "description": "Escolha como conectar ao seu nó Lightning phoenixd",
+      "dockerTitle": "Local (Docker)",
+      "dockerDesc": "Use a instância phoenixd pré-instalada",
+      "externalTitle": "Externo",
+      "externalDesc": "Conecte ao seu próprio servidor phoenixd",
+      "dockerInfo": "O Docker phoenixd já está configurado e pronto para uso. Nenhuma configuração adicional necessária!",
+      "connection": "Conexão",
+      "nameLabel": "Nome da Conexão",
+      "namePlaceholder": "ex., Meu Servidor",
+      "urlLabel": "URL do Phoenixd",
+      "passwordLabel": "Senha da API",
+      "passwordPlaceholder": "Do phoenix.conf (http-password)",
+      "testConnection": "Testar Conexão",
+      "testing": "Testando...",
+      "testFailed": "Teste de conexão falhou",
+      "addConnection": "Adicionar Outra Conexão"
+    },
+    "network": {
+      "title": "Serviços de Rede",
+      "description": "Configure como deseja acessar seu painel remotamente",
+      "optional": "Serviços de rede são opcionais. Você pode ativá-los depois nas Configurações.",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "Acesso VPN seguro via Tailscale",
+        "authKeyLabel": "Chave de Autenticação",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "Nome do Host"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "Expor painel via Cloudflare",
+        "tokenLabel": "Token do Túnel",
+        "tokenPlaceholder": "Seu token do túnel"
+      },
+      "tor": {
+        "title": "Serviço Oculto Tor",
+        "description": "Acessar painel via endereço .onion"
+      }
+    },
+    "apps": {
+      "title": "Apps Pré-instalados",
+      "description": "Selecione quais apps você quer ter prontos para usar",
+      "recommended": "Recomendado",
+      "noApps": "Nenhum app disponível para pré-instalação",
+      "canChangeLater": "Você pode instalar ou remover apps depois na seção Apps"
+    },
+    "review": {
+      "title": "Revise Sua Configuração",
+      "description": "Aqui está um resumo da sua configuração. Clique em Concluir para finalizar.",
+      "password": "Proteção por Senha",
+      "passwordSet": "Configurada",
+      "language": "Idioma",
+      "theme": "Tema",
+      "themes": {
+        "light": "Claro",
+        "dark": "Escuro",
+        "system": "Sistema (Auto)"
+      },
+      "phoenixd": "Conexão Phoenixd",
+      "phoenixdDocker": "Docker (Local)",
+      "phoenixdExternal": "{count} conexão(ões) externa(s)",
+      "network": "Serviços de Rede",
+      "networkNone": "Nenhum configurado",
+      "apps": "Apps Pré-instalados",
+      "appsNone": "Nenhum selecionado",
+      "appsDonations": "Página de Doações",
+      "appsCount": "{count} app(s) selecionado(s)",
+      "ready": "Tudo pronto! Clique em 'Concluir Configuração' para finalizar."
+    }
   },
   "nodeInfo": {
     "title": "Informações do Nó",

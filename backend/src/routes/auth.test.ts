@@ -95,6 +95,8 @@ describe('Auth Routes', () => {
         authenticated: true,
         autoLockMinutes: 0,
         lockScreenBg: 'storm-clouds',
+        setupCompleted: false,
+        defaultLocale: 'en',
       });
     });
 

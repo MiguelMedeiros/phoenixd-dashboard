@@ -30,6 +30,7 @@ import {
 } from './routes/phoenixd-connections.js';
 import { appsRouter } from './routes/apps.js';
 import { appsApiRouter } from './routes/apps-api.js';
+import { setupRouter } from './routes/setup.js';
 import { PhoenixdService } from './services/phoenixd.js';
 import { startRecurringPaymentScheduler } from './services/recurring-scheduler.js';
 import { cleanupExpiredSessions, validateSessionFromCookie } from './middleware/auth.js';
@@ -187,6 +188,7 @@ app.use('/api/phoenixd', phoenixdConfigRouter); // Mount phoenixd config routes 
 app.use('/api/phoenixd-connections', phoenixdConnectionsRouter);
 app.use('/api/apps', appsRouter); // Apps management
 app.use('/api/apps-gateway', appsApiRouter); // API gateway for apps to call backend
+app.use('/api/setup', setupRouter); // Setup wizard
 
 // WebSocket clients
 const clients = new Set<WebSocket>();

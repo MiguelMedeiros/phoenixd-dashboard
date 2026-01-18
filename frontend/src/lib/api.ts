@@ -488,6 +488,8 @@ export interface AuthStatus {
   authenticated: boolean;
   autoLockMinutes: number;
   lockScreenBg: LockScreenBg;
+  setupCompleted: boolean;
+  defaultLocale: string;
 }
 
 export interface AuthSettings {
@@ -1490,4 +1492,109 @@ export async function getAppStatus(id: string): Promise<{
     healthStatus: string;
     running: boolean;
   }>(`/api/apps/${id}/status`);
+}
+
+// ============================================================================
+// Setup Wizard API
+// ============================================================================
+
+export interface SetupStatus {
+  setupCompleted: boolean;
+  setupProfile: 'minimal' | 'full' | 'custom' | null;
+  defaultLocale: string;
+}
+
+export interface SetupConfig {
+  profile: 'minimal' | 'full' | 'custom';
+  password: string;
+  locale: string;
+  theme: string;
+  phoenixd: {
+    type: 'docker' | 'external';
+    connections?: Array<{
+      name: string;
+      url: string;
+      password: string;
+    }>;
+  };
+  network: {
+    tailscale?: {
+      enabled: boolean;
+      authKey?: string;
+      hostname?: string;
+    };
+    cloudflared?: {
+      enabled: boolean;
+      token?: string;
+    };
+    tor?: {
+      enabled: boolean;
+    };
+  };
+  apps: {
+    donations?: boolean;
+  };
+}
+
+export interface AvailableApp {
+  slug: string;
+  name: string;
+  description: string;
+  icon: string;
+  recommended: boolean;
+}
+
+export async function getSetupStatus(): Promise<SetupStatus> {
+  return request<SetupStatus>('/api/setup/status');
+}
+
+export async function completeSetup(
+  config: SetupConfig
+): Promise<{ success: boolean; message: string; locale: string }> {
+  return request<{ success: boolean; message: string; locale: string }>('/api/setup/complete', {
+    method: 'POST',
+    body: JSON.stringify(config),
+  });
+}
+
+export interface ResetOptions {
+  keepContacts?: boolean;
+  keepRecurring?: boolean;
+  keepPhoenixdConnections?: boolean;
+}
+
+export async function resetSetup(
+  password: string,
+  options?: ResetOptions
+): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>('/api/setup/reset', {
+    method: 'POST',
+    body: JSON.stringify({ password, options }),
+  });
+}
+
+export async function getAvailableApps(): Promise<AvailableApp[]> {
+  return request<AvailableApp[]>('/api/setup/available-apps');
+}
+
+export async function testSetupPhoenixdConnection(
+  url: string,
+  password: string
+): Promise<{
+  success: boolean;
+  nodeId?: string;
+  chain?: string;
+  version?: string;
+  error?: string;
+}> {
+  return request<{
+    success: boolean;
+    nodeId?: string;
+    chain?: string;
+    version?: string;
+    error?: string;
+  }>('/api/setup/test-phoenixd', {
+    method: 'POST',
+    body: JSON.stringify({ url, password }),
+  });
 }

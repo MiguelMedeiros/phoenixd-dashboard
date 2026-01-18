@@ -1,7 +1,13 @@
 'use client';
 
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export type StatCardVariant =
   | 'success'
@@ -19,6 +25,7 @@ interface StatCardProps {
   variant?: StatCardVariant;
   className?: string;
   onClick?: () => void;
+  tooltip?: string;
 }
 
 const variantStyles: Record<StatCardVariant, { text: string; bg: string }> = {
@@ -38,10 +45,11 @@ export function StatCard({
   variant = 'muted',
   className,
   onClick,
+  tooltip,
 }: StatCardProps) {
   const styles = variantStyles[variant];
 
-  return (
+  const content = (
     <div
       className={cn(
         'glass-card rounded-xl md:rounded-2xl p-3 md:p-5 group md:hover:scale-[1.02] transition-all',
@@ -52,7 +60,12 @@ export function StatCard({
     >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-[10px] md:text-sm text-muted-foreground">{label}</p>
+          <div className="flex items-center gap-1">
+            <p className="text-[10px] md:text-sm text-muted-foreground">{label}</p>
+            {tooltip && (
+              <Info className="h-3 w-3 text-muted-foreground/50 hidden md:inline-block" />
+            )}
+          </div>
           <p className={cn('text-sm md:text-2xl font-bold mt-0.5 md:mt-1 truncate', styles.text)}>
             {value}
           </p>
@@ -68,6 +81,21 @@ export function StatCard({
       </div>
     </div>
   );
+
+  if (tooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{content}</TooltipTrigger>
+          <TooltipContent className="max-w-xs text-sm">
+            <p>{tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return content;
 }
 
 interface StatCardGridProps {

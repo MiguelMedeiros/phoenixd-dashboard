@@ -137,7 +137,12 @@
     "manageContacts": "Manage contacts",
     "recurringActive": "Recurring",
     "upcomingPayments": "Upcoming Payments",
-    "unknownContact": "Unknown contact"
+    "unknownContact": "Unknown contact",
+    "every_minute": "Every minute",
+    "every_5_minutes": "Every 5 min",
+    "every_15_minutes": "Every 15 min",
+    "every_30_minutes": "Every 30 min",
+    "feeCreditTooltip": "Fee Credit is a reserve used to pay for channel operations. When you receive small payments without enough inbound liquidity, part of the amount is set aside as credit toward future channel fees. This ensures payments are never rejected due to insufficient liquidity."
   },
   "receive": {
     "title": "استلام دفعة",
@@ -532,7 +537,166 @@
     "passwordSaved": "Password saved",
     "enterNewPasswordToChange": "Enter a new password to change it",
     "testConnection": "Test Connection",
-    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker."
+    "nodeConnectionDescription": "اتصل بمثيل phoenixd الخاص بك الذي يعمل على جهازك أو شبكتك. مفيد إذا كنت تشغل phoenixd بالفعل خارج Docker.",
+    "resetWizard": "إعادة تعيين معالج الإعداد",
+    "resetWizardDesc": "أعد تشغيل معالج الإعداد لإعادة تكوين لوحة التحكم",
+    "resetToWizard": "إعادة التعيين للمعالج",
+    "resetWizardWarning": "سيؤدي هذا إلى تسجيل خروجك وإعادة تشغيل معالج الإعداد. سيتم الاحتفاظ ببياناتك، لكنك ستحتاج إلى إعادة تكوين إعداداتك.",
+    "enterPasswordToConfirm": "أدخل كلمة المرور للتأكيد",
+    "confirmReset": "تأكيد إعادة التعيين",
+    "resetFailed": "فشل إعادة تعيين الإعداد",
+    "resetKeepDataTitle": "Data to keep during reset",
+    "resetKeepContacts": "Keep contacts",
+    "resetKeepRecurring": "Keep recurring payments",
+    "resetKeepPhoenixd": "Keep phoenixd connection settings",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "إعداد Phoenixd Dashboard",
+    "subtitle": "دعنا نقوم بتكوين لوحة تحكم عقدة Lightning الخاصة بك",
+    "step": "خطوة",
+    "of": "من",
+    "back": "رجوع",
+    "next": "التالي",
+    "completeSetup": "إكمال الإعداد",
+    "completing": "جارٍ الإكمال...",
+    "setupComplete": "اكتمل الإعداد",
+    "welcomeMessage": "مرحباً بك في Phoenixd Dashboard!",
+    "setupFailed": "فشل الإعداد",
+    "unknownError": "حدث خطأ غير معروف",
+    "profile": {
+      "title": "اختر ملف تعريف التثبيت",
+      "description": "اختر كيف تريد تكوين لوحة التحكم. يمكنك تغيير الإعدادات لاحقاً.",
+      "recommended": "موصى به",
+      "minimal": {
+        "title": "الحد الأدنى",
+        "description": "إعداد سريع مع الميزات الأساسية فقط",
+        "features": [
+          "حماية بكلمة مرور",
+          "Docker phoenixd محلي",
+          "السمة الافتراضية"
+        ]
+      },
+      "full": {
+        "title": "كامل",
+        "description": "إعداد كامل مع تفعيل جميع الميزات",
+        "features": [
+          "حماية بكلمة مرور",
+          "Docker phoenixd",
+          "خدمات الشبكة",
+          "تطبيقات مثبتة مسبقاً"
+        ]
+      },
+      "custom": {
+        "title": "مخصص",
+        "description": "قم بتكوين كل خيار يدوياً خطوة بخطوة",
+        "features": [
+          "تحكم كامل في جميع الإعدادات",
+          "اختر اتصال phoenixd",
+          "اختر خدمات الشبكة",
+          "اختر التطبيقات للتثبيت"
+        ]
+      }
+    },
+    "password": {
+      "title": "إنشاء كلمة المرور",
+      "description": "ستحمي كلمة المرور هذه الوصول إلى لوحة التحكم والمحفظة",
+      "securityNote": "كلمة المرور مطلوبة للوصول إلى لوحة التحكم وعرض المعلومات الحساسة مثل عبارة الاسترداد.",
+      "passwordLabel": "كلمة المرور",
+      "passwordPlaceholder": "أدخل كلمة مرور آمنة",
+      "confirmLabel": "تأكيد كلمة المرور",
+      "confirmPlaceholder": "أكد كلمة المرور",
+      "strength": "القوة",
+      "weak": "ضعيفة",
+      "fair": "متوسطة",
+      "good": "جيدة",
+      "strong": "قوية",
+      "noMatch": "كلمات المرور غير متطابقة",
+      "minLength": "4 أحرف على الأقل"
+    },
+    "language": {
+      "title": "اختر لغتك",
+      "description": "اختر لغة واجهة لوحة التحكم"
+    },
+    "theme": {
+      "title": "اختر السمة",
+      "description": "اختر مظهر لوحة التحكم",
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام",
+      "preview": "يتم تطبيق السمة في الوقت الفعلي كمعاينة"
+    },
+    "phoenixd": {
+      "title": "تكوين اتصال Phoenixd",
+      "description": "اختر كيفية الاتصال بعقدة phoenixd Lightning",
+      "dockerTitle": "محلي (Docker)",
+      "dockerDesc": "استخدم مثيل phoenixd المثبت مسبقاً",
+      "externalTitle": "خارجي",
+      "externalDesc": "اتصل بخادم phoenixd الخاص بك",
+      "dockerInfo": "Docker phoenixd مُكوَّن بالفعل وجاهز للاستخدام. لا يلزم إعداد إضافي!",
+      "connection": "الاتصال",
+      "nameLabel": "اسم الاتصال",
+      "namePlaceholder": "مثال: خادمي",
+      "urlLabel": "عنوان URL لـ Phoenixd",
+      "passwordLabel": "كلمة مرور API",
+      "passwordPlaceholder": "من phoenix.conf (http-password)",
+      "testConnection": "اختبار الاتصال",
+      "testing": "جارٍ الاختبار...",
+      "testFailed": "فشل اختبار الاتصال",
+      "addConnection": "إضافة اتصال آخر"
+    },
+    "network": {
+      "title": "خدمات الشبكة",
+      "description": "كوِّن كيفية الوصول عن بعد إلى لوحة التحكم",
+      "optional": "خدمات الشبكة اختيارية. يمكنك تفعيلها لاحقاً من الإعدادات.",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "وصول VPN آمن عبر Tailscale",
+        "authKeyLabel": "مفتاح المصادقة",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "اسم المضيف"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "كشف لوحة التحكم عبر Cloudflare",
+        "tokenLabel": "رمز النفق",
+        "tokenPlaceholder": "رمز النفق الخاص بك"
+      },
+      "tor": {
+        "title": "خدمة Tor المخفية",
+        "description": "الوصول إلى لوحة التحكم عبر عنوان .onion"
+      }
+    },
+    "apps": {
+      "title": "التطبيقات المثبتة مسبقاً",
+      "description": "اختر التطبيقات التي تريدها جاهزة للاستخدام",
+      "recommended": "موصى به",
+      "noApps": "لا توجد تطبيقات متاحة للتثبيت المسبق",
+      "canChangeLater": "يمكنك تثبيت أو إزالة التطبيقات لاحقاً من قسم التطبيقات"
+    },
+    "review": {
+      "title": "مراجعة التكوين",
+      "description": "إليك ملخص إعدادك. انقر فوق إكمال للإنهاء.",
+      "password": "حماية كلمة المرور",
+      "passwordSet": "مُكوَّنة",
+      "language": "اللغة",
+      "theme": "السمة",
+      "themes": {
+        "light": "فاتح",
+        "dark": "داكن",
+        "system": "النظام (تلقائي)"
+      },
+      "phoenixd": "اتصال Phoenixd",
+      "phoenixdDocker": "Docker (محلي)",
+      "phoenixdExternal": "{count} اتصال(ات) خارجية",
+      "network": "خدمات الشبكة",
+      "networkNone": "لم يتم التكوين",
+      "apps": "التطبيقات المثبتة مسبقاً",
+      "appsNone": "لم يتم الاختيار",
+      "appsDonations": "صفحة التبرعات",
+      "appsCount": "تم اختيار {count} تطبيق(ات)",
+      "ready": "كل شيء جاهز! انقر فوق 'إكمال الإعداد' للإنهاء."
+    }
   },
   "nodeInfo": {
     "title": "معلومات العقدة",

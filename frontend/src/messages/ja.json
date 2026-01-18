@@ -137,7 +137,12 @@
     "manageContacts": "Manage contacts",
     "recurringActive": "Recurring",
     "upcomingPayments": "Upcoming Payments",
-    "unknownContact": "Unknown contact"
+    "unknownContact": "Unknown contact",
+    "every_minute": "Every minute",
+    "every_5_minutes": "Every 5 min",
+    "every_15_minutes": "Every 15 min",
+    "every_30_minutes": "Every 30 min",
+    "feeCreditTooltip": "Fee Credit is a reserve used to pay for channel operations. When you receive small payments without enough inbound liquidity, part of the amount is set aside as credit toward future channel fees. This ensures payments are never rejected due to insufficient liquidity."
   },
   "receive": {
     "title": "支払いを受取る",
@@ -532,7 +537,166 @@
     "passwordSaved": "Password saved",
     "enterNewPasswordToChange": "Enter a new password to change it",
     "testConnection": "Test Connection",
-    "nodeConnectionDescription": "Connect to your own phoenixd instance running natively on your machine or network. This is useful if you already have phoenixd running outside of Docker."
+    "nodeConnectionDescription": "マシンまたはネットワーク上でネイティブに実行されている独自の phoenixd インスタンスに接続します。Docker 外で phoenixd を既に実行している場合に便利です。",
+    "resetWizard": "セットアップウィザードをリセット",
+    "resetWizardDesc": "ダッシュボードを再設定するためにセットアップウィザードを再開始します",
+    "resetToWizard": "ウィザードをリセット",
+    "resetWizardWarning": "これによりログアウトされ、セットアップウィザードが再開始されます。データは保持されますが、設定を再構成する必要があります。",
+    "enterPasswordToConfirm": "確認のためパスワードを入力してください",
+    "confirmReset": "リセットを確認",
+    "resetFailed": "セットアップのリセットに失敗しました",
+    "resetKeepDataTitle": "Data to keep during reset",
+    "resetKeepContacts": "Keep contacts",
+    "resetKeepRecurring": "Keep recurring payments",
+    "resetKeepPhoenixd": "Keep phoenixd connection settings",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "Phoenixd Dashboard セットアップ",
+    "subtitle": "ライトニングノードダッシュボードを設定しましょう",
+    "step": "ステップ",
+    "of": "/",
+    "back": "戻る",
+    "next": "次へ",
+    "completeSetup": "セットアップを完了",
+    "completing": "完了中...",
+    "setupComplete": "セットアップ完了",
+    "welcomeMessage": "Phoenixd Dashboard へようこそ！",
+    "setupFailed": "セットアップ失敗",
+    "unknownError": "不明なエラーが発生しました",
+    "profile": {
+      "title": "インストールプロファイルを選択",
+      "description": "ダッシュボードの設定方法を選択してください。設定は後から変更できます。",
+      "recommended": "推奨",
+      "minimal": {
+        "title": "最小",
+        "description": "必須機能のみの迅速なセットアップ",
+        "features": [
+          "パスワード保護",
+          "ローカル Docker phoenixd",
+          "デフォルトテーマ"
+        ]
+      },
+      "full": {
+        "title": "フル",
+        "description": "すべての機能を有効にした完全なセットアップ",
+        "features": [
+          "パスワード保護",
+          "Docker phoenixd",
+          "ネットワークサービス",
+          "プリインストールアプリ"
+        ]
+      },
+      "custom": {
+        "title": "カスタム",
+        "description": "各オプションを手動でステップバイステップで設定",
+        "features": [
+          "すべての設定を完全に制御",
+          "phoenixd 接続を選択",
+          "ネットワークサービスを選択",
+          "インストールするアプリを選択"
+        ]
+      }
+    },
+    "password": {
+      "title": "パスワードを作成",
+      "description": "このパスワードはダッシュボードとウォレットへのアクセスを保護します",
+      "securityNote": "パスワードはダッシュボードへのアクセスとシードフレーズなどの機密情報の表示に必要です。",
+      "passwordLabel": "パスワード",
+      "passwordPlaceholder": "安全なパスワードを入力",
+      "confirmLabel": "パスワードを確認",
+      "confirmPlaceholder": "パスワードを確認",
+      "strength": "強度",
+      "weak": "弱い",
+      "fair": "普通",
+      "good": "良い",
+      "strong": "強い",
+      "noMatch": "パスワードが一致しません",
+      "minLength": "4文字以上"
+    },
+    "language": {
+      "title": "言語を選択",
+      "description": "ダッシュボードインターフェースの言語を選択"
+    },
+    "theme": {
+      "title": "テーマを選択",
+      "description": "ダッシュボードの外観を選択",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム",
+      "preview": "テーマはリアルタイムでプレビューとして適用されます"
+    },
+    "phoenixd": {
+      "title": "Phoenixd 接続を設定",
+      "description": "phoenixd ライトニングノードへの接続方法を選択",
+      "dockerTitle": "ローカル (Docker)",
+      "dockerDesc": "プリインストールされた phoenixd インスタンスを使用",
+      "externalTitle": "外部",
+      "externalDesc": "独自の phoenixd サーバーに接続",
+      "dockerInfo": "Docker phoenixd は既に設定されており、使用可能です。追加のセットアップは不要です！",
+      "connection": "接続",
+      "nameLabel": "接続名",
+      "namePlaceholder": "例：マイサーバー",
+      "urlLabel": "Phoenixd URL",
+      "passwordLabel": "API パスワード",
+      "passwordPlaceholder": "phoenix.conf から (http-password)",
+      "testConnection": "接続テスト",
+      "testing": "テスト中...",
+      "testFailed": "接続テスト失敗",
+      "addConnection": "別の接続を追加"
+    },
+    "network": {
+      "title": "ネットワークサービス",
+      "description": "ダッシュボードへのリモートアクセス方法を設定",
+      "optional": "ネットワークサービスはオプションです。設定から後で有効にできます。",
+      "tailscale": {
+        "title": "Tailscale",
+        "description": "Tailscale 経由のセキュア VPN アクセス",
+        "authKeyLabel": "認証キー",
+        "authKeyPlaceholder": "tskey-auth-...",
+        "hostnameLabel": "ホスト名"
+      },
+      "cloudflared": {
+        "title": "Cloudflare Tunnel",
+        "description": "Cloudflare 経由でダッシュボードを公開",
+        "tokenLabel": "トンネルトークン",
+        "tokenPlaceholder": "トンネルトークン"
+      },
+      "tor": {
+        "title": "Tor Hidden Service",
+        "description": ".onion アドレス経由でダッシュボードにアクセス"
+      }
+    },
+    "apps": {
+      "title": "プリインストールアプリ",
+      "description": "すぐに使えるようにしたいアプリを選択",
+      "recommended": "推奨",
+      "noApps": "プリインストール可能なアプリがありません",
+      "canChangeLater": "アプリは後からアプリセクションでインストールまたは削除できます"
+    },
+    "review": {
+      "title": "設定を確認",
+      "description": "セットアップの概要です。完了をクリックして終了します。",
+      "password": "パスワード保護",
+      "passwordSet": "設定済み",
+      "language": "言語",
+      "theme": "テーマ",
+      "themes": {
+        "light": "ライト",
+        "dark": "ダーク",
+        "system": "システム (自動)"
+      },
+      "phoenixd": "Phoenixd 接続",
+      "phoenixdDocker": "Docker (ローカル)",
+      "phoenixdExternal": "{count} 件の外部接続",
+      "network": "ネットワークサービス",
+      "networkNone": "設定なし",
+      "apps": "プリインストールアプリ",
+      "appsNone": "選択なし",
+      "appsDonations": "寄付ページ",
+      "appsCount": "{count} 件のアプリを選択",
+      "ready": "準備完了！「セットアップを完了」をクリックして終了します。"
+    }
   },
   "nodeInfo": {
     "title": "ノード情報",
