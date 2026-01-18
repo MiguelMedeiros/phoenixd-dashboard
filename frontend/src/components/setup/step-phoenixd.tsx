@@ -73,7 +73,7 @@ export function StepPhoenixd({ value, onChange }: StepPhoenixdProps) {
     onChange({
       ...value,
       connections: value.connections.map((conn, i) =>
-        i === index ? { ...conn, ...updates, tested: false } : conn
+        i === index ? { ...conn, tested: false, ...updates } : conn
       ),
     });
   };
