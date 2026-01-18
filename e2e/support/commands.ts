@@ -114,8 +114,19 @@ Cypress.Commands.add('setupApiMocks', () => {
       authenticated: true,
       autoLockMinutes: 0,
       lockScreenBg: 'storm-clouds',
+      setupCompleted: true,
+      defaultLocale: 'en',
     },
   }).as('getAuthStatus');
+
+  // Setup status endpoint
+  cy.intercept('GET', '**/api/setup/status', {
+    body: {
+      setupCompleted: true,
+      setupProfile: 'full',
+      defaultLocale: 'en',
+    },
+  }).as('getSetupStatus');
 
   // Node endpoints
   cy.intercept('GET', '**/api/node/info', { fixture: 'node-info.json' }).as('getNodeInfo');
@@ -197,8 +208,19 @@ Cypress.Commands.add('mockNodeEndpoints', () => {
       authenticated: true,
       autoLockMinutes: 0,
       lockScreenBg: 'storm-clouds',
+      setupCompleted: true,
+      defaultLocale: 'en',
     },
   }).as('getAuthStatus');
+
+  // Setup status endpoint
+  cy.intercept('GET', '**/api/setup/status', {
+    body: {
+      setupCompleted: true,
+      setupProfile: 'full',
+      defaultLocale: 'en',
+    },
+  }).as('getSetupStatus');
 
   cy.intercept('GET', '**/api/node/info', { fixture: 'node-info.json' }).as('getNodeInfo');
   cy.intercept('GET', '**/api/node/balance', { fixture: 'balance.json' }).as('getBalance');
@@ -270,8 +292,18 @@ Cypress.Commands.add('mockAuthNoPassword', () => {
       authenticated: true,
       autoLockMinutes: 0,
       lockScreenBg: 'storm-clouds',
+      setupCompleted: true,
+      defaultLocale: 'en',
     },
   }).as('getAuthStatus');
+
+  cy.intercept('GET', '**/api/setup/status', {
+    body: {
+      setupCompleted: true,
+      setupProfile: 'full',
+      defaultLocale: 'en',
+    },
+  }).as('getSetupStatus');
 });
 
 // Mock auth - password configured but locked (not authenticated)
@@ -282,8 +314,18 @@ Cypress.Commands.add('mockAuthLocked', () => {
       authenticated: false,
       autoLockMinutes: 5,
       lockScreenBg: 'storm-clouds',
+      setupCompleted: true,
+      defaultLocale: 'en',
     },
   }).as('getAuthStatus');
+
+  cy.intercept('GET', '**/api/setup/status', {
+    body: {
+      setupCompleted: true,
+      setupProfile: 'full',
+      defaultLocale: 'en',
+    },
+  }).as('getSetupStatus');
 });
 
 // Mock auth - password configured and authenticated
@@ -294,8 +336,18 @@ Cypress.Commands.add('mockAuthAuthenticated', () => {
       authenticated: true,
       autoLockMinutes: 5,
       lockScreenBg: 'storm-clouds',
+      setupCompleted: true,
+      defaultLocale: 'en',
     },
   }).as('getAuthStatus');
+
+  cy.intercept('GET', '**/api/setup/status', {
+    body: {
+      setupCompleted: true,
+      setupProfile: 'full',
+      defaultLocale: 'en',
+    },
+  }).as('getSetupStatus');
 
   cy.intercept('GET', '**/api/auth/settings', {
     body: {

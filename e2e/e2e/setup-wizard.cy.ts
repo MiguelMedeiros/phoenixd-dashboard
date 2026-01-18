@@ -91,34 +91,21 @@ describe('Setup Wizard', () => {
       }).as('getAvailableApps');
     });
 
-    it('shows profile selection on first step', () => {
+    it('shows language selection on first step', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      // Should show profile selection
-      cy.contains('Choose Installation Profile').should('be.visible');
-      cy.contains('Minimal').should('be.visible');
-      cy.contains('Full').should('be.visible');
-      cy.contains('Custom').should('be.visible');
+      // Should show language selection first
+      cy.contains('Select Your Language').should('be.visible');
+      cy.contains('English').should('be.visible');
+      cy.contains('Português').should('be.visible');
     });
 
-    it('can select minimal profile', () => {
+    it('can navigate through minimal profile steps', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      cy.contains('Minimal').click();
-      cy.contains('button', 'Next').click();
-
-      // Should go to password step
-      cy.contains('Create Your Password').should('be.visible');
-    });
-
-    it('can select custom profile and navigate through all steps', () => {
-      cy.visit('/en/setup');
-      cy.wait('@getSetupStatus');
-
-      // Step 1: Profile selection
-      cy.contains('Custom').click();
+      // Step 1: Language (already on English)
       cy.contains('button', 'Next').click();
 
       // Step 2: Password
@@ -127,9 +114,33 @@ describe('Setup Wizard', () => {
       cy.get('input[id="confirmPassword"]').type('testpass1234');
       cy.contains('button', 'Next').click();
 
-      // Step 3: Language
+      // Step 3: Profile selection
+      cy.contains('Choose Installation Profile').should('be.visible');
+      cy.contains('Minimal').click();
+      cy.contains('button', 'Next').click();
+
+      // Step 4: Review (minimal skips other steps)
+      cy.contains('Review Your Configuration').should('be.visible');
+    });
+
+    it('can select custom profile and navigate through all steps', () => {
+      cy.visit('/en/setup');
+      cy.wait('@getSetupStatus');
+
+      // Step 1: Language
       cy.contains('Select Your Language').should('be.visible');
       cy.contains('English').should('be.visible');
+      cy.contains('button', 'Next').click();
+
+      // Step 2: Password
+      cy.contains('Create Your Password').should('be.visible');
+      cy.get('input[id="password"]').type('testpass1234');
+      cy.get('input[id="confirmPassword"]').type('testpass1234');
+      cy.contains('button', 'Next').click();
+
+      // Step 3: Profile selection
+      cy.contains('Choose Installation Profile').should('be.visible');
+      cy.contains('Custom').click();
       cy.contains('button', 'Next').click();
 
       // Step 4: Theme
@@ -167,34 +178,35 @@ describe('Setup Wizard', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      cy.contains('Custom').click();
+      // Go to password step (step 2)
       cy.contains('button', 'Next').click();
 
       // Empty password - next should be disabled
       cy.contains('button', 'Next').should('be.disabled');
 
-      // Password too short
+      // Password too short (less than 4 chars)
       cy.get('input[id="password"]').type('abc');
       cy.contains('button', 'Next').should('be.disabled');
 
-      // Password long enough but no confirmation
-      cy.get('input[id="password"]').clear().type('testpass');
-      cy.contains('button', 'Next').should('be.disabled');
+      // Password long enough (4+ chars) - next should be enabled
+      cy.get('input[id="password"]').clear().type('test');
+      cy.contains('button', 'Next').should('not.be.disabled');
 
-      // Passwords don't match
+      // Password mismatch shows error message
+      cy.get('input[id="password"]').clear().type('testpass');
       cy.get('input[id="confirmPassword"]').type('wrongpass');
       cy.contains('Passwords do not match').should('be.visible');
 
-      // Passwords match
+      // Passwords match shows checkmark
       cy.get('input[id="confirmPassword"]').clear().type('testpass');
-      cy.contains('button', 'Next').should('not.be.disabled');
+      cy.contains('Passwords do not match').should('not.exist');
     });
 
     it('can go back between steps', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      cy.contains('Custom').click();
+      // Go to password step
       cy.contains('button', 'Next').click();
 
       // On password step
@@ -203,20 +215,19 @@ describe('Setup Wizard', () => {
       // Go back
       cy.contains('button', 'Back').click();
 
-      // Back on profile step
-      cy.contains('Choose Installation Profile').should('be.visible');
+      // Back on language step
+      cy.contains('Select Your Language').should('be.visible');
     });
 
     it('shows progress indicator', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      // Should show step 1 of 8 for custom
-      cy.contains('Custom').click();
-      cy.contains('Step 1 of 8').should('be.visible');
+      // Should show step 1 of 8 for custom (language is first)
+      cy.contains('Step 1').should('be.visible');
 
       cy.contains('button', 'Next').click();
-      cy.contains('Step 2 of 8').should('be.visible');
+      cy.contains('Step 2').should('be.visible');
     });
   });
 
@@ -266,13 +277,16 @@ describe('Setup Wizard', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      // Select minimal profile
-      cy.contains('Minimal').click();
+      // Step 1: Language - already on English
       cy.contains('button', 'Next').click();
 
-      // Enter password
+      // Step 2: Enter password
       cy.get('input[id="password"]').type('testpass1234');
       cy.get('input[id="confirmPassword"]').type('testpass1234');
+      cy.contains('button', 'Next').click();
+
+      // Step 3: Select minimal profile
+      cy.contains('Minimal').click();
       cy.contains('button', 'Next').click();
 
       // On review step
@@ -314,18 +328,22 @@ describe('Setup Wizard', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      // Go to phoenixd step
-      cy.contains('Custom').click();
-      cy.contains('button', 'Next').click(); // password
+      // Step 1: Language
+      cy.contains('button', 'Next').click();
 
+      // Step 2: Password
       cy.get('input[id="password"]').type('testpass1234');
       cy.get('input[id="confirmPassword"]').type('testpass1234');
-      cy.contains('button', 'Next').click(); // language
+      cy.contains('button', 'Next').click();
 
-      cy.contains('button', 'Next').click(); // theme
-      cy.contains('button', 'Next').click(); // phoenixd step
+      // Step 3: Profile - select Custom
+      cy.contains('Custom').click();
+      cy.contains('button', 'Next').click();
 
-      // Select external
+      // Step 4: Theme
+      cy.contains('button', 'Next').click();
+
+      // Step 5: Phoenixd - select External
       cy.contains('External').click();
 
       // Should show connection form
@@ -347,18 +365,22 @@ describe('Setup Wizard', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      // Go to phoenixd step
-      cy.contains('Custom').click();
+      // Step 1: Language
       cy.contains('button', 'Next').click();
 
+      // Step 2: Password
       cy.get('input[id="password"]').type('testpass1234');
       cy.get('input[id="confirmPassword"]').type('testpass1234');
       cy.contains('button', 'Next').click();
 
-      cy.contains('button', 'Next').click();
+      // Step 3: Profile - select Custom
+      cy.contains('Custom').click();
       cy.contains('button', 'Next').click();
 
-      // Select external
+      // Step 4: Theme
+      cy.contains('button', 'Next').click();
+
+      // Step 5: Phoenixd - select External
       cy.contains('External').click();
 
       // Fill in connection details
@@ -402,13 +424,11 @@ describe('Setup Wizard', () => {
       cy.visit('/en/setup');
       cy.wait('@getSetupStatus');
 
-      // Profile cards should be visible
-      cy.contains('Minimal').should('be.visible');
-      cy.contains('Full').should('be.visible');
-      cy.contains('Custom').should('be.visible');
+      // Language selection should be visible (first step)
+      cy.contains('Select Your Language').should('be.visible');
+      cy.contains('English').should('be.visible');
 
       // Navigation should work
-      cy.contains('Custom').click();
       cy.contains('button', 'Next').click();
 
       cy.contains('Create Your Password').should('be.visible');

@@ -7,8 +7,18 @@ describe('Channels Page', () => {
         authenticated: true,
         autoLockMinutes: 0,
         lockScreenBg: 'storm-clouds',
+        setupCompleted: true,
+        defaultLocale: 'en',
       },
     }).as('getAuthStatus');
+
+    cy.intercept('GET', '**/api/setup/status', {
+      body: {
+        setupCompleted: true,
+        setupProfile: 'full',
+        defaultLocale: 'en',
+      },
+    }).as('getSetupStatus');
 
     cy.intercept('GET', '**/api/node/channels', { fixture: 'channels.json' }).as('getChannels');
     cy.intercept('GET', '**/api/node/info', { fixture: 'node-info.json' }).as('getNodeInfo');

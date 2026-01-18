@@ -111,6 +111,8 @@ describe('Authentication & Security', () => {
           authenticated: false,
           autoLockMinutes: 5,
           lockScreenBg: 'storm-clouds',
+          setupCompleted: true,
+          defaultLocale: 'en',
         },
       }).as('getAuthStatusLocked');
 
