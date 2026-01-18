@@ -1,28 +1,25 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
 import { locales, localeNames, localeFlags, type Locale } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 
 interface StepLanguageProps {
   value: string;
   onChange: (value: string) => void;
+  onLocaleChange?: (locale: string) => void;
 }
 
-export function StepLanguage({ value, onChange }: StepLanguageProps) {
+export function StepLanguage({ value, onChange, onLocaleChange }: StepLanguageProps) {
   const t = useTranslations('setup.language');
-  const router = useRouter();
-  const pathname = usePathname();
 
   const handleLanguageChange = (locale: string) => {
     onChange(locale);
 
-    // Get current path without locale prefix
-    const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '');
-
-    // Navigate to the same page with the new locale
-    router.replace(`/${locale}${pathWithoutLocale || '/setup'}`);
+    // Notify parent to handle locale change without navigation
+    if (onLocaleChange) {
+      onLocaleChange(locale);
+    }
   };
 
   return (

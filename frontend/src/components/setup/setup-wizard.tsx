@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter, usePathname } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { Zap, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,9 +30,9 @@ export type WizardStep =
   | 'review';
 
 const CUSTOM_STEPS: WizardStep[] = [
-  'profile',
-  'password',
   'language',
+  'password',
+  'profile',
   'theme',
   'phoenixd',
   'network',
@@ -40,7 +40,9 @@ const CUSTOM_STEPS: WizardStep[] = [
   'review',
 ];
 
-const QUICK_STEPS: WizardStep[] = ['profile', 'password', 'review'];
+const QUICK_STEPS: WizardStep[] = ['language', 'password', 'profile', 'review'];
+
+const WIZARD_STATE_KEY = 'phoenixd-setup-wizard-state';
 
 interface WizardState {
   profile: ProfileType;
@@ -50,6 +52,12 @@ interface WizardState {
   phoenixd: PhoenixdConfig;
   network: NetworkConfig;
   apps: AppsConfig;
+}
+
+interface PersistedState {
+  state: WizardState;
+  step: WizardStep;
+  timestamp: number;
 }
 
 const defaultState: WizardState = {
@@ -71,24 +79,88 @@ const defaultState: WizardState = {
   },
 };
 
+// Helper to get persisted state from sessionStorage
+function getPersistedState(): PersistedState | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = sessionStorage.getItem(WIZARD_STATE_KEY);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored) as PersistedState;
+    // Expire after 30 minutes
+    if (Date.now() - parsed.timestamp > 30 * 60 * 1000) {
+      sessionStorage.removeItem(WIZARD_STATE_KEY);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+// Helper to persist state to sessionStorage
+function persistState(state: WizardState, step: WizardStep) {
+  if (typeof window === 'undefined') return;
+  try {
+    const data: PersistedState = { state, step, timestamp: Date.now() };
+    sessionStorage.setItem(WIZARD_STATE_KEY, JSON.stringify(data));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+// Helper to clear persisted state
+function clearPersistedState() {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.removeItem(WIZARD_STATE_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export function SetupWizard() {
   const t = useTranslations('setup');
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
 
-  // Get current locale from URL
-  const currentLocale = useMemo(() => {
-    const pathLocale = pathname.split('/')[1];
-    return locales.includes(pathLocale as (typeof locales)[number]) ? pathLocale : 'en';
-  }, [pathname]);
+  // Initialize state from sessionStorage or defaults
+  const [currentStep, setCurrentStep] = useState<WizardStep>(() => {
+    const persisted = getPersistedState();
+    return persisted?.step || 'language';
+  });
 
-  const [currentStep, setCurrentStep] = useState<WizardStep>('profile');
-  const [state, setState] = useState<WizardState>(() => ({
-    ...defaultState,
-    locale: currentLocale,
-  }));
+  const [state, setState] = useState<WizardState>(() => {
+    const persisted = getPersistedState();
+    if (persisted) {
+      return persisted.state;
+    }
+    // Get locale from URL for initial state
+    const pathParts = typeof window !== 'undefined' ? window.location.pathname.split('/') : [];
+    const pathLocale = pathParts[1];
+    const initialLocale = locales.includes(pathLocale as (typeof locales)[number])
+      ? pathLocale
+      : 'en';
+    return { ...defaultState, locale: initialLocale };
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Persist state whenever it changes
+  useEffect(() => {
+    persistState(state, currentStep);
+  }, [state, currentStep]);
+
+  // Handle locale change - persist state and navigate
+  const handleLocaleChange = useCallback(
+    (locale: string) => {
+      // Persist current state before navigation
+      persistState({ ...state, locale }, currentStep);
+      // Navigate to new locale
+      router.replace(pathname, { locale });
+    },
+    [state, currentStep, router, pathname]
+  );
 
   // Get steps based on profile
   const steps = state.profile === 'custom' ? CUSTOM_STEPS : QUICK_STEPS;
@@ -99,25 +171,35 @@ export function SetupWizard() {
     setState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const handleProfileSelect = useCallback((profile: ProfileType) => {
-    const newState = { ...defaultState, profile };
-
-    // Set defaults based on profile
-    if (profile === 'minimal') {
-      newState.phoenixd = { type: 'docker', connections: [] };
-      newState.network = {
-        tailscale: { enabled: false },
-        cloudflared: { enabled: false },
-        tor: { enabled: false },
+  const handleProfileSelect = useCallback(
+    (profile: ProfileType) => {
+      // Preserve locale, password, and theme that were already set
+      const newState: WizardState = {
+        ...defaultState,
+        profile,
+        locale: state.locale,
+        password: state.password,
+        theme: state.theme,
       };
-      newState.apps = { donations: false };
-    } else if (profile === 'full') {
-      newState.phoenixd = { type: 'docker', connections: [] };
-      newState.apps = { donations: true };
-    }
 
-    setState(newState);
-  }, []);
+      // Set defaults based on profile
+      if (profile === 'minimal') {
+        newState.phoenixd = { type: 'docker', connections: [] };
+        newState.network = {
+          tailscale: { enabled: false },
+          cloudflared: { enabled: false },
+          tor: { enabled: false },
+        };
+        newState.apps = { donations: false };
+      } else if (profile === 'full') {
+        newState.phoenixd = { type: 'docker', connections: [] };
+        newState.apps = { donations: true };
+      }
+
+      setState(newState);
+    },
+    [state.locale, state.password, state.theme]
+  );
 
   const canGoNext = useCallback((): boolean => {
     switch (currentStep) {
@@ -189,13 +271,16 @@ export function SetupWizard() {
       const result = await completeSetup(config);
 
       if (result.success) {
+        // Clear persisted wizard state
+        clearPersistedState();
+
         toast({
           title: t('setupComplete'),
           description: t('welcomeMessage'),
         });
 
         // Redirect to dashboard with the selected locale
-        router.replace(`/${result.locale || 'en'}`);
+        router.replace('/', { locale: result.locale || 'en' });
       }
     } catch (error) {
       console.error('Setup failed:', error);
@@ -222,7 +307,11 @@ export function SetupWizard() {
         );
       case 'language':
         return (
-          <StepLanguage value={state.locale} onChange={(value) => updateState('locale', value)} />
+          <StepLanguage
+            value={state.locale}
+            onChange={(value) => updateState('locale', value)}
+            onLocaleChange={handleLocaleChange}
+          />
         );
       case 'theme':
         return <StepTheme value={state.theme} onChange={(value) => updateState('theme', value)} />;

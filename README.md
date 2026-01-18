@@ -35,13 +35,15 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ## Features
 
+✅ **Setup Wizard** — Step-by-step onboarding: profile selection, password, language, and network configuration
+
 ✅ **Send & Receive** — Bolt11, Bolt12 offers, Lightning Address, On-chain
 
 ✅ **Dashboard** — Real-time balance, channel stats, payment activity charts
 
 ✅ **Bitcoin Network** — Live block height, fee estimates, and mempool congestion from mempool.space
 
-✅ **Analytics** — Activity heatmaps, fees comparison, monthly trends, top contacts
+✅ **Analytics** — Activity heatmaps, payment distribution, monthly comparisons, fees breakdown, top contacts
 
 ✅ **History** — Full payment history with filters & CSV export
 
