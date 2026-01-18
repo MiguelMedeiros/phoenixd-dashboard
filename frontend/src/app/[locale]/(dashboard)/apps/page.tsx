@@ -22,6 +22,9 @@ import {
   ChevronUp,
   Globe,
   Pause,
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  ChevronRight,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useToast } from '@/hooks/use-toast';
@@ -36,15 +39,23 @@ import {
   getAppWebhooks,
   regenerateAppKey,
   regenerateAppSecret,
+  getIncomingPayment,
+  getOutgoingPayment,
+  getCategories,
   type App,
   type AppWebhookLog,
+  type IncomingPayment,
+  type OutgoingPayment,
+  type PaymentCategory,
 } from '@/lib/api';
 import { AppInstallDialog } from '@/components/app-install-dialog';
 import { AppConfigDialog } from '@/components/app-config-dialog';
 import { StatCard, StatCardGrid } from '@/components/stat-card';
 import { PageHeader } from '@/components/page-header';
+import { PaymentDetailsDialog } from '@/components/payment-details-dialog';
 import { cn } from '@/lib/utils';
 import { getWsUrl } from '@/hooks/use-dynamic-urls';
+import { useCurrencyContext } from '@/components/currency-provider';
 
 interface LogLine {
   timestamp: string;
@@ -54,7 +65,9 @@ interface LogLine {
 export default function AppsPage() {
   const t = useTranslations('apps');
   const tc = useTranslations('common');
+  const tp = useTranslations('payments');
   const { toast } = useToast();
+  const { formatValue } = useCurrencyContext();
 
   const [apps, setApps] = useState<App[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,6 +82,13 @@ export default function AppsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [logsConnected, setLogsConnected] = useState(false);
   const [logsPaused, setLogsPaused] = useState(false);
+
+  // Payment details state for webhook clicks
+  const [selectedWebhookPayment, setSelectedWebhookPayment] = useState<
+    IncomingPayment | OutgoingPayment | null
+  >(null);
+  const [categories, setCategories] = useState<PaymentCategory[]>([]);
+  const [loadingPayment, setLoadingPayment] = useState<string | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
@@ -192,7 +212,63 @@ export default function AppsPage() {
 
   useEffect(() => {
     fetchApps();
+    // Fetch categories for payment details dialog
+    getCategories().then(setCategories).catch(console.error);
   }, [fetchApps]);
+
+  // Handle webhook click to show payment details
+  const handleWebhookClick = useCallback(
+    async (webhook: AppWebhookLog) => {
+      if (!webhook.success) return;
+
+      try {
+        const payload = JSON.parse(webhook.payload);
+        const data = payload.data;
+
+        if (!data) return;
+
+        setLoadingPayment(webhook.id);
+
+        if (webhook.eventType === 'payment_received' && data.paymentHash) {
+          const payment = await getIncomingPayment(data.paymentHash);
+          setSelectedWebhookPayment(payment);
+        } else if (webhook.eventType === 'payment_sent' && data.paymentId) {
+          const payment = await getOutgoingPayment(data.paymentId);
+          setSelectedWebhookPayment(payment);
+        }
+      } catch (error) {
+        console.error('Failed to fetch payment details:', error);
+        toast({
+          variant: 'destructive',
+          title: tc('error'),
+          description: 'Failed to load payment details',
+        });
+      } finally {
+        setLoadingPayment(null);
+      }
+    },
+    [toast, tc]
+  );
+
+  // Parse webhook payload to get display info
+  const getWebhookPaymentInfo = (webhook: AppWebhookLog) => {
+    try {
+      const payload = JSON.parse(webhook.payload);
+      const data = payload.data;
+      if (data?.amountSat) {
+        return {
+          amountSat: data.amountSat,
+          isIncoming: webhook.eventType === 'payment_received',
+          canClick:
+            webhook.success &&
+            (webhook.eventType === 'payment_received' || webhook.eventType === 'payment_sent'),
+        };
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    return null;
+  };
 
   const handleInstall = async (data: {
     name: string;
@@ -940,33 +1016,98 @@ export default function AppsPage() {
                               {t('refresh')}
                             </button>
                           </div>
-                          <div className="space-y-1">
+                          <div className="space-y-0.5">
                             {loadingWebhooks === app.id ? (
                               <div className="flex items-center justify-center py-4">
                                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                               </div>
                             ) : appWebhooks[app.id]?.length > 0 ? (
-                              appWebhooks[app.id].slice(0, 5).map((webhook) => (
-                                <div
-                                  key={webhook.id}
-                                  className="flex items-center gap-2 rounded-lg p-2 bg-white/[0.03] border border-white/[0.06]"
-                                >
-                                  {webhook.success ? (
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
-                                  ) : (
-                                    <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
-                                  )}
-                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 font-mono">
-                                    {webhook.eventType}
-                                  </span>
-                                  <span className="text-[10px] text-muted-foreground flex-1">
-                                    {webhook.statusCode ? `${webhook.statusCode}` : 'N/A'}
-                                  </span>
-                                  <span className="text-[10px] text-muted-foreground">
-                                    {new Date(webhook.createdAt).toLocaleTimeString()}
-                                  </span>
-                                </div>
-                              ))
+                              appWebhooks[app.id].slice(0, 5).map((webhook) => {
+                                const paymentInfo = getWebhookPaymentInfo(webhook);
+                                const isLoading = loadingPayment === webhook.id;
+
+                                return (
+                                  <button
+                                    key={webhook.id}
+                                    onClick={() =>
+                                      paymentInfo?.canClick && handleWebhookClick(webhook)
+                                    }
+                                    disabled={!paymentInfo?.canClick || isLoading}
+                                    className={cn(
+                                      'w-full flex items-center gap-3 p-2.5 rounded-xl transition-colors text-left',
+                                      paymentInfo?.canClick
+                                        ? 'hover:bg-white/5 cursor-pointer'
+                                        : 'cursor-default'
+                                    )}
+                                  >
+                                    {/* Icon */}
+                                    <div
+                                      className={cn(
+                                        'h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0',
+                                        webhook.success
+                                          ? paymentInfo?.isIncoming
+                                            ? 'bg-success/10'
+                                            : 'bg-primary/10'
+                                          : 'bg-destructive/10'
+                                      )}
+                                    >
+                                      {isLoading ? (
+                                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                      ) : webhook.success ? (
+                                        paymentInfo?.isIncoming ? (
+                                          <ArrowDownToLine className="h-4 w-4 text-success" />
+                                        ) : (
+                                          <ArrowUpFromLine className="h-4 w-4 text-primary" />
+                                        )
+                                      ) : (
+                                        <AlertCircle className="h-4 w-4 text-destructive" />
+                                      )}
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium">
+                                        {webhook.success
+                                          ? paymentInfo?.isIncoming
+                                            ? tp('received')
+                                            : tp('sent')
+                                          : t('failed')}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground truncate">
+                                        {new Date(webhook.createdAt).toLocaleString(undefined, {
+                                          month: 'short',
+                                          day: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                        })}
+                                        {' • '}
+                                        {webhook.eventType}
+                                        {webhook.statusCode && ` • ${webhook.statusCode}`}
+                                      </p>
+                                    </div>
+
+                                    {/* Amount */}
+                                    {paymentInfo?.amountSat && (
+                                      <p
+                                        className={cn(
+                                          'font-mono text-sm font-semibold tabular-nums',
+                                          paymentInfo.isIncoming
+                                            ? 'text-success'
+                                            : 'text-foreground'
+                                        )}
+                                      >
+                                        {paymentInfo.isIncoming ? '+' : '-'}
+                                        {formatValue(paymentInfo.amountSat)}
+                                      </p>
+                                    )}
+
+                                    {/* Arrow for clickable items */}
+                                    {paymentInfo?.canClick && (
+                                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                                    )}
+                                  </button>
+                                );
+                              })
                             ) : (
                               <p className="text-xs text-muted-foreground text-center py-2">
                                 {t('noWebhooks')}
@@ -1005,6 +1146,15 @@ export default function AppsPage() {
           }}
         />
       )}
+
+      {/* Payment Details Dialog for Webhooks */}
+      <PaymentDetailsDialog
+        open={!!selectedWebhookPayment}
+        onOpenChange={(open) => !open && setSelectedWebhookPayment(null)}
+        payment={selectedWebhookPayment}
+        categories={categories}
+        formatValue={formatValue}
+      />
     </>
   );
 }

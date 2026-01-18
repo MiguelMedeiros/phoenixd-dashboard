@@ -9,12 +9,10 @@ import {
   Copy,
   Check,
   Zap,
-  Clock,
   Hash,
   FileText,
   Key,
   Calendar,
-  ChevronRight,
   Receipt,
   TrendingUp,
   TrendingDown,
@@ -42,9 +40,9 @@ import { PageHeader } from '@/components/page-header';
 import { StatCard, StatCardGrid } from '@/components/stat-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslations } from 'next-intl';
-import { CategoryBadge } from '@/components/category-badge';
 import { CategoryManager } from '@/components/category-manager';
 import { PaymentNoteEditor } from '@/components/payment-note-editor';
+import { PaymentListItem } from '@/components/payment-list-item';
 
 type Payment = IncomingPayment | OutgoingPayment;
 
@@ -379,23 +377,6 @@ export default function PaymentsPage() {
     return new Date(timestamp).toLocaleString();
   };
 
-  const formatShortDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else if (days === 1) {
-      return t('yesterday');
-    } else if (days < 7) {
-      return t('daysAgo', { days });
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
-
   const truncateHash = (hash: string) => {
     if (!hash) return '';
     return `${hash.slice(0, 8)}...${hash.slice(-8)}`;
@@ -578,63 +559,18 @@ export default function PaymentsPage() {
                 ? (currentPayments as IncomingPayment[]).map((payment, index) => {
                     const metadata = paymentMetadataMap[payment.paymentHash];
                     return (
-                      <button
+                      <PaymentListItem
                         key={payment.paymentHash}
+                        payment={payment}
+                        metadata={metadata}
+                        formatValue={formatValue}
                         onClick={() => setSelectedPayment(payment)}
-                        className="w-full glass-card rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center gap-3 md:gap-4 hover:bg-white/[0.08] transition-all text-left group"
-                        style={{ animationDelay: `${index * 30}ms` }}
-                      >
-                        {/* Icon */}
-                        <div
-                          className={cn(
-                            'flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl md:rounded-2xl shrink-0 transition-transform group-hover:scale-110',
-                            payment.isPaid
-                              ? 'bg-gradient-to-br from-success/20 to-emerald-600/20'
-                              : 'bg-yellow-500/10'
-                          )}
-                        >
-                          <ArrowDownToLine
-                            className={cn(
-                              'h-4 w-4 md:h-6 md:w-6',
-                              payment.isPaid ? 'text-success' : 'text-yellow-500'
-                            )}
-                          />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
-                            <span className="font-bold text-sm md:text-lg text-success">
-                              +{formatValue(payment.receivedSat)}
-                            </span>
-                            <span
-                              className={cn(
-                                'text-[10px] md:text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full font-medium',
-                                payment.isPaid
-                                  ? 'bg-success/10 text-success'
-                                  : 'bg-yellow-500/10 text-yellow-500'
-                              )}
-                            >
-                              {payment.isPaid ? t('received') : tc('pending')}
-                            </span>
-                            {metadata?.categories?.map((cat) => (
-                              <CategoryBadge key={cat.id} category={cat} size="sm" />
-                            ))}
-                          </div>
-                          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" />
-                            <span className="truncate">
-                              {formatShortDate(payment.completedAt || payment.createdAt)}
-                              {metadata?.note
-                                ? ` • ${metadata.note}`
-                                : payment.description && ` • ${payment.description}`}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Arrow */}
-                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-                      </button>
+                        variant="default"
+                        showCategories={true}
+                        showFees={true}
+                        showArrow={true}
+                        animationDelay={index * 30}
+                      />
                     );
                   })
                 : (currentPayments as OutgoingPayment[]).map((payment, index) => {
@@ -644,66 +580,18 @@ export default function PaymentsPage() {
                       paymentMetadataMap[payment.paymentId] ||
                       (payment.paymentHash ? paymentMetadataMap[payment.paymentHash] : undefined);
                     return (
-                      <button
+                      <PaymentListItem
                         key={payment.paymentId}
+                        payment={payment}
+                        metadata={metadata}
+                        formatValue={formatValue}
                         onClick={() => setSelectedPayment(payment)}
-                        className="w-full glass-card rounded-xl md:rounded-2xl p-3 md:p-4 flex items-center gap-3 md:gap-4 hover:bg-white/[0.08] transition-all text-left group"
-                        style={{ animationDelay: `${index * 30}ms` }}
-                      >
-                        {/* Icon */}
-                        <div
-                          className={cn(
-                            'flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl md:rounded-2xl shrink-0 transition-transform group-hover:scale-110',
-                            payment.isPaid
-                              ? 'bg-gradient-to-br from-primary/20 to-orange-600/20'
-                              : 'bg-yellow-500/10'
-                          )}
-                        >
-                          <ArrowUpFromLine
-                            className={cn(
-                              'h-4 w-4 md:h-6 md:w-6',
-                              payment.isPaid ? 'text-primary' : 'text-yellow-500'
-                            )}
-                          />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1 flex-wrap">
-                            <span className="font-bold text-sm md:text-lg">
-                              -{formatValue(payment.sent)}
-                            </span>
-                            <span
-                              className={cn(
-                                'text-[10px] md:text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full font-medium',
-                                payment.isPaid
-                                  ? 'bg-success/10 text-success'
-                                  : 'bg-yellow-500/10 text-yellow-500'
-                              )}
-                            >
-                              {payment.isPaid ? t('sent') : tc('pending')}
-                            </span>
-                            {payment.fees > 0 && (
-                              <span className="text-[10px] md:text-xs text-muted-foreground hidden sm:inline">
-                                {t('fee')}: {formatValue(Math.floor(payment.fees / 1000))}
-                              </span>
-                            )}
-                            {metadata?.categories?.map((cat) => (
-                              <CategoryBadge key={cat.id} category={cat} size="sm" />
-                            ))}
-                          </div>
-                          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3 md:h-3.5 md:w-3.5 shrink-0" />
-                            <span className="truncate">
-                              {formatShortDate(payment.completedAt || payment.createdAt)}
-                              {metadata?.note && ` • ${metadata.note}`}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Arrow */}
-                        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-                      </button>
+                        variant="default"
+                        showCategories={true}
+                        showFees={true}
+                        showArrow={true}
+                        animationDelay={index * 30}
+                      />
                     );
                   })}
 

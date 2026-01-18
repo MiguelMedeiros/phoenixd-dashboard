@@ -20,6 +20,7 @@ import {
   RefreshCw,
   Clock,
 } from 'lucide-react';
+import { PaymentList } from '@/components/payment-list';
 import {
   getNodeInfo,
   getBalance,
@@ -34,7 +35,6 @@ import {
   type Contact,
   type RecurringPayment,
 } from '@/lib/api';
-import { cn } from '@/lib/utils';
 import { useCurrencyContext } from '@/components/currency-provider';
 import { useToast } from '@/hooks/use-toast';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
@@ -179,71 +179,19 @@ export default function OverviewPage() {
             </Link>
           </div>
 
-          {recentPayments.length > 0 ? (
-            <div className="space-y-0.5">
-              {recentPayments.slice(0, 8).map((payment) => {
-                const isIncoming = 'receivedSat' in payment;
-                const amount = isIncoming
-                  ? (payment as IncomingPayment).receivedSat
-                  : (payment as OutgoingPayment).sent || 0;
-                const key = isIncoming
-                  ? (payment as IncomingPayment).paymentHash
-                  : (payment as OutgoingPayment).paymentId;
-
-                return (
-                  <div
-                    key={key}
-                    className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0"
-                  >
-                    <div
-                      className={cn(
-                        'h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0',
-                        isIncoming ? 'bg-success/15' : 'bg-primary/15'
-                      )}
-                    >
-                      {isIncoming ? (
-                        <ArrowDownToLine className="h-5 w-5 text-success" />
-                      ) : (
-                        <ArrowUpFromLine className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">
-                        {isIncoming ? t('received') : t('sent')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {payment.completedAt
-                          ? new Date(payment.completedAt).toLocaleString([], {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : tc('pending')}
-                      </p>
-                    </div>
-                    <p
-                      className={cn(
-                        'font-mono text-sm font-semibold tabular-nums',
-                        isIncoming ? 'text-success' : 'text-foreground'
-                      )}
-                    >
-                      {isIncoming ? '+' : '-'}
-                      {formatValue(amount)}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
-                <Zap className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <p className="text-sm text-muted-foreground">{t('noPayments')}</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">{t('createInvoice')}</p>
-            </div>
-          )}
+          <PaymentList
+            payments={recentPayments}
+            formatValue={formatValue}
+            variant="compact"
+            limit={8}
+            showCategories={false}
+            showFees={false}
+            showArrow={true}
+            showDetailsDialog={true}
+            emptyIcon="zap"
+            emptyMessage={t('noPayments')}
+            emptySubMessage={t('createInvoice')}
+          />
         </div>
       </div>
 
@@ -573,70 +521,18 @@ export default function OverviewPage() {
               </Link>
             </div>
 
-            {recentPayments.length > 0 ? (
-              <div className="space-y-1.5">
-                {recentPayments.slice(0, 5).map((payment) => {
-                  const isIncoming = 'receivedSat' in payment;
-                  const amount = isIncoming
-                    ? (payment as IncomingPayment).receivedSat
-                    : (payment as OutgoingPayment).sent || 0;
-                  const key = isIncoming
-                    ? (payment as IncomingPayment).paymentHash
-                    : (payment as OutgoingPayment).paymentId;
-
-                  return (
-                    <div
-                      key={key}
-                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors"
-                    >
-                      <div
-                        className={cn(
-                          'h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0',
-                          isIncoming ? 'bg-success/10' : 'bg-primary/10'
-                        )}
-                      >
-                        {isIncoming ? (
-                          <ArrowDownToLine className="h-4 w-4 text-success" />
-                        ) : (
-                          <ArrowUpFromLine className="h-4 w-4 text-primary" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">
-                          {isIncoming ? t('received') : t('sent')}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {payment.completedAt
-                            ? new Date(payment.completedAt).toLocaleString([], {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : tc('pending')}
-                        </p>
-                      </div>
-                      <p
-                        className={cn(
-                          'font-mono text-sm font-semibold',
-                          isIncoming ? 'text-success' : 'text-foreground'
-                        )}
-                      >
-                        {isIncoming ? '+' : '-'}
-                        {formatValue(amount)}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center mb-3">
-                  <Zap className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">{t('noPayments')}</p>
-              </div>
-            )}
+            <PaymentList
+              payments={recentPayments}
+              formatValue={formatValue}
+              variant="compact"
+              limit={5}
+              showCategories={false}
+              showFees={false}
+              showArrow={true}
+              showDetailsDialog={true}
+              emptyIcon="zap"
+              emptyMessage={t('noPayments')}
+            />
           </div>
         </div>
       </div>

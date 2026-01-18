@@ -185,47 +185,40 @@ describe('Contacts Page', () => {
     });
   });
 
-  describe('Recurring Payments', () => {
+  describe('Contact Expansion', () => {
     beforeEach(() => {
       cy.setupContactsMocks();
       cy.visit('/contacts');
       cy.wait('@getContactsWithData');
-      // Recurring payments are fetched per contact when expanded
     });
 
-    it('shows recurring payments section for contact', () => {
+    it('shows contact addresses when expanded', () => {
       cy.contains('Alice Lightning').click();
 
-      // Wait for recurring payments to load for this contact
-      cy.wait('@getRecurringPaymentsWithData');
-
-      // Should show recurring payments section
-      cy.contains(/recurring|scheduled/i).should('exist');
+      // Should show address details
+      cy.contains('alice@example.com').should('be.visible');
     });
 
-    it('displays recurring payment information', () => {
+    it('displays payment methods for contact', () => {
       cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
 
-      // Should show recurring payment details - at minimum the section exists
-      cy.contains(/recurring|scheduled|no recurring/i).should('exist');
+      // Should show LN address indicator
+      cy.contains('LN').should('exist');
     });
 
-    it('shows payment history toggle when recurring payments exist', () => {
+    it('shows action buttons when expanded', () => {
       cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
 
-      // If there are recurring payments, a history section should exist
-      // This is a basic check - the fixture may or may not have data
-      cy.contains(/recurring|scheduled|no recurring/i).should('exist');
+      // Should show pay and edit buttons
+      cy.contains('button', /pay/i).should('exist');
+      cy.get('button[title*="Edit"], button[title*="edit"]').should('exist');
     });
 
-    it('has add recurring payment button', () => {
+    it('has quick pay functionality', () => {
       cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
 
-      // Should have button or link to add recurring payment
-      cy.contains(/add recurring|new recurring|schedule|no recurring/i).should('exist');
+      // Should have pay button for lightning address
+      cy.contains('button', /pay/i).should('exist');
     });
   });
 

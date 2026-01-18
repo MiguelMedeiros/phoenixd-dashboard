@@ -51,6 +51,7 @@ import { cn } from '@/lib/utils';
 export default function RecurringPage() {
   const t = useTranslations('recurringPayments');
   const tc = useTranslations('common');
+  const tp = useTranslations('payments');
   const { toast } = useToast();
 
   const [allRecurringPayments, setAllRecurringPayments] = useState<RecurringPayment[]>([]);
@@ -733,7 +734,7 @@ export default function RecurringPage() {
                       </button>
 
                       {expandedHistories[recurring.id] && recurringExecutions[recurring.id] && (
-                        <div className="mt-1.5 space-y-1 pl-3 border-l-2 border-white/[0.06]">
+                        <div className="mt-1.5 space-y-0.5 pl-3 border-l-2 border-white/[0.06]">
                           {(recurringExecutions[recurring.id] || []).map((exec) => (
                             <button
                               key={exec.id}
@@ -744,31 +745,60 @@ export default function RecurringPage() {
                               }}
                               disabled={exec.status !== 'success' || !exec.paymentId}
                               className={cn(
-                                'w-full rounded-lg p-2.5 flex items-center gap-2 bg-white/[0.03] border border-white/[0.04] text-left',
+                                'w-full flex items-center gap-3 p-2.5 rounded-xl transition-colors text-left',
                                 exec.status === 'success' && exec.paymentId
-                                  ? 'hover:bg-white/[0.06] cursor-pointer transition-colors'
+                                  ? 'hover:bg-white/5 cursor-pointer'
                                   : 'opacity-70 cursor-default'
                               )}
                             >
-                              {exec.status === 'success' ? (
-                                <ArrowUpFromLine className="h-3.5 w-3.5 text-primary shrink-0" />
-                              ) : (
-                                <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
-                              )}
-                              <span className="text-xs flex-1 truncate">
+                              {/* Icon */}
+                              <div
+                                className={cn(
+                                  'h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0',
+                                  exec.status === 'success' ? 'bg-primary/10' : 'bg-destructive/10'
+                                )}
+                              >
+                                {exec.status === 'success' ? (
+                                  <ArrowUpFromLine className="h-4 w-4 text-primary" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-destructive" />
+                                )}
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium">
+                                  {exec.status === 'success' ? tp('sent') : t('failed')}
+                                </p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {new Date(exec.executedAt).toLocaleString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                  {exec.status !== 'success' &&
+                                    exec.errorMessage &&
+                                    ` • ${exec.errorMessage}`}
+                                </p>
+                              </div>
+
+                              {/* Amount */}
+                              <p
+                                className={cn(
+                                  'font-mono text-sm font-semibold tabular-nums',
+                                  exec.status === 'success' ? 'text-foreground' : 'text-destructive'
+                                )}
+                              >
                                 {exec.status === 'success'
-                                  ? `${exec.amountSat.toLocaleString()} sats`
-                                  : exec.errorMessage || 'Failed'}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                {new Date(exec.executedAt).toLocaleString(undefined, {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  second: '2-digit',
-                                })}
-                              </span>
+                                  ? `-${exec.amountSat.toLocaleString()} sats`
+                                  : t('failed')}
+                              </p>
+
+                              {/* Arrow for clickable items */}
+                              {exec.status === 'success' && exec.paymentId && (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground rotate-[-90deg] shrink-0" />
+                              )}
                             </button>
                           ))}
                           {hasMoreExecutions[recurring.id] && (

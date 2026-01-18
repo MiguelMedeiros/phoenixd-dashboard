@@ -1,226 +1,160 @@
-describe('Recurring Payments', () => {
+describe('Recurring Payments Page', () => {
   beforeEach(() => {
     cy.viewport(1280, 900);
     cy.setupContactsMocks();
   });
 
-  describe('Access from Contacts Page', () => {
-    it('shows recurring payments when expanding a contact', () => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
-
-      // Expand a contact
-      cy.contains('Alice Lightning').click();
+  describe('Page Load', () => {
+    it('displays the recurring payments page header', () => {
+      cy.visit('/recurring');
       cy.wait('@getRecurringPaymentsWithData');
 
-      // Should show recurring payments section
-      cy.contains(/recurring|scheduled/i).should('exist');
+      cy.contains('h1', /recurring/i).should('be.visible');
     });
 
-    it('displays recurring payment details', () => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
-
-      cy.contains('Alice Lightning').click();
+    it('shows recurring payments from fixtures', () => {
+      cy.visit('/recurring');
       cy.wait('@getRecurringPaymentsWithData');
 
-      // Should show at least one of: payment amount, frequency, or add button
-      cy.contains(/weekly|daily|monthly|sats|add recurring|no recurring/i).should('exist');
+      // Should show stat cards
+      cy.contains(/active|paused|total/i).should('exist');
+    });
+
+    it('displays stat cards', () => {
+      cy.visit('/recurring');
+      cy.wait('@getRecurringPaymentsWithData');
+
+      // Should show stat cards for active, paused, total paid
+      cy.contains(/active/i).should('exist');
     });
   });
 
-  describe('Create Recurring Payment', () => {
+  describe('Recurring Payment List', () => {
     beforeEach(() => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
+      cy.visit('/recurring');
+      cy.wait('@getRecurringPaymentsWithData');
     });
 
-    it('opens recurring payment form', () => {
-      // Expand contact
-      cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
-
-      // Click add recurring payment button (if no payments exist, there's a prompt)
-      cy.contains(/add recurring|schedule|new recurring/i).first().click({ force: true });
-
-      // Should show recurring payment form
-      cy.get('[role="dialog"]').should('be.visible');
+    it('shows recurring payment entries', () => {
+      // Should show at least one recurring payment or empty state
+      cy.contains(/recurring|no recurring/i).should('exist');
     });
 
-    it('has frequency selection', () => {
-      cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
-
-      cy.contains(/add recurring|schedule|new recurring/i).first().click({ force: true });
-
-      // Should have frequency options
-      cy.get('[role="dialog"]').should('be.visible');
-      cy.contains(/frequency|daily|weekly|monthly/i).should('exist');
+    it('displays payment amount and frequency', () => {
+      // Should show sats and frequency
+      cy.contains(/sats|daily|weekly|monthly|no recurring/i).should('exist');
     });
 
-    it('has amount input', () => {
-      cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
-
-      cy.contains(/add recurring|schedule|new recurring/i).first().click({ force: true });
-
-      // Should have amount input
-      cy.get('[role="dialog"]').should('be.visible');
-      cy.get('[role="dialog"] input').should('exist');
-    });
-
-    it('creates a recurring payment successfully', () => {
-      cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
-
-      cy.contains(/add recurring|schedule|new recurring/i).first().click({ force: true });
-      cy.get('[role="dialog"]').should('be.visible');
-
-      // Fill amount
-      cy.get('[role="dialog"] input[inputmode="numeric"], [role="dialog"] input[type="number"]').first().clear().type('500');
-
-      // Submit
-      cy.get('[role="dialog"]').contains('button', /save|create|schedule/i).click();
-
-      cy.wait('@createRecurringPaymentWithData');
-
-      // Dialog should close or success message shown
-      cy.contains(/success|created|scheduled/i).should('exist');
+    it('shows contact name for each recurring payment', () => {
+      // Should show contact info or empty state
+      cy.contains(/alice|bob|no recurring/i, { matchCase: false }).should('exist');
     });
   });
 
-  describe('Edit Recurring Payment', () => {
+  describe('Add Recurring Payment', () => {
     beforeEach(() => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
+      cy.visit('/recurring');
+      cy.wait('@getRecurringPaymentsWithData');
     });
 
-    it('can access edit for existing recurring payment', () => {
-      cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
+    it('has Add Recurring Payment button', () => {
+      cy.contains('button', /add recurring|new/i).should('exist');
+    });
 
-      // Find edit button for recurring payment (may be an icon button)
-      cy.get('button[title*="edit" i], button[title*="Edit"]').first().click({ force: true });
+    it('opens recurring payment form dialog', () => {
+      cy.contains('button', /add recurring|new/i).click();
 
-      // Should show edit dialog
+      // Should show dialog to select contact
       cy.get('[role="dialog"]').should('be.visible');
     });
   });
 
-  describe('Delete/Pause Recurring Payment', () => {
+  describe('Payment Actions', () => {
     beforeEach(() => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
+      cy.visit('/recurring');
+      cy.wait('@getRecurringPaymentsWithData');
     });
 
-    it('can pause or delete recurring payment', () => {
-      cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
+    it('shows pause/play buttons for recurring payments', () => {
+      // Should have action buttons or empty state
+      cy.contains(/pause|play|no recurring/i, { matchCase: false }).should('exist');
+    });
 
-      // Should have pause/delete controls
-      cy.contains(/recurring|scheduled|no recurring/i).should('exist');
+    it('shows edit button for recurring payments', () => {
+      // Should have edit buttons or empty state
+      cy.get('button[title*="edit" i], button[title*="Edit"]').should('exist');
+    });
+
+    it('shows delete button for recurring payments', () => {
+      // Should have delete buttons or empty state
+      cy.get('button[title*="delete" i], button[title*="Delete"]').should('exist');
     });
   });
 
   describe('Payment History', () => {
     beforeEach(() => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
-    });
-
-    it('can view payment history for recurring payment', () => {
-      cy.contains('Alice Lightning').click();
+      cy.visit('/recurring');
       cy.wait('@getRecurringPaymentsWithData');
-
-      // Payment history section should be accessible
-      cy.contains(/recurring|history|scheduled|no recurring/i).should('exist');
     });
 
-    it('shows successful executions', () => {
-      cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
-
-      // Should show payment history or no payments message
-      cy.contains(/recurring|history|scheduled|no recurring/i).should('exist');
-    });
-  });
-
-  describe('Real-time Updates', () => {
-    it('page loads with mocked WebSocket events', () => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
-
-      // Page should be interactive
-      cy.contains('Alice Lightning').should('be.visible').click();
-      cy.wait('@getRecurringPaymentsWithData');
-
-      // Stats and recurring payments should be displayed
-      cy.contains(/recurring|scheduled|no recurring/i).should('exist');
-    });
-  });
-
-  describe('Address Selection', () => {
-    beforeEach(() => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
+    it('can expand payment history', () => {
+      // Click on a recurring payment to show history
+      cy.contains(/payment history|executions/i).should('exist');
     });
 
-    it('shows address selection for contacts with multiple addresses', () => {
-      // Click on a contact that may have multiple addresses
-      cy.contains('Alice Lightning').click();
-      cy.wait('@getRecurringPaymentsWithData');
+    it('shows execution entries when expanded', () => {
+      // Click to expand history
+      cy.contains(/payment history|executions/i).first().click();
+      cy.wait('@getRecurringExecutions');
 
-      // Open add recurring dialog
-      cy.contains(/add recurring|schedule|new recurring/i).first().click({ force: true });
-
-      // Dialog should have address or contact selection
-      cy.get('[role="dialog"]').should('be.visible');
+      // Should show execution entries or empty message
+      cy.contains(/sats|no payments|failed/i).should('exist');
     });
   });
 
   describe('Countdown Display', () => {
-    it('shows next payment countdown', () => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
-
-      cy.contains('Alice Lightning').click();
+    it('shows next payment countdown for active payments', () => {
+      cy.visit('/recurring');
       cy.wait('@getRecurringPaymentsWithData');
 
-      // Should show recurring payment info including countdown or next run time
-      cy.contains(/recurring|scheduled|next|no recurring/i).should('exist');
+      // Should show countdown timer or next payment info
+      cy.contains(/next|countdown|no recurring/i, { matchCase: false }).should('exist');
     });
   });
 
-  describe('Frequency Options', () => {
-    beforeEach(() => {
-      cy.visit('/contacts');
-      cy.wait('@getContactsWithData');
-      cy.contains('Alice Lightning').click();
+  describe('Empty State', () => {
+    it('shows empty state when no recurring payments', () => {
+      cy.setupApiMocks(); // Uses empty recurring payments array
+      cy.visit('/recurring');
+      cy.wait('@getRecurringPayments');
+
+      cy.contains(/no recurring/i).should('be.visible');
+    });
+
+    it('has create first recurring payment button in empty state', () => {
+      cy.setupApiMocks();
+      cy.visit('/recurring');
+      cy.wait('@getRecurringPayments');
+
+      cy.contains('button', /add recurring/i).should('exist');
+    });
+  });
+
+  describe('Responsive Design', () => {
+    it('displays correctly on mobile', () => {
+      cy.viewport('iphone-x');
+      cy.visit('/recurring');
       cy.wait('@getRecurringPaymentsWithData');
+
+      cy.contains(/recurring/i).should('be.visible');
     });
 
-    it('daily frequency option exists', () => {
-      cy.contains(/add recurring|schedule|new recurring/i).first().click({ force: true });
-      cy.get('[role="dialog"]').should('be.visible');
-      
-      // Check for daily option
-      cy.contains(/daily/i).should('exist');
-    });
+    it('displays correctly on tablet', () => {
+      cy.viewport('ipad-2');
+      cy.visit('/recurring');
+      cy.wait('@getRecurringPaymentsWithData');
 
-    it('weekly frequency option exists', () => {
-      cy.contains(/add recurring|schedule|new recurring/i).first().click({ force: true });
-      cy.get('[role="dialog"]').should('be.visible');
-      
-      // Check for weekly option
-      cy.contains(/weekly/i).should('exist');
-    });
-
-    it('monthly frequency option exists', () => {
-      cy.contains(/add recurring|schedule|new recurring/i).first().click({ force: true });
-      cy.get('[role="dialog"]').should('be.visible');
-      
-      // Check for monthly option
-      cy.contains(/monthly/i).should('exist');
+      cy.contains(/recurring/i).should('be.visible');
     });
   });
 });
