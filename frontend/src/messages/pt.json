@@ -762,7 +762,10 @@
     "invalidAmount": "Por favor, insira um valor válido",
     "noPaymentAddress": "Este contato não tem endereço de pagamento",
     "unsupportedPaymentType": "Pagamentos por Node ID ainda não são suportados",
-    "nodeIdNoPayment": "Apenas ID (sem pagamento direto)"
+    "nodeIdNoPayment": "Apenas ID (sem pagamento direto)",
+    "createRecurring": "Criar Recorrente",
+    "recurringTo": "Criando pagamento recorrente para {name}",
+    "recurringCreated": "Pagamento recorrente criado com sucesso"
   },
   "categories": {
     "title": "Categorias",

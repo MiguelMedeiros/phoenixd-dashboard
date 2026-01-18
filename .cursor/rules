@@ -285,3 +285,181 @@ When releasing, update version in:
 - [ ] CHANGELOG.md updated (if exists)
 - [ ] No console errors in app
 - [ ] Tested on at least one platform locally
+
+---
+
+## Auto Restart Docker After Changes
+
+**CRITICAL**: After completing ANY task that modifies code in this project, you MUST offer to run the `/restart-docker` command.
+
+### When to Trigger
+
+Always suggest running `/restart-docker` after:
+
+1. **Any code changes** in `backend/`, `frontend/`, or `services/`
+2. **Configuration changes** in `docker-compose.yml`, Dockerfiles, or entrypoint scripts
+3. **Database schema changes** in `prisma/schema.prisma`
+4. **Environment variable changes** in `.env` files
+
+### How to Suggest
+
+At the END of every response that includes code changes, add:
+
+```
+---
+🐳 **Docker Restart Required**
+
+Changes detected. Run `/restart-docker` to rebuild and restart the affected containers:
+
+- `/restart-docker` - Auto-detect changes and rebuild affected containers
+- `/restart-docker backend` - Rebuild only backend
+- `/restart-docker frontend` - Rebuild only frontend  
+- `/restart-docker all` - Rebuild all containers
+```
+
+### Automatic Detection
+
+When suggesting, specify which containers need restart based on changed files:
+
+| Changed Files | Container to Restart |
+| ------------- | -------------------- |
+| `backend/**` | backend |
+| `frontend/**` | frontend |
+| `services/tor/**` | tor |
+| `services/tailscale/**` | tailscale |
+| `services/cloudflared/**` | cloudflared |
+| `docker-compose.yml` | all |
+| `prisma/**` | backend |
+
+### Example End of Response
+
+```
+✅ Changes complete!
+
+---
+🐳 **Docker Restart Required**
+
+Files changed in `frontend/`. To apply changes:
+
+`/restart-docker frontend`
+
+Or run `/restart-docker` to auto-detect and rebuild.
+```
+
+---
+
+## Pre-Restart Workflow (MANDATORY)
+
+**CRITICAL**: Before restarting Docker containers after completing changes, you MUST follow this workflow in order:
+
+### Step 1: Sync Translations
+
+Run the translation sync check to ensure all language files are in sync with `en.json`:
+
+```bash
+node -e "
+const fs = require('fs');
+const path = require('path');
+
+const messagesDir = './frontend/src/messages';
+const sourceFile = 'en.json';
+
+function getAllKeys(obj, prefix = '') {
+  let keys = [];
+  for (const key in obj) {
+    const fullKey = prefix ? \\\`\\\${prefix}.\\\${key}\\\` : key;
+    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+      keys = keys.concat(getAllKeys(obj[key], fullKey));
+    } else {
+      keys.push(fullKey);
+    }
+  }
+  return keys;
+}
+
+const source = JSON.parse(fs.readFileSync(path.join(messagesDir, sourceFile), 'utf8'));
+const sourceKeys = getAllKeys(source);
+
+const files = fs.readdirSync(messagesDir).filter(f => f.endsWith('.json') && f !== sourceFile);
+let hasIssues = false;
+
+console.log('\\n📊 Translation Sync Check\\n');
+console.log('| Language   | Missing | Extra | Status |');
+console.log('|------------|---------|-------|--------|');
+
+for (const file of files) {
+  const target = JSON.parse(fs.readFileSync(path.join(messagesDir, file), 'utf8'));
+  const targetKeys = getAllKeys(target);
+  const missing = sourceKeys.filter(k => !targetKeys.includes(k));
+  const extra = targetKeys.filter(k => !sourceKeys.includes(k));
+  const status = missing.length === 0 && extra.length === 0 ? '✅' : '⚠️';
+  if (missing.length > 0 || extra.length > 0) hasIssues = true;
+  console.log(\\\`| \\\${file.padEnd(10)} | \\\${String(missing.length).padEnd(7)} | \\\${String(extra.length).padEnd(5)} | \\\${status}      |\\\`);
+}
+
+if (hasIssues) {
+  console.log('\\n❌ Translation issues found! Fix before restarting Docker.');
+  process.exit(1);
+} else {
+  console.log('\\n✅ All translations in sync!');
+}
+"
+```
+
+### Step 2: Restart Docker
+
+Only after translations are verified, run the docker restart:
+
+```bash
+/restart-docker
+```
+
+### Workflow Summary
+
+```
+1. ✅ Complete code changes
+2. ✅ Run /sync-translations (check translations)
+3. ✅ Fix any translation issues (if found)
+4. ✅ Run /restart-docker (rebuild containers)
+```
+
+### When Using /restart-docker Command
+
+The `/restart-docker` command should automatically run the translation check first. If issues are found, stop and report them before rebuilding containers.
+
+### Example Complete Workflow
+
+```
+User: "Add a new feature X"
+
+AI: [Makes changes to frontend/src/...]
+    [Adds translations to en.json]
+    [Adds translations to ALL other language files]
+
+    ✅ Changes complete!
+    
+    ---
+    📋 **Pre-Restart Checklist**
+    
+    1. Checking translations... ✅ All 879 keys synced
+    2. Ready to restart Docker
+    
+    Run `/restart-docker` to apply changes.
+```
+
+### If Translations Are Out of Sync
+
+```
+❌ Translation issues found!
+
+| Language   | Missing | Extra | Status |
+|------------|---------|-------|--------|
+| pt.json    | 2       | 0     | ⚠️     |
+| es.json    | 2       | 0     | ⚠️     |
+
+Missing keys:
+- contacts.newFeature
+- contacts.newFeatureDesc
+
+Fix these before running /restart-docker!
+```

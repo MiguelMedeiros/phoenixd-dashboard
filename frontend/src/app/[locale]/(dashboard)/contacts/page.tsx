@@ -15,6 +15,7 @@ import {
   Star,
   Zap,
   Send,
+  Repeat,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -27,10 +28,15 @@ import {
   deleteContact,
   payOffer,
   payLnAddress,
+  createRecurringPayment,
+  getCategories,
   type Contact,
   type ContactAddress,
   type CreateContactAddressInput,
+  type PaymentCategory,
+  type RecurringPaymentFrequency,
 } from '@/lib/api';
+import { RecurringPaymentForm } from '@/components/recurring-payment-form';
 import { StatCard, StatCardGrid } from '@/components/stat-card';
 import { PageHeader } from '@/components/page-header';
 import { cn } from '@/lib/utils';
@@ -57,6 +63,11 @@ export default function ContactsPage() {
 
   // Label filter state
   const [selectedLabelFilter, setSelectedLabelFilter] = useState<string | null>(null);
+
+  // Recurring payment dialog state
+  const [showRecurringDialog, setShowRecurringDialog] = useState(false);
+  const [recurringLoading, setRecurringLoading] = useState(false);
+  const [categories, setCategories] = useState<PaymentCategory[]>([]);
 
   const fetchContacts = useCallback(async () => {
     setLoading(true);
@@ -181,6 +192,60 @@ export default function ContactsPage() {
         title: tc('error'),
         description: String(error),
       });
+    }
+  };
+
+  // Fetch categories when recurring dialog opens
+  useEffect(() => {
+    if (showRecurringDialog) {
+      getCategories()
+        .then(setCategories)
+        .catch((error) => {
+          console.error('Failed to load categories:', error);
+        });
+    }
+  }, [showRecurringDialog]);
+
+  const handleCreateRecurring = async (data: {
+    contactId: string;
+    addressId: string;
+    amountSat: number;
+    frequency: RecurringPaymentFrequency;
+    dayOfWeek?: number;
+    dayOfMonth?: number;
+    timeOfDay?: string;
+    note?: string;
+    categoryIds?: string[];
+  }) => {
+    setRecurringLoading(true);
+    try {
+      await createRecurringPayment({
+        contactId: data.contactId,
+        addressId: data.addressId,
+        amountSat: data.amountSat,
+        frequency: data.frequency,
+        dayOfWeek: data.dayOfWeek,
+        dayOfMonth: data.dayOfMonth,
+        timeOfDay: data.timeOfDay,
+        note: data.note,
+        categoryId: data.categoryIds?.[0],
+      });
+
+      toast({
+        title: tc('success'),
+        description: t('recurringCreated'),
+      });
+      setShowRecurringDialog(false);
+      setSelectedPaymentAddress(null);
+    } catch (error) {
+      console.error('Failed to create recurring payment:', error);
+      toast({
+        variant: 'destructive',
+        title: tc('error'),
+        description: String(error),
+      });
+    } finally {
+      setRecurringLoading(false);
     }
   };
 
@@ -568,17 +633,30 @@ export default function ContactsPage() {
                                       </p>
                                     </div>
                                     {canPay ? (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setSelectedPaymentAddress(addr);
-                                          setShowQuickPayDialog(true);
-                                        }}
-                                        className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-xs font-medium"
-                                      >
-                                        <Send className="h-3 w-3" />
-                                        {t('pay')}
-                                      </button>
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPaymentAddress(addr);
+                                            setShowRecurringDialog(true);
+                                          }}
+                                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-accent/10 text-accent hover:bg-accent/20 transition-colors text-xs font-medium"
+                                          title={t('createRecurring')}
+                                        >
+                                          <Repeat className="h-3 w-3" />
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPaymentAddress(addr);
+                                            setShowQuickPayDialog(true);
+                                          }}
+                                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-xs font-medium"
+                                        >
+                                          <Send className="h-3 w-3" />
+                                          {t('pay')}
+                                        </button>
+                                      </div>
                                     ) : addr.type === 'node_id' ? (
                                       <span className="shrink-0 text-[10px] text-muted-foreground italic">
                                         {t('nodeIdNoPayment')}
@@ -762,6 +840,53 @@ export default function ContactsPage() {
                 )}
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recurring Payment Dialog */}
+      <Dialog
+        open={showRecurringDialog}
+        onOpenChange={(open) => {
+          setShowRecurringDialog(open);
+          if (!open) {
+            setSelectedPaymentAddress(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Repeat className="h-5 w-5 text-accent" />
+              {t('createRecurring')}
+            </DialogTitle>
+            {selectedContact && (
+              <p className="text-sm text-muted-foreground">
+                {t('recurringTo', { name: selectedContact.name })}
+              </p>
+            )}
+          </DialogHeader>
+          <div className="mt-4">
+            {selectedContact && (
+              <RecurringPaymentForm
+                contact={{
+                  ...selectedContact,
+                  addresses: selectedPaymentAddress
+                    ? selectedContact.addresses.map((a) => ({
+                        ...a,
+                        isPrimary: a.id === selectedPaymentAddress.id,
+                      }))
+                    : selectedContact.addresses,
+                }}
+                categories={categories}
+                onSubmit={handleCreateRecurring}
+                onCancel={() => {
+                  setShowRecurringDialog(false);
+                  setSelectedPaymentAddress(null);
+                }}
+                loading={recurringLoading}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>

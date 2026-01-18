@@ -762,7 +762,10 @@
     "invalidAmount": "Please enter a valid amount",
     "noPaymentAddress": "This contact has no payment address",
     "unsupportedPaymentType": "Node ID payments are not supported yet",
-    "nodeIdNoPayment": "ID only (no direct payment)"
+    "nodeIdNoPayment": "ID only (no direct payment)",
+    "createRecurring": "Create Recurring",
+    "recurringTo": "Creating recurring payment for {name}",
+    "recurringCreated": "Recurring payment created successfully"
   },
   "categories": {
     "title": "Kategorien",

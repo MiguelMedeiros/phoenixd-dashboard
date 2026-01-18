@@ -327,54 +327,176 @@ export default function OverviewPage() {
           </Link>
         </div>
 
-        {/* Contacts & Recurring - Compact Row */}
-        {(contacts.length > 0 || recurringPayments.length > 0) && (
-          <Link
-            href="/contacts"
-            className="glass-card rounded-xl px-4 py-2.5 flex items-center justify-between hover:bg-white/[0.06] transition-colors group"
-          >
-            <div className="flex items-center gap-4">
+        {/* Contacts & Recurring Payments Grid */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Contacts Card */}
+          <div className="glass-card rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-cyan-500" />
-                <span className="text-sm">
-                  <span className="font-semibold text-cyan-500">{contacts.length}</span>
-                  <span className="text-muted-foreground ml-1">{tc('contacts')}</span>
-                </span>
+                <div className="h-8 w-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-cyan-500" />
+                </div>
+                <h3 className="font-semibold text-sm">{tc('contacts')}</h3>
               </div>
-              {recurringPayments.length > 0 && (
-                <>
-                  <div className="w-px h-4 bg-white/10" />
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4 text-purple-500" />
-                    <span className="text-sm">
-                      <span className="font-semibold text-purple-500">
-                        {recurringPayments.length}
-                      </span>
-                      <span className="text-muted-foreground ml-1">{t('recurringActive')}</span>
-                    </span>
-                  </div>
-                  {/* Next payment indicator */}
-                  {recurringPayments[0] && (
-                    <>
-                      <div className="w-px h-4 bg-white/10 hidden sm:block" />
-                      <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>{tc('next')}:</span>
-                        <span className="font-medium text-foreground">
-                          {recurringPayments[0].contact?.name || '?'}
-                        </span>
-                        <span className="font-mono text-primary">
-                          {formatValue(recurringPayments[0].amountSat)}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
+              <Link
+                href="/contacts"
+                className="text-xs text-primary hover:underline flex items-center gap-0.5"
+              >
+                {tc('viewAll')} <ChevronRight className="h-3 w-3" />
+              </Link>
             </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-          </Link>
-        )}
+
+            {contacts.length === 0 ? (
+              <div className="py-6 text-center">
+                <Users className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">{t('noPayments')}</p>
+                <Link
+                  href="/contacts"
+                  className="text-xs text-primary hover:underline mt-1 inline-block"
+                >
+                  + {t('manageContacts')}
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {contacts.slice(0, 4).map((contact) => (
+                  <Link
+                    key={contact.id}
+                    href="/contacts"
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group"
+                  >
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500/15 to-blue-500/15 shrink-0">
+                      <Users className="h-4 w-4 text-cyan-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{contact.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {contact.addresses[0]?.address
+                          ? contact.addresses[0].address.length > 25
+                            ? `${contact.addresses[0].address.slice(0, 25)}...`
+                            : contact.addresses[0].address
+                          : '-'}
+                      </p>
+                    </div>
+                    {contact._count?.payments && contact._count.payments > 0 && (
+                      <span className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
+                        <Zap className="h-2.5 w-2.5" />
+                        {contact._count.payments}
+                      </span>
+                    )}
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                  </Link>
+                ))}
+                {contacts.length > 4 && (
+                  <Link
+                    href="/contacts"
+                    className="block text-center py-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    +{contacts.length - 4} more contacts
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Recurring Payments Card */}
+          <div className="glass-card rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <RefreshCw className="h-4 w-4 text-purple-500" />
+                </div>
+                <h3 className="font-semibold text-sm">{tc('recurring')}</h3>
+              </div>
+              <Link
+                href="/recurring"
+                className="text-xs text-primary hover:underline flex items-center gap-0.5"
+              >
+                {tc('viewAll')} <ChevronRight className="h-3 w-3" />
+              </Link>
+            </div>
+
+            {recurringPayments.length === 0 ? (
+              <div className="py-6 text-center">
+                <RefreshCw className="h-8 w-8 mx-auto mb-2 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">{t('noPayments')}</p>
+                <Link
+                  href="/recurring"
+                  className="text-xs text-primary hover:underline mt-1 inline-block"
+                >
+                  + {t('upcomingPayments')}
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recurringPayments.slice(0, 4).map((recurring) => {
+                  const nextRun = new Date(recurring.nextRunAt);
+                  const now = new Date();
+                  const diffMs = nextRun.getTime() - now.getTime();
+                  const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+                  const diffHours = Math.floor(diffMins / 60);
+                  const diffDays = Math.floor(diffHours / 24);
+
+                  let countdown = '';
+                  if (diffDays > 0) {
+                    countdown = `${diffDays}d ${diffHours % 24}h`;
+                  } else if (diffHours > 0) {
+                    countdown = `${diffHours}h ${diffMins % 60}m`;
+                  } else if (diffMins > 0) {
+                    countdown = `${diffMins}m`;
+                  } else {
+                    countdown = 'Now';
+                  }
+
+                  return (
+                    <Link
+                      key={recurring.id}
+                      href="/recurring"
+                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/15 to-pink-500/15 shrink-0">
+                        <RefreshCw className="h-4 w-4 text-purple-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {recurring.contact?.name || t('unknownContact')}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="font-mono text-foreground">
+                            {formatValue(recurring.amountSat)}
+                          </span>
+                          <span>•</span>
+                          <span>
+                            {recurring.frequency === 'daily'
+                              ? 'Daily'
+                              : recurring.frequency === 'weekly'
+                                ? 'Weekly'
+                                : recurring.frequency === 'monthly'
+                                  ? 'Monthly'
+                                  : recurring.frequency}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-purple-500/10">
+                        <Clock className="h-3 w-3 text-purple-500" />
+                        <span className="text-[11px] font-mono text-purple-500">{countdown}</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                    </Link>
+                  );
+                })}
+                {recurringPayments.length > 4 && (
+                  <Link
+                    href="/recurring"
+                    className="block text-center py-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    +{recurringPayments.length - 4} more recurring
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Bottom Row: Node Info + Recent Payments */}
         <div className="grid gap-4 lg:grid-cols-5">
