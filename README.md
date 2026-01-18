@@ -37,7 +37,9 @@ https://github.com/user-attachments/assets/494d58b8-1e23-473e-8aca-74a2705ac33e
 
 ✅ **Send & Receive** — Bolt11, Bolt12 offers, Lightning Address, On-chain
 
-✅ **Dashboard** — Real-time balance, channel stats, payment activity
+✅ **Dashboard** — Real-time balance, channel stats, payment activity charts
+
+✅ **Analytics** — Activity heatmaps, fees comparison, monthly trends, top contacts
 
 ✅ **History** — Full payment history with filters & CSV export
 
@@ -99,6 +101,7 @@ open http://localhost:3000
 
 - 📦 [**Installation**](docs/installation.md) — Docker setup, local development, and requirements
 - ⚙️ [**Configuration**](docs/configuration.md) — Environment variables, network modes, and options
+- 🔌 [**External Phoenixd**](docs/external-phoenixd.md) — Connect to an existing phoenixd instance
 - 🖥️ [**Desktop App**](desktop/README.md) — Native app for macOS and Linux
 
 ### Mobile & Remote Access

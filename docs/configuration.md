@@ -129,6 +129,8 @@ You can add connections to phoenixd instances running outside of Docker:
 4. Click **Test Connection** to verify
 5. Save the connection
 
+> 📖 **Need help finding your password and URL?** See the complete [External Phoenixd Guide](external-phoenixd.md) for step-by-step instructions.
+
 ### Switching Between Nodes
 
 - Click **Activate** on any connection to switch to it
