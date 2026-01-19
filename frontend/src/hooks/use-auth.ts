@@ -31,10 +31,14 @@ export function useAuth(): UseAuthReturn {
   const [isLocked, setIsLocked] = useState(false);
   const lastActivityRef = useRef<number>(Date.now());
   const autoLockTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const initialLoadDoneRef = useRef(false);
 
   const refreshStatus = useCallback(async () => {
     try {
-      setIsLoading(true);
+      // Only show loading spinner on initial load, not on subsequent refreshes
+      if (!initialLoadDoneRef.current) {
+        setIsLoading(true);
+      }
       setError(null);
       const authStatus = await getAuthStatus();
       setStatus(authStatus);
@@ -50,6 +54,7 @@ export function useAuth(): UseAuthReturn {
       setError('Failed to check authentication status');
     } finally {
       setIsLoading(false);
+      initialLoadDoneRef.current = true;
     }
   }, []);
 
