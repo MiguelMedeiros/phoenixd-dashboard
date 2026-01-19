@@ -1,0 +1,51 @@
+# Render Blueprint - https://render.com/docs/blueprint-spec
+# Deploy with one click: https://render.com/deploy
+
+databases:
+  - name: phoenixd-db
+    databaseName: phoenixd_dashboard
+    user: phoenixd
+    plan: free
+    region: oregon
+
+services:
+  # Backend API
+  - type: web
+    name: phoenixd-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: phoenixd-db
+          property: connectionString
+      - key: PHOENIXD_URL
+        sync: false
+      - key: PHOENIXD_PASSWORD
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+
+  # Frontend Next.js
+  - type: web
+    name: phoenixd-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_WS_URL
+        sync: false

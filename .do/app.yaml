@@ -1,0 +1,63 @@
+# DigitalOcean App Platform Spec
+# https://docs.digitalocean.com/products/app-platform/reference/app-spec/
+
+name: phoenixd-dashboard
+
+region: nyc
+
+databases:
+  - name: db
+    engine: PG
+    production: false
+    cluster_name: phoenixd-db
+    db_name: phoenixd_dashboard
+    db_user: phoenixd
+
+services:
+  # Backend API
+  - name: backend
+    dockerfile_path: backend/Dockerfile
+    source_dir: backend
+    http_port: 4000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+      - path: /api
+    health_check:
+      http_path: /health
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        value: ${db.DATABASE_URL}
+      - key: PHOENIXD_URL
+        scope: RUN_TIME
+        type: SECRET
+      - key: PHOENIXD_PASSWORD
+        scope: RUN_TIME
+        type: SECRET
+      - key: FRONTEND_URL
+        scope: RUN_TIME
+        value: ${APP_URL}
+
+  # Frontend Next.js
+  - name: frontend
+    dockerfile_path: frontend/Dockerfile
+    source_dir: frontend
+    http_port: 3000
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+      - path: /
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        scope: BUILD_TIME
+        value: ${APP_URL}/api
+      - key: NEXT_PUBLIC_WS_URL
+        scope: BUILD_TIME
+        value: wss://${APP_DOMAIN}/api

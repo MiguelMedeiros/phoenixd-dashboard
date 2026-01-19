@@ -23,6 +23,16 @@
   <img src="https://img.shields.io/github/license/MiguelMedeiros/phoenixd-dashboard?style=flat-square" alt="License">
 </p>
 
+<p align="center">
+  <a href="https://railway.com/new/template?template=https://github.com/MiguelMedeiros/phoenixd-dashboard"><img src="https://railway.com/button.svg" alt="Deploy on Railway" height="32"></a>
+  &nbsp;&nbsp;
+  <a href="https://render.com/deploy?repo=https://github.com/MiguelMedeiros/phoenixd-dashboard"><img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" height="32"></a>
+  &nbsp;&nbsp;
+  <a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/MiguelMedeiros/phoenixd-dashboard/tree/main"><img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DigitalOcean" height="32"></a>
+  &nbsp;&nbsp;
+  <a href="https://heroku.com/deploy?template=https://github.com/MiguelMedeiros/phoenixd-dashboard"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku" height="32"></a>
+</p>
+
 <br>
 
 <p align="center">
@@ -104,6 +114,7 @@ open http://localhost:3000
 ### Getting Started
 
 - 📦 [**Installation**](docs/installation.md) — Docker setup, local development, and requirements
+- ☁️ [**Cloud Deploy**](docs/cloud-deploy.md) — One-click deploy to Railway, Render, DigitalOcean, Heroku
 - ⚙️ [**Configuration**](docs/configuration.md) — Environment variables, network modes, and options
 - 🔌 [**External Phoenixd**](docs/external-phoenixd.md) — Connect to an existing phoenixd instance
 - 🖥️ [**Desktop App**](desktop/README.md) — Native app for macOS and Linux

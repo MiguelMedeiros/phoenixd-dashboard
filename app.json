@@ -1,0 +1,39 @@
+{
+  "name": "Phoenixd Dashboard",
+  "description": "A modern, self-hosted dashboard for your phoenixd Lightning node",
+  "keywords": ["bitcoin", "lightning", "phoenixd", "dashboard", "node"],
+  "website": "https://github.com/MiguelMedeiros/phoenixd-dashboard",
+  "repository": "https://github.com/MiguelMedeiros/phoenixd-dashboard",
+  "logo": "https://raw.githubusercontent.com/MiguelMedeiros/phoenixd-dashboard/main/docs/screenshots/logo.svg",
+  "success_url": "/",
+  "stack": "container",
+  "env": {
+    "NODE_ENV": {
+      "value": "production"
+    },
+    "PHOENIXD_URL": {
+      "description": "URL of your phoenixd instance (e.g., http://phoenixd:9740)",
+      "required": true
+    },
+    "PHOENIXD_PASSWORD": {
+      "description": "Password for phoenixd authentication",
+      "required": true
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:essential-0"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
