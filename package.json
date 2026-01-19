@@ -35,9 +35,11 @@
     "desktop:build": "npm run desktop:prepare && cd desktop && npm run tauri:build",
     "desktop:prepare": "chmod +x desktop/scripts/*.sh && desktop/scripts/prepare-resources.sh",
     "desktop:download-phoenixd": "chmod +x desktop/scripts/*.sh && desktop/scripts/download-phoenixd.sh",
-    "desktop:icons": "chmod +x desktop/scripts/*.sh && desktop/scripts/generate-icons.sh"
+    "desktop:icons": "chmod +x desktop/scripts/*.sh && desktop/scripts/generate-icons.sh",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "husky": "^9.1.7"
   }
 }

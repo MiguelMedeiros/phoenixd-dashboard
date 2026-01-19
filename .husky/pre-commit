@@ -1,0 +1,21 @@
+#!/bin/sh
+
+echo "🔍 Running pre-commit checks..."
+
+# Generate Prisma client
+echo "📦 Generating Prisma client..."
+npm run db:generate --prefix backend || exit 1
+
+# Lint
+echo "🔎 Running linters..."
+npm run lint || exit 1
+
+# Format check
+echo "✨ Checking formatting..."
+npm run format:check || exit 1
+
+# Unit tests
+echo "🧪 Running unit tests..."
+npm run test || exit 1
+
+echo "✅ Pre-commit checks passed!"

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "🚀 Running pre-push checks..."
+
+# Build
+echo "🔨 Building project..."
+npm run build || exit 1
+
+# E2E tests
+echo "🧪 Running E2E tests..."
+npm run test:e2e || exit 1
+
+echo "✅ Pre-push checks passed!"
