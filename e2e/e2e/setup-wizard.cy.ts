@@ -150,28 +150,32 @@ describe('Setup Wizard', () => {
       cy.contains('System').should('be.visible');
       cy.contains('button', 'Next').click();
 
-      // Step 5: Phoenixd connection
+      // Step 5: Lock Screen Background
+      cy.contains('Choose Lock Screen Background').should('be.visible');
+      cy.contains('button', 'Next').click();
+
+      // Step 6: Phoenixd connection
       cy.contains('Configure Phoenixd Connection').should('be.visible');
       cy.contains('Local (Docker)').should('be.visible');
       cy.contains('External').should('be.visible');
       cy.contains('button', 'Next').click();
 
-      // Step 6: Network services
+      // Step 7: Network services
       cy.contains('Network Services').should('be.visible');
       cy.contains('Tailscale').should('be.visible');
       cy.contains('Cloudflare Tunnel').should('be.visible');
       cy.contains('Tor Hidden Service').should('be.visible');
       cy.contains('button', 'Next').click();
 
-      // Step 7: Apps
+      // Step 8: Apps
       cy.wait('@getAvailableApps');
       cy.contains('Pre-installed Apps').should('be.visible');
       cy.contains('Donations Page').should('be.visible');
       cy.contains('button', 'Next').click();
 
-      // Step 8: Review
+      // Step 9: Review
       cy.contains('Review Your Configuration').should('be.visible');
-      cy.contains('Complete Setup').should('be.visible');
+      cy.contains('button', 'Complete Setup').scrollIntoView().should('be.visible');
     });
 
     it('password validation works correctly', () => {
@@ -343,7 +347,10 @@ describe('Setup Wizard', () => {
       // Step 4: Theme
       cy.contains('button', 'Next').click();
 
-      // Step 5: Phoenixd - select External
+      // Step 5: Lock Screen Background
+      cy.contains('button', 'Next').click();
+
+      // Step 6: Phoenixd - select External
       cy.contains('External').click();
 
       // Should show connection form
@@ -380,7 +387,10 @@ describe('Setup Wizard', () => {
       // Step 4: Theme
       cy.contains('button', 'Next').click();
 
-      // Step 5: Phoenixd - select External
+      // Step 5: Lock Screen Background
+      cy.contains('button', 'Next').click();
+
+      // Step 6: Phoenixd - select External
       cy.contains('External').click();
 
       // Fill in connection details
