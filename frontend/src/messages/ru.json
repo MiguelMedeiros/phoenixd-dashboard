@@ -622,6 +622,11 @@
       "system": "Системная",
       "preview": "Тема применяется в реальном времени как предпросмотр"
     },
+    "background": {
+      "title": "Выберите фон экрана блокировки",
+      "description": "Выберите фоновое видео для экрана блокировки",
+      "preview": "Нажмите на видео для выбора"
+    },
     "phoenixd": {
       "title": "Настройка подключения Phoenixd",
       "description": "Выберите способ подключения к Lightning-узлу phoenixd",
@@ -681,6 +686,15 @@
         "light": "Светлая",
         "dark": "Темная",
         "system": "Системная (Авто)"
+      },
+      "background": "Фон экрана блокировки",
+      "backgrounds": {
+        "storm-clouds": "Грозовые облака",
+        "lightning": "Молния",
+        "thunder-flash": "Вспышка грома",
+        "electric-storm": "Электрическая буря",
+        "night-lightning": "Ночная молния",
+        "sky-thunder": "Небесный гром"
       },
       "phoenixd": "Подключение Phoenixd",
       "phoenixdDocker": "Docker (Локальный)",

@@ -622,6 +622,11 @@
       "system": "システム",
       "preview": "テーマはリアルタイムでプレビューとして適用されます"
     },
+    "background": {
+      "title": "ロック画面の背景を選択",
+      "description": "ロック画面の背景ビデオを選択",
+      "preview": "ビデオをクリックして選択"
+    },
     "phoenixd": {
       "title": "Phoenixd 接続を設定",
       "description": "phoenixd ライトニングノードへの接続方法を選択",
@@ -681,6 +686,15 @@
         "light": "ライト",
         "dark": "ダーク",
         "system": "システム (自動)"
+      },
+      "background": "ロック画面の背景",
+      "backgrounds": {
+        "storm-clouds": "嵐雲",
+        "lightning": "稲妻",
+        "thunder-flash": "雷光",
+        "electric-storm": "電気嵐",
+        "night-lightning": "夜の稲妻",
+        "sky-thunder": "空の雷"
       },
       "phoenixd": "Phoenixd 接続",
       "phoenixdDocker": "Docker (ローカル)",

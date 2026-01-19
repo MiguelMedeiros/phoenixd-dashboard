@@ -617,6 +617,11 @@
       "system": "系统",
       "preview": "主题实时预览"
     },
+    "background": {
+      "title": "选择锁屏背景",
+      "description": "选择锁屏的背景视频",
+      "preview": "点击视频进行选择"
+    },
     "phoenixd": {
       "title": "配置 Phoenixd 连接",
       "description": "选择如何连接到您的 phoenixd 闪电节点",
@@ -676,6 +681,15 @@
         "light": "浅色",
         "dark": "深色",
         "system": "系统 (自动)"
+      },
+      "background": "锁屏背景",
+      "backgrounds": {
+        "storm-clouds": "暴风云",
+        "lightning": "闪电",
+        "thunder-flash": "雷电闪光",
+        "electric-storm": "电暴",
+        "night-lightning": "夜间闪电",
+        "sky-thunder": "天空雷鸣"
       },
       "phoenixd": "Phoenixd 连接",
       "phoenixdDocker": "Docker (本地)",

@@ -617,6 +617,11 @@
       "system": "System",
       "preview": "Das Theme wird in Echtzeit als Vorschau angewendet"
     },
+    "background": {
+      "title": "Wählen Sie den Sperrbildschirm-Hintergrund",
+      "description": "Wählen Sie das Hintergrundvideo für den Sperrbildschirm",
+      "preview": "Klicken Sie auf ein Video, um es auszuwählen"
+    },
     "phoenixd": {
       "title": "Phoenixd-Verbindung konfigurieren",
       "description": "Wählen Sie, wie Sie sich mit Ihrem phoenixd Lightning-Node verbinden möchten",
@@ -676,6 +681,15 @@
         "light": "Hell",
         "dark": "Dunkel",
         "system": "System (Auto)"
+      },
+      "background": "Sperrbildschirm-Hintergrund",
+      "backgrounds": {
+        "storm-clouds": "Sturmwolken",
+        "lightning": "Blitz",
+        "thunder-flash": "Donnerblitz",
+        "electric-storm": "Elektrischer Sturm",
+        "night-lightning": "Nachtblitz",
+        "sky-thunder": "Himmelsdonner"
       },
       "phoenixd": "Phoenixd-Verbindung",
       "phoenixdDocker": "Docker (Lokal)",

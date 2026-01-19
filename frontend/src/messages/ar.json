@@ -617,6 +617,11 @@
       "system": "النظام",
       "preview": "يتم تطبيق السمة في الوقت الفعلي كمعاينة"
     },
+    "background": {
+      "title": "اختر خلفية شاشة القفل",
+      "description": "اختر فيديو الخلفية لشاشة القفل",
+      "preview": "انقر على فيديو لاختياره"
+    },
     "phoenixd": {
       "title": "تكوين اتصال Phoenixd",
       "description": "اختر كيفية الاتصال بعقدة phoenixd Lightning",
@@ -676,6 +681,15 @@
         "light": "فاتح",
         "dark": "داكن",
         "system": "النظام (تلقائي)"
+      },
+      "background": "خلفية شاشة القفل",
+      "backgrounds": {
+        "storm-clouds": "غيوم عاصفة",
+        "lightning": "برق",
+        "thunder-flash": "وميض الرعد",
+        "electric-storm": "عاصفة كهربائية",
+        "night-lightning": "برق ليلي",
+        "sky-thunder": "رعد السماء"
       },
       "phoenixd": "اتصال Phoenixd",
       "phoenixdDocker": "Docker (محلي)",

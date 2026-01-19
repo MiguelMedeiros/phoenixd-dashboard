@@ -622,6 +622,11 @@
       "system": "Sistema",
       "preview": "O tema é aplicado em tempo real como prévia"
     },
+    "background": {
+      "title": "Escolha o Fundo da Tela de Bloqueio",
+      "description": "Selecione o vídeo de fundo para a tela de bloqueio",
+      "preview": "Clique em um vídeo para selecioná-lo"
+    },
     "phoenixd": {
       "title": "Configurar Conexão Phoenixd",
       "description": "Escolha como conectar ao seu nó Lightning phoenixd",
@@ -681,6 +686,15 @@
         "light": "Claro",
         "dark": "Escuro",
         "system": "Sistema (Auto)"
+      },
+      "background": "Fundo da Tela de Bloqueio",
+      "backgrounds": {
+        "storm-clouds": "Nuvens de Tempestade",
+        "lightning": "Relâmpago",
+        "thunder-flash": "Clarão de Trovão",
+        "electric-storm": "Tempestade Elétrica",
+        "night-lightning": "Relâmpago Noturno",
+        "sky-thunder": "Trovão Celeste"
       },
       "phoenixd": "Conexão Phoenixd",
       "phoenixdDocker": "Docker (Local)",

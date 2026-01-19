@@ -623,6 +623,11 @@
       "system": "System",
       "preview": "The theme is applied in real-time as a preview"
     },
+    "background": {
+      "title": "Choose Lock Screen Background",
+      "description": "Select the background video for the lock screen",
+      "preview": "Click on a video to select it"
+    },
     "phoenixd": {
       "title": "Configure Phoenixd Connection",
       "description": "Choose how to connect to your phoenixd Lightning node",
@@ -682,6 +687,15 @@
         "light": "Light",
         "dark": "Dark",
         "system": "System (Auto)"
+      },
+      "background": "Lock Screen Background",
+      "backgrounds": {
+        "storm-clouds": "Storm Clouds",
+        "lightning": "Lightning",
+        "thunder-flash": "Thunder Flash",
+        "electric-storm": "Electric Storm",
+        "night-lightning": "Night Lightning",
+        "sky-thunder": "Sky Thunder"
       },
       "phoenixd": "Phoenixd Connection",
       "phoenixdDocker": "Docker (Local)",

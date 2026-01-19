@@ -617,6 +617,11 @@
       "system": "सिस्टम",
       "preview": "थीम प्रीव्यू के रूप में रीयल-टाइम में लागू होती है"
     },
+    "background": {
+      "title": "लॉक स्क्रीन बैकग्राउंड चुनें",
+      "description": "लॉक स्क्रीन के लिए बैकग्राउंड वीडियो चुनें",
+      "preview": "चुनने के लिए वीडियो पर क्लिक करें"
+    },
     "phoenixd": {
       "title": "Phoenixd कनेक्शन कॉन्फ़िगर करें",
       "description": "चुनें कि अपने phoenixd Lightning नोड से कैसे कनेक्ट करना है",
@@ -676,6 +681,15 @@
         "light": "लाइट",
         "dark": "डार्क",
         "system": "सिस्टम (ऑटो)"
+      },
+      "background": "लॉक स्क्रीन बैकग्राउंड",
+      "backgrounds": {
+        "storm-clouds": "तूफानी बादल",
+        "lightning": "बिजली",
+        "thunder-flash": "गरज की चमक",
+        "electric-storm": "विद्युत तूफान",
+        "night-lightning": "रात की बिजली",
+        "sky-thunder": "आकाशीय गरज"
       },
       "phoenixd": "Phoenixd कनेक्शन",
       "phoenixdDocker": "Docker (लोकल)",

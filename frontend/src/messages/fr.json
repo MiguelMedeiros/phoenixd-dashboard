@@ -622,6 +622,11 @@
       "system": "Système",
       "preview": "Le thème est appliqué en temps réel en aperçu"
     },
+    "background": {
+      "title": "Choisissez le Fond de l'Écran de Verrouillage",
+      "description": "Sélectionnez la vidéo de fond pour l'écran de verrouillage",
+      "preview": "Cliquez sur une vidéo pour la sélectionner"
+    },
     "phoenixd": {
       "title": "Configurer la Connexion Phoenixd",
       "description": "Choisissez comment vous connecter à votre nœud Lightning phoenixd",
@@ -681,6 +686,15 @@
         "light": "Clair",
         "dark": "Sombre",
         "system": "Système (Auto)"
+      },
+      "background": "Fond de l'Écran de Verrouillage",
+      "backgrounds": {
+        "storm-clouds": "Nuages d'Orage",
+        "lightning": "Éclair",
+        "thunder-flash": "Éclair de Tonnerre",
+        "electric-storm": "Tempête Électrique",
+        "night-lightning": "Éclair Nocturne",
+        "sky-thunder": "Tonnerre Céleste"
       },
       "phoenixd": "Connexion Phoenixd",
       "phoenixdDocker": "Docker (Local)",

@@ -1,18 +1,20 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Check, Shield, Languages, Palette, Server, Globe, Package } from 'lucide-react';
+import { Check, Shield, Languages, Palette, Image, Server, Globe, Package } from 'lucide-react';
 import { localeNames, localeFlags, type Locale } from '@/i18n/routing';
 import type { PhoenixdConfig } from './step-phoenixd';
 import type { NetworkConfig } from './step-network';
 import type { AppsConfig } from './step-apps';
 import type { ProfileType } from './step-profile';
+import type { LockScreenBg } from '@/lib/api';
 
 interface WizardState {
   profile: ProfileType;
   password: string;
   locale: string;
   theme: 'light' | 'dark' | 'system';
+  lockScreenBg: LockScreenBg;
   phoenixd: PhoenixdConfig;
   network: NetworkConfig;
   apps: AppsConfig;
@@ -62,6 +64,12 @@ export function StepReview({ config }: StepReviewProps) {
       icon: Palette,
       title: t('theme'),
       value: t(`themes.${config.theme}`),
+      enabled: true,
+    },
+    {
+      icon: Image,
+      title: t('background'),
+      value: t(`backgrounds.${config.lockScreenBg}`),
       enabled: true,
     },
     {

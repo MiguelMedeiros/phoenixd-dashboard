@@ -194,11 +194,22 @@ const VALID_PROFILES = ['minimal', 'full', 'custom'];
 // Valid locales (must match frontend i18n/routing.ts)
 const VALID_LOCALES = ['en', 'pt', 'es', 'fr', 'de', 'zh', 'ko', 'ja', 'ru', 'ar', 'hi'];
 
+// Valid lock screen backgrounds (must match frontend)
+const VALID_LOCK_SCREEN_BGS = [
+  'lightning',
+  'thunder-flash',
+  'storm-clouds',
+  'electric-storm',
+  'night-lightning',
+  'sky-thunder',
+];
+
 export interface SetupConfig {
   profile: 'minimal' | 'full' | 'custom';
   password: string;
   locale: string;
   theme: string;
+  lockScreenBg?: string;
   phoenixd: {
     type: 'docker' | 'external';
     connections?: Array<{
@@ -278,6 +289,12 @@ setupRouter.post('/complete', async (req: Request, res: Response) => {
     // Validate locale
     const locale = config.locale && VALID_LOCALES.includes(config.locale) ? config.locale : 'en';
 
+    // Validate lock screen background
+    const lockScreenBg =
+      config.lockScreenBg && VALID_LOCK_SCREEN_BGS.includes(config.lockScreenBg)
+        ? config.lockScreenBg
+        : 'electric-storm';
+
     // Hash password
     const passwordHash = await bcrypt.hash(config.password, SALT_ROUNDS);
 
@@ -291,6 +308,7 @@ setupRouter.post('/complete', async (req: Request, res: Response) => {
           setupCompleted: true,
           setupProfile: config.profile,
           defaultLocale: locale,
+          lockScreenBg,
         },
         create: {
           id: 'singleton',
@@ -298,6 +316,7 @@ setupRouter.post('/complete', async (req: Request, res: Response) => {
           setupCompleted: true,
           setupProfile: config.profile,
           defaultLocale: locale,
+          lockScreenBg,
         },
       });
 

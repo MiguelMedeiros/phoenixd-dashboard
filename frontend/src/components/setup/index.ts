@@ -3,6 +3,7 @@ export { StepProfile, type ProfileType } from './step-profile';
 export { StepPassword } from './step-password';
 export { StepLanguage } from './step-language';
 export { StepTheme } from './step-theme';
+export { StepBackground } from './step-background';
 export { StepPhoenixd, type PhoenixdConfig, type PhoenixdConnection } from './step-phoenixd';
 export { StepNetwork, type NetworkConfig } from './step-network';
 export { StepApps, type AppsConfig } from './step-apps';

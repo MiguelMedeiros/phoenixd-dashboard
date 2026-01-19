@@ -470,6 +470,89 @@
     background: hsl(30 10% 95% / 0.04);
     border-color: hsl(30 10% 95% / 0.08);
   }
+
+  /* ============================================
+     SETUP WIZARD - Always Dark Styling
+     Forces dark theme colors inside wizard content
+     regardless of selected theme for video contrast
+     ============================================ */
+
+  .setup-wizard-content {
+    /* Override CSS variables for dark theme */
+    --foreground: 30 10% 95%;
+    --card-foreground: 30 10% 95%;
+    --muted-foreground: 30 10% 70%;
+    --muted: 30 10% 95% / 0.08;
+    --border: 30 10% 95% / 0.2;
+    --input: 30 10% 95% / 0.08;
+    --primary: 24 95% 58%;
+    --primary-foreground: 0 0% 100%;
+    --card: 30 10% 95% / 0.06;
+  }
+
+  .setup-wizard-content h2,
+  .setup-wizard-content h3,
+  .setup-wizard-content span,
+  .setup-wizard-content p {
+    color: hsl(30 10% 95%);
+  }
+
+  .setup-wizard-content .text-muted-foreground {
+    color: hsl(30 10% 70%) !important;
+  }
+
+  .setup-wizard-content button {
+    color: hsl(30 10% 95%);
+    border-color: hsl(30 10% 95% / 0.2);
+  }
+
+  .setup-wizard-content button:hover {
+    background: hsl(30 10% 95% / 0.1);
+    border-color: hsl(30 10% 95% / 0.3);
+  }
+
+  .setup-wizard-content button[class*='border-primary'],
+  .setup-wizard-content button[class*='bg-primary'] {
+    border-color: hsl(24 95% 58%);
+    background: hsl(24 95% 58% / 0.15);
+  }
+
+  .setup-wizard-content .bg-muted {
+    background: hsl(30 10% 95% / 0.08) !important;
+  }
+
+  .setup-wizard-content .bg-primary\/5,
+  .setup-wizard-content [class*='bg-primary/5'] {
+    background: hsl(24 95% 58% / 0.15) !important;
+  }
+
+  .setup-wizard-content .bg-primary\/20,
+  .setup-wizard-content [class*='bg-primary/20'] {
+    background: hsl(24 95% 58% / 0.25) !important;
+  }
+
+  .setup-wizard-content .text-primary {
+    color: hsl(24 95% 58%) !important;
+  }
+
+  .setup-wizard-content .border-border {
+    border-color: hsl(30 10% 95% / 0.2) !important;
+  }
+
+  .setup-wizard-content input {
+    background: hsl(30 10% 95% / 0.08) !important;
+    border-color: hsl(30 10% 95% / 0.2) !important;
+    color: hsl(30 10% 95%) !important;
+  }
+
+  .setup-wizard-content input::placeholder {
+    color: hsl(30 10% 60%) !important;
+  }
+
+  .setup-wizard-content input:focus {
+    border-color: hsl(24 95% 58%) !important;
+    box-shadow: 0 0 0 2px hsl(24 95% 58% / 0.2) !important;
+  }
 }
 
 @layer utilities {

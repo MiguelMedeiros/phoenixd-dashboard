@@ -1509,6 +1509,7 @@ export interface SetupConfig {
   password: string;
   locale: string;
   theme: string;
+  lockScreenBg?: LockScreenBg;
   phoenixd: {
     type: 'docker' | 'external';
     connections?: Array<{

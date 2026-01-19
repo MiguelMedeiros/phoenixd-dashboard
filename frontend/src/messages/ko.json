@@ -617,6 +617,11 @@
       "system": "시스템",
       "preview": "테마가 실시간으로 미리보기로 적용됩니다"
     },
+    "background": {
+      "title": "잠금 화면 배경 선택",
+      "description": "잠금 화면의 배경 비디오 선택",
+      "preview": "비디오를 클릭하여 선택하세요"
+    },
     "phoenixd": {
       "title": "Phoenixd 연결 구성",
       "description": "phoenixd 라이트닝 노드에 연결하는 방법 선택",
@@ -676,6 +681,15 @@
         "light": "라이트",
         "dark": "다크",
         "system": "시스템 (자동)"
+      },
+      "background": "잠금 화면 배경",
+      "backgrounds": {
+        "storm-clouds": "폭풍 구름",
+        "lightning": "번개",
+        "thunder-flash": "천둥 번쩍",
+        "electric-storm": "전기 폭풍",
+        "night-lightning": "밤 번개",
+        "sky-thunder": "하늘 천둥"
       },
       "phoenixd": "Phoenixd 연결",
       "phoenixdDocker": "Docker (로컬)",
