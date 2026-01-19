@@ -2,6 +2,8 @@
 
 Deploy Phoenixd Dashboard to popular cloud platforms with one click.
 
+> **Note:** All environment variables are optional! You can deploy immediately and configure your phoenixd connection later through the setup wizard.
+
 ## One-Click Deploy Options
 
 ### Railway
@@ -19,10 +21,8 @@ Railway offers the best Docker Compose support and automatic PostgreSQL provisio
 **Setup:**
 1. Click the deploy button
 2. Connect your GitHub account
-3. Configure environment variables:
-   - `PHOENIXD_URL`: Your phoenixd instance URL
-   - `PHOENIXD_PASSWORD`: Your phoenixd password
-4. Deploy!
+3. Skip the environment variables (they're optional!)
+4. Deploy and configure phoenixd connection in the setup wizard
 
 ---
 
@@ -42,9 +42,7 @@ Render provides managed PostgreSQL and automatic SSL.
 1. Click the deploy button
 2. Connect your GitHub account
 3. Review the services (backend, frontend, database)
-4. Configure secrets:
-   - `PHOENIXD_URL`: Your phoenixd instance URL
-   - `PHOENIXD_PASSWORD`: Your phoenixd password
+4. Skip the optional secrets (configure later in setup wizard)
 5. Deploy!
 
 ---
@@ -64,7 +62,7 @@ DigitalOcean offers reliable infrastructure with predictable pricing.
 **Setup:**
 1. Click the deploy button
 2. Connect your GitHub repository
-3. Configure environment variables
+3. Skip optional environment variables
 4. Select your plan
 5. Deploy!
 
@@ -84,8 +82,8 @@ Heroku is a classic PaaS with easy deployment.
 **Setup:**
 1. Click the deploy button
 2. Create or log in to your Heroku account
-3. Configure environment variables
-4. Deploy!
+3. Leave optional variables empty
+4. Deploy and configure in setup wizard!
 
 ---
 
@@ -123,14 +121,15 @@ For full functionality, consider [self-hosting with Docker](installation.md).
 
 ## Environment Variables
 
-All cloud platforms require these environment variables:
+All phoenixd-related environment variables are **optional**. You can configure your connection through the setup wizard after deployment.
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `PHOENIXD_URL` | Yes | URL of your phoenixd instance |
-| `PHOENIXD_PASSWORD` | Yes | Password for phoenixd authentication |
+| `PHOENIXD_URL` | No | URL of your phoenixd instance (configure in setup wizard) |
+| `PHOENIXD_PASSWORD` | No | Password for phoenixd authentication (configure in setup wizard) |
 | `FRONTEND_URL` | Auto | Set automatically by most platforms |
 | `DATABASE_URL` | Auto | Set automatically when using managed database |
+| `NODE_ENV` | Auto | Set to `production` automatically |
 
 ---
 

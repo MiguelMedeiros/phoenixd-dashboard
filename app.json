@@ -12,12 +12,12 @@
       "value": "production"
     },
     "PHOENIXD_URL": {
-      "description": "URL of your phoenixd instance (e.g., http://phoenixd:9740)",
-      "required": true
+      "description": "Optional: URL of your phoenixd instance. Can be configured later in the setup wizard.",
+      "required": false
     },
     "PHOENIXD_PASSWORD": {
-      "description": "Password for phoenixd authentication",
-      "required": true
+      "description": "Optional: Password for phoenixd authentication. Can be configured later in the setup wizard.",
+      "required": false
     }
   },
   "addons": [

@@ -1,5 +1,8 @@
 # Render Blueprint - https://render.com/docs/blueprint-spec
 # Deploy with one click: https://render.com/deploy
+#
+# Note: PHOENIXD_URL and PHOENIXD_PASSWORD are optional.
+# You can configure your phoenixd connection later in the setup wizard.
 
 databases:
   - name: phoenixd-db
@@ -27,6 +30,7 @@ services:
         fromDatabase:
           name: phoenixd-db
           property: connectionString
+      # Optional: Can be configured later in the setup wizard
       - key: PHOENIXD_URL
         sync: false
       - key: PHOENIXD_PASSWORD

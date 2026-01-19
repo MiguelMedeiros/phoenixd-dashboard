@@ -1,5 +1,8 @@
 # DigitalOcean App Platform Spec
 # https://docs.digitalocean.com/products/app-platform/reference/app-spec/
+#
+# Note: PHOENIXD_URL and PHOENIXD_PASSWORD are optional.
+# You can configure your phoenixd connection later in the setup wizard.
 
 name: phoenixd-dashboard
 
@@ -33,12 +36,13 @@ services:
       - key: DATABASE_URL
         scope: RUN_TIME
         value: ${db.DATABASE_URL}
+      # Optional: Can be configured later in the setup wizard
       - key: PHOENIXD_URL
         scope: RUN_TIME
-        type: SECRET
+        value: ""
       - key: PHOENIXD_PASSWORD
         scope: RUN_TIME
-        type: SECRET
+        value: ""
       - key: FRONTEND_URL
         scope: RUN_TIME
         value: ${APP_URL}
