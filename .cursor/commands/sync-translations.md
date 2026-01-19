@@ -1,17 +1,17 @@
 # /sync-translations - Sync translation files with en.json
 
-Check and synchronize all translation files to match the structure of `en.json` (the default/source of truth).
+Synchronize all translation files to match the structure of `en.json` (the default/source of truth).
 
 ## Usage
 
-- `/sync-translations` - Check all translation files and report differences
-- `/sync-translations fix` - Automatically fix all translation files to match en.json
+- `/sync-translations` - Sync all translation files (adds missing keys, removes extra keys)
+- `/sync-translations check` - Only report differences without fixing
 
 ## What This Command Does
 
 1. **Compares** all language files against `en.json`
 2. **Reports** missing keys, extra keys, and structural differences
-3. **Optionally fixes** by adding missing keys (with English fallback) and removing extra keys
+3. **Fixes** by adding missing keys (with English fallback) and removing extra keys
 
 ## Translation Files Location
 
@@ -43,41 +43,39 @@ For each language file, compare against en.json to find:
 - **Extra keys**: Keys that exist in the language file but not in en.json
 - **Structure differences**: Nested objects that don't match
 
-### Step 3: Report or Fix
+### Step 3: Fix and Report
 
-**Check mode (default):**
+1. Add missing keys using English text as placeholder
+2. Remove extra keys that don't exist in en.json
+3. Preserve existing translations
+4. Maintain proper JSON formatting
+5. Show summary table of changes
+
 Generate a report table showing:
 
 | Language | Missing Keys | Extra Keys | Status |
 |----------|-------------|------------|--------|
 | pt.json  | 0           | 0          | ✅     |
-| es.json  | 2           | 1          | ⚠️     |
+| es.json  | 2 (fixed)   | 1 (fixed)  | ✅     |
 | ...      | ...         | ...        | ...    |
-
-List specific missing/extra keys for each file with issues.
-
-**Fix mode (`/sync-translations fix`):**
-1. Add missing keys using English text as placeholder (with comment)
-2. Remove extra keys that don't exist in en.json
-3. Preserve existing translations
-4. Maintain proper JSON formatting
 
 ## Helper Script
 
-Create and run this Node.js script to perform the check:
+Run this Node.js script to sync translations:
 
-```javascript
+```bash
+cd /Users/miguelmedeiros/code/phoenixd-dashboard
+node -e "
 const fs = require('fs');
 const path = require('path');
 
 const messagesDir = './frontend/src/messages';
 const sourceFile = 'en.json';
 
-// Get all keys from an object recursively
 function getAllKeys(obj, prefix = '') {
   let keys = [];
   for (const key in obj) {
-    const fullKey = prefix ? `${prefix}.${key}` : key;
+    const fullKey = prefix ? \`\${prefix}.\${key}\` : key;
     if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
       keys = keys.concat(getAllKeys(obj[key], fullKey));
     } else {
@@ -87,12 +85,10 @@ function getAllKeys(obj, prefix = '') {
   return keys;
 }
 
-// Get value by dot-notation key
 function getValue(obj, key) {
   return key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj);
 }
 
-// Set value by dot-notation key
 function setValue(obj, key, value) {
   const keys = key.split('.');
   let current = obj;
@@ -103,7 +99,6 @@ function setValue(obj, key, value) {
   current[keys[keys.length - 1]] = value;
 }
 
-// Delete value by dot-notation key
 function deleteValue(obj, key) {
   const keys = key.split('.');
   let current = obj;
@@ -114,12 +109,15 @@ function deleteValue(obj, key) {
   delete current[keys[keys.length - 1]];
 }
 
-// Main
 const source = JSON.parse(fs.readFileSync(path.join(messagesDir, sourceFile), 'utf8'));
 const sourceKeys = getAllKeys(source);
-
 const files = fs.readdirSync(messagesDir).filter(f => f.endsWith('.json') && f !== sourceFile);
-const results = [];
+
+console.log('\n📊 Translation Sync Report\n');
+console.log('| Language | Missing | Extra | Status |');
+console.log('|----------|---------|-------|--------|');
+
+let totalFixed = 0;
 
 for (const file of files) {
   const filePath = path.join(messagesDir, file);
@@ -129,82 +127,30 @@ for (const file of files) {
   const missing = sourceKeys.filter(k => !targetKeys.includes(k));
   const extra = targetKeys.filter(k => !sourceKeys.includes(k));
 
-  results.push({ file, missing, extra, target, filePath });
-}
-
-// Report
-console.log('\n📊 Translation Sync Report\n');
-console.log('| Language | Missing | Extra | Status |');
-console.log('|----------|---------|-------|--------|');
-
-for (const r of results) {
-  const status = r.missing.length === 0 && r.extra.length === 0 ? '✅' : '⚠️';
-  console.log(`| ${r.file.padEnd(8)} | ${String(r.missing.length).padEnd(7)} | ${String(r.extra.length).padEnd(5)} | ${status}      |`);
-}
-
-// Details
-for (const r of results) {
-  if (r.missing.length > 0 || r.extra.length > 0) {
-    console.log(`\n📁 ${r.file}:`);
-    if (r.missing.length > 0) {
-      console.log('  Missing keys:');
-      r.missing.forEach(k => console.log(`    - ${k}`));
-    }
-    if (r.extra.length > 0) {
-      console.log('  Extra keys (to remove):');
-      r.extra.forEach(k => console.log(`    - ${k}`));
-    }
+  let modified = false;
+  for (const key of missing) {
+    setValue(target, key, getValue(source, key));
+    modified = true;
   }
-}
-
-// Fix mode
-if (process.argv.includes('--fix')) {
-  console.log('\n🔧 Fixing translation files...\n');
-  for (const r of results) {
-    let modified = false;
-    
-    // Add missing keys with English fallback
-    for (const key of r.missing) {
-      setValue(r.target, key, getValue(source, key));
-      modified = true;
-    }
-    
-    // Remove extra keys
-    for (const key of r.extra) {
-      deleteValue(r.target, key);
-      modified = true;
-    }
-    
-    if (modified) {
-      fs.writeFileSync(r.filePath, JSON.stringify(r.target, null, 2) + '\n');
-      console.log(`✅ Fixed: ${r.file}`);
-    }
+  for (const key of extra) {
+    deleteValue(target, key);
+    modified = true;
   }
-  console.log('\nDone!');
+
+  if (modified) {
+    fs.writeFileSync(filePath, JSON.stringify(target, null, 2) + '\n');
+    totalFixed++;
+  }
+
+  const status = missing.length === 0 && extra.length === 0 ? '✅' : '🔧';
+  const missingStr = missing.length > 0 ? \`\${missing.length} fixed\` : '0';
+  const extraStr = extra.length > 0 ? \`\${extra.length} fixed\` : '0';
+  console.log(\`| \${file.padEnd(8)} | \${missingStr.padEnd(7)} | \${extraStr.padEnd(5)} | \${status}      |\`);
 }
+
+console.log(\`\n✅ Sync complete! \${totalFixed} files updated.\n\`);
+"
 ```
-
-## Quick Commands
-
-```bash
-# Check translations (report only)
-node -e "$(cat << 'SCRIPT'
-// ... script above ...
-SCRIPT
-)"
-
-# Fix translations
-node -e "..." --fix
-```
-
-## Manual Check Process
-
-If not using the script, manually:
-
-1. Open en.json and each language file side by side
-2. Use a JSON diff tool or compare keys
-3. For missing keys: copy from en.json (translation can be updated later)
-4. For extra keys: remove them from the language file
 
 ## Notes
 
@@ -212,4 +158,4 @@ If not using the script, manually:
 - New features should add translations to en.json first
 - Other language files can use English text as placeholder until translated
 - Maintain alphabetical order of keys when possible
-- Run this check before major releases
+- Run this before major releases

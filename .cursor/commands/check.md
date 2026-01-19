@@ -29,7 +29,16 @@ cd /Users/miguelmedeiros/code/phoenixd-dashboard/frontend
 3. Run tests: `npm run test`
 4. Build Next.js: `npm run build`
 
-### 3. Summary
+### 3. E2E Tests
+
+```bash
+cd /Users/miguelmedeiros/code/phoenixd-dashboard
+npm run test:e2e
+```
+
+Run the full E2E test suite with Cypress.
+
+### 4. Summary
 
 After running all checks, provide a summary table:
 
@@ -44,18 +53,12 @@ After running all checks, provide a summary table:
 | Frontend | ESLint          | ✅/❌  |
 | Frontend | Tests (count)   | ✅/❌  |
 | Frontend | Build           | ✅/❌  |
+| E2E      | Tests (count)   | ✅/❌  |
 
 ## Variants
 
-- `/check` - Run quick checks (unit tests only)
-- `/check full` or `/check e2e` - Also run E2E tests with Cypress
-
-### E2E Tests (when requested)
-
-```bash
-cd /Users/miguelmedeiros/code/phoenixd-dashboard/e2e
-npm run test
-```
+- `/check` - Run all checks including E2E tests
+- `/check quick` - Run only unit tests (skip E2E)
 
 ## Notes
 
