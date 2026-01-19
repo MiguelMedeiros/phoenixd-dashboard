@@ -8,7 +8,7 @@ Deploy Phoenixd Dashboard to popular cloud platforms with one click.
 
 ### Railway
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https://github.com/MiguelMedeiros/phoenixd-dashboard)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/5Sg2f0?referralCode=rBePXa)
 
 Railway offers the best Docker Compose support and automatic PostgreSQL provisioning.
 

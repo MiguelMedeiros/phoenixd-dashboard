@@ -24,7 +24,7 @@
 </p>
 
 <p align="center">
-  <a href="https://railway.com/new/template?template=https://github.com/MiguelMedeiros/phoenixd-dashboard"><img src="https://railway.com/button.svg" alt="Deploy on Railway" height="32"></a>
+  <a href="https://railway.com/deploy/5Sg2f0?referralCode=rBePXa"><img src="https://railway.com/button.svg" alt="Deploy on Railway" height="32"></a>
   &nbsp;&nbsp;
   <a href="https://render.com/deploy?repo=https://github.com/MiguelMedeiros/phoenixd-dashboard"><img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" height="32"></a>
   &nbsp;&nbsp;
