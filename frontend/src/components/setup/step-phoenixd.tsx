@@ -108,7 +108,7 @@ export function StepPhoenixd({ value, onChange }: StepPhoenixdProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">{t('title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <p className="text-slate-600 dark:text-white/60 text-sm">{t('description')}</p>
       </div>
 
       {/* Type Selection */}
@@ -118,28 +118,28 @@ export function StepPhoenixd({ value, onChange }: StepPhoenixdProps) {
           className={cn(
             'flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all',
             value.type === 'docker'
-              ? 'border-primary bg-primary/5'
-              : 'border-border hover:border-primary/50 hover:bg-muted/50'
+              ? 'border-orange-500 bg-orange-500/10 dark:bg-orange-500/5'
+              : 'border-slate-200 dark:border-white/10 hover:border-orange-400 hover:bg-slate-50 dark:hover:bg-white/5'
           )}
         >
           <div
             className={cn(
               'h-14 w-14 rounded-xl flex items-center justify-center',
-              value.type === 'docker' ? 'bg-primary/20' : 'bg-muted'
+              value.type === 'docker' ? 'bg-orange-500/20' : 'bg-slate-100 dark:bg-white/10'
             )}
           >
             <Server
               className={cn(
                 'h-7 w-7',
-                value.type === 'docker' ? 'text-primary' : 'text-muted-foreground'
+                value.type === 'docker' ? 'text-orange-500' : 'text-slate-500 dark:text-white/60'
               )}
             />
           </div>
           <div className="text-center">
-            <span className={cn('font-medium block', value.type === 'docker' && 'text-primary')}>
+            <span className={cn('font-medium block', value.type === 'docker' && 'text-orange-500')}>
               {t('dockerTitle')}
             </span>
-            <span className="text-xs text-muted-foreground">{t('dockerDesc')}</span>
+            <span className="text-xs text-slate-500 dark:text-white/50">{t('dockerDesc')}</span>
           </div>
         </button>
 
@@ -148,37 +148,39 @@ export function StepPhoenixd({ value, onChange }: StepPhoenixdProps) {
           className={cn(
             'flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all',
             value.type === 'external'
-              ? 'border-primary bg-primary/5'
-              : 'border-border hover:border-primary/50 hover:bg-muted/50'
+              ? 'border-orange-500 bg-orange-500/10 dark:bg-orange-500/5'
+              : 'border-slate-200 dark:border-white/10 hover:border-orange-400 hover:bg-slate-50 dark:hover:bg-white/5'
           )}
         >
           <div
             className={cn(
               'h-14 w-14 rounded-xl flex items-center justify-center',
-              value.type === 'external' ? 'bg-primary/20' : 'bg-muted'
+              value.type === 'external' ? 'bg-orange-500/20' : 'bg-slate-100 dark:bg-white/10'
             )}
           >
             <ExternalLink
               className={cn(
                 'h-7 w-7',
-                value.type === 'external' ? 'text-primary' : 'text-muted-foreground'
+                value.type === 'external' ? 'text-orange-500' : 'text-slate-500 dark:text-white/60'
               )}
             />
           </div>
           <div className="text-center">
-            <span className={cn('font-medium block', value.type === 'external' && 'text-primary')}>
+            <span
+              className={cn('font-medium block', value.type === 'external' && 'text-orange-500')}
+            >
               {t('externalTitle')}
             </span>
-            <span className="text-xs text-muted-foreground">{t('externalDesc')}</span>
+            <span className="text-xs text-slate-500 dark:text-white/50">{t('externalDesc')}</span>
           </div>
         </button>
       </div>
 
       {/* Docker Info */}
       {value.type === 'docker' && (
-        <div className="flex items-center gap-3 p-4 rounded-lg bg-success/10 border border-success/20">
-          <Zap className="h-5 w-5 text-success flex-shrink-0" />
-          <p className="text-sm text-success">{t('dockerInfo')}</p>
+        <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+          <Zap className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+          <p className="text-sm text-emerald-700 dark:text-emerald-400">{t('dockerInfo')}</p>
         </div>
       )}
 
@@ -186,7 +188,10 @@ export function StepPhoenixd({ value, onChange }: StepPhoenixdProps) {
       {value.type === 'external' && (
         <div className="space-y-4">
           {value.connections.map((conn, index) => (
-            <div key={index} className="p-4 rounded-lg border border-border space-y-4">
+            <div
+              key={index}
+              className="p-4 rounded-lg border border-slate-200 dark:border-white/10 space-y-4"
+            >
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">
                   {t('connection')} {index + 1}

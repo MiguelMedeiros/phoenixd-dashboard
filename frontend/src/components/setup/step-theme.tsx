@@ -33,7 +33,7 @@ export function StepTheme({ value, onChange }: StepThemeProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">{t('title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <p className="text-slate-600 dark:text-white/60 text-sm">{t('description')}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -48,27 +48,32 @@ export function StepTheme({ value, onChange }: StepThemeProps) {
               className={cn(
                 'flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all',
                 isSelected
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                  ? 'border-orange-500 bg-orange-500/10 dark:bg-orange-500/5'
+                  : 'border-slate-200 dark:border-white/10 hover:border-orange-400 hover:bg-slate-50 dark:hover:bg-white/5'
               )}
             >
               <div
                 className={cn(
                   'h-14 w-14 rounded-xl flex items-center justify-center',
-                  isSelected ? 'bg-primary/20' : 'bg-muted'
+                  isSelected ? 'bg-orange-500/20' : 'bg-slate-100 dark:bg-white/10'
                 )}
               >
                 <Icon
-                  className={cn('h-7 w-7', isSelected ? 'text-primary' : 'text-muted-foreground')}
+                  className={cn(
+                    'h-7 w-7',
+                    isSelected ? 'text-orange-500' : 'text-slate-500 dark:text-white/60'
+                  )}
                 />
               </div>
-              <span className={cn('font-medium', isSelected && 'text-primary')}>{t(theme.id)}</span>
+              <span className={cn('font-medium', isSelected && 'text-orange-500')}>
+                {t(theme.id)}
+              </span>
             </button>
           );
         })}
       </div>
 
-      <p className="text-xs text-muted-foreground text-center">{t('preview')}</p>
+      <p className="text-xs text-slate-500 dark:text-white/50 text-center">{t('preview')}</p>
     </div>
   );
 }

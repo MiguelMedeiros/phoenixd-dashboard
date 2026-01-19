@@ -45,12 +45,12 @@ export function StepPassword({ value, onChange }: StepPasswordProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">{t('title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <p className="text-slate-600 dark:text-white/60 text-sm">{t('description')}</p>
       </div>
 
-      <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/10 border border-primary/20">
-        <Shield className="h-5 w-5 text-primary flex-shrink-0" />
-        <p className="text-sm text-primary">{t('securityNote')}</p>
+      <div className="flex items-center gap-3 p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
+        <Shield className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+        <p className="text-sm text-orange-700 dark:text-orange-400">{t('securityNote')}</p>
       </div>
 
       <div className="space-y-4">
@@ -68,7 +68,7 @@ export function StepPassword({ value, onChange }: StepPasswordProps) {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-white/50 hover:text-slate-700 dark:hover:text-white"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -87,7 +87,7 @@ export function StepPassword({ value, onChange }: StepPasswordProps) {
                   />
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500 dark:text-white/50">
                 {t('strength')}: {t(strength.label)}
               </p>
             </div>
@@ -121,7 +121,7 @@ export function StepPassword({ value, onChange }: StepPasswordProps) {
         </div>
       </div>
 
-      <div className="text-xs text-muted-foreground space-y-1">
+      <div className="text-xs text-slate-500 dark:text-white/50 space-y-1">
         <p className="flex items-center gap-2">
           <span className={value.length >= 4 ? 'text-success' : ''}>
             {value.length >= 4 ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}

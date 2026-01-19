@@ -55,12 +55,12 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">{t('title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <p className="text-slate-600 dark:text-white/60 text-sm">{t('description')}</p>
       </div>
 
-      <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-        <Info className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-        <p className="text-sm text-muted-foreground">{t('optional')}</p>
+      <div className="flex items-center gap-3 p-4 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+        <Info className="h-5 w-5 text-slate-500 dark:text-white/50 flex-shrink-0" />
+        <p className="text-sm text-slate-600 dark:text-white/60">{t('optional')}</p>
       </div>
 
       <div className="space-y-4">
@@ -68,7 +68,9 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
         <div
           className={cn(
             'p-4 rounded-xl border-2 transition-all',
-            value.tailscale?.enabled ? 'border-primary bg-primary/5' : 'border-border'
+            value.tailscale?.enabled
+              ? 'border-orange-500 bg-orange-500/10 dark:bg-orange-500/5'
+              : 'border-slate-200 dark:border-white/10'
           )}
         >
           <div className="flex items-center justify-between mb-4">
@@ -76,19 +78,23 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
               <div
                 className={cn(
                   'h-10 w-10 rounded-lg flex items-center justify-center',
-                  value.tailscale?.enabled ? 'bg-primary/20' : 'bg-muted'
+                  value.tailscale?.enabled ? 'bg-orange-500/20' : 'bg-slate-100 dark:bg-white/10'
                 )}
               >
                 <Globe
                   className={cn(
                     'h-5 w-5',
-                    value.tailscale?.enabled ? 'text-primary' : 'text-muted-foreground'
+                    value.tailscale?.enabled
+                      ? 'text-orange-500'
+                      : 'text-slate-500 dark:text-white/60'
                   )}
                 />
               </div>
               <div>
                 <h3 className="font-medium">{t('tailscale.title')}</h3>
-                <p className="text-xs text-muted-foreground">{t('tailscale.description')}</p>
+                <p className="text-xs text-slate-500 dark:text-white/50">
+                  {t('tailscale.description')}
+                </p>
               </div>
             </div>
             <Switch
@@ -98,7 +104,7 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
           </div>
 
           {value.tailscale?.enabled && (
-            <div className="space-y-3 pt-3 border-t border-border">
+            <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-white/10">
               <div className="space-y-1.5">
                 <Label htmlFor="tailscale-authkey">{t('tailscale.authKeyLabel')}</Label>
                 <Input
@@ -126,7 +132,9 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
         <div
           className={cn(
             'p-4 rounded-xl border-2 transition-all',
-            value.cloudflared?.enabled ? 'border-primary bg-primary/5' : 'border-border'
+            value.cloudflared?.enabled
+              ? 'border-orange-500 bg-orange-500/10 dark:bg-orange-500/5'
+              : 'border-slate-200 dark:border-white/10'
           )}
         >
           <div className="flex items-center justify-between mb-4">
@@ -134,19 +142,23 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
               <div
                 className={cn(
                   'h-10 w-10 rounded-lg flex items-center justify-center',
-                  value.cloudflared?.enabled ? 'bg-primary/20' : 'bg-muted'
+                  value.cloudflared?.enabled ? 'bg-orange-500/20' : 'bg-slate-100 dark:bg-white/10'
                 )}
               >
                 <Cloud
                   className={cn(
                     'h-5 w-5',
-                    value.cloudflared?.enabled ? 'text-primary' : 'text-muted-foreground'
+                    value.cloudflared?.enabled
+                      ? 'text-orange-500'
+                      : 'text-slate-500 dark:text-white/60'
                   )}
                 />
               </div>
               <div>
                 <h3 className="font-medium">{t('cloudflared.title')}</h3>
-                <p className="text-xs text-muted-foreground">{t('cloudflared.description')}</p>
+                <p className="text-xs text-slate-500 dark:text-white/50">
+                  {t('cloudflared.description')}
+                </p>
               </div>
             </div>
             <Switch
@@ -156,7 +168,7 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
           </div>
 
           {value.cloudflared?.enabled && (
-            <div className="space-y-3 pt-3 border-t border-border">
+            <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-white/10">
               <div className="space-y-1.5">
                 <Label htmlFor="cloudflared-token">{t('cloudflared.tokenLabel')}</Label>
                 <Input
@@ -175,7 +187,9 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
         <div
           className={cn(
             'p-4 rounded-xl border-2 transition-all',
-            value.tor?.enabled ? 'border-primary bg-primary/5' : 'border-border'
+            value.tor?.enabled
+              ? 'border-orange-500 bg-orange-500/10 dark:bg-orange-500/5'
+              : 'border-slate-200 dark:border-white/10'
           )}
         >
           <div className="flex items-center justify-between">
@@ -183,19 +197,19 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
               <div
                 className={cn(
                   'h-10 w-10 rounded-lg flex items-center justify-center',
-                  value.tor?.enabled ? 'bg-primary/20' : 'bg-muted'
+                  value.tor?.enabled ? 'bg-orange-500/20' : 'bg-slate-100 dark:bg-white/10'
                 )}
               >
                 <Shield
                   className={cn(
                     'h-5 w-5',
-                    value.tor?.enabled ? 'text-primary' : 'text-muted-foreground'
+                    value.tor?.enabled ? 'text-orange-500' : 'text-slate-500 dark:text-white/60'
                   )}
                 />
               </div>
               <div>
                 <h3 className="font-medium">{t('tor.title')}</h3>
-                <p className="text-xs text-muted-foreground">{t('tor.description')}</p>
+                <p className="text-xs text-slate-500 dark:text-white/50">{t('tor.description')}</p>
               </div>
             </div>
             <Switch

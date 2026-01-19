@@ -62,7 +62,7 @@ export function StepApps({ value, onChange }: StepAppsProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
       </div>
     );
   }
@@ -71,13 +71,13 @@ export function StepApps({ value, onChange }: StepAppsProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">{t('title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <p className="text-slate-600 dark:text-white/60 text-sm">{t('description')}</p>
       </div>
 
       {apps.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <Package className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">{t('noApps')}</p>
+          <Package className="h-12 w-12 text-slate-400 dark:text-white/40 mb-4" />
+          <p className="text-slate-500 dark:text-white/50">{t('noApps')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -90,13 +90,15 @@ export function StepApps({ value, onChange }: StepAppsProps) {
                 key={app.slug}
                 className={cn(
                   'flex items-center gap-4 p-4 rounded-xl border-2 transition-all',
-                  isEnabled ? 'border-primary bg-primary/5' : 'border-border'
+                  isEnabled
+                    ? 'border-orange-500 bg-orange-500/10 dark:bg-orange-500/5'
+                    : 'border-slate-200 dark:border-white/10'
                 )}
               >
                 <div
                   className={cn(
                     'h-12 w-12 rounded-xl flex items-center justify-center text-2xl',
-                    isEnabled ? 'bg-primary/20' : 'bg-muted'
+                    isEnabled ? 'bg-orange-500/20' : 'bg-slate-100 dark:bg-white/10'
                   )}
                 >
                   {app.icon || <Icon className="h-6 w-6" />}
@@ -106,12 +108,12 @@ export function StepApps({ value, onChange }: StepAppsProps) {
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium">{app.name}</h3>
                     {app.recommended && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-primary/20 text-primary rounded-full">
+                      <span className="px-2 py-0.5 text-xs font-medium bg-orange-500/20 text-orange-600 dark:text-orange-400 rounded-full">
                         {t('recommended')}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{app.description}</p>
+                  <p className="text-sm text-slate-600 dark:text-white/60">{app.description}</p>
                 </div>
 
                 <Switch
@@ -124,7 +126,7 @@ export function StepApps({ value, onChange }: StepAppsProps) {
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground text-center">{t('canChangeLater')}</p>
+      <p className="text-xs text-slate-500 dark:text-white/50 text-center">{t('canChangeLater')}</p>
     </div>
   );
 }

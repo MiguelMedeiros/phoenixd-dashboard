@@ -421,8 +421,14 @@ export function SetupWizard() {
           <Progress value={progress} className="h-2" />
         </div>
 
-        {/* Step Content - Always dark theme styling for contrast with video background */}
-        <div className="backdrop-blur-xl bg-black/40 border border-white/20 rounded-2xl p-6 md:p-8 mb-6 setup-wizard-content">
+        {/* Step Content */}
+        <div
+          className={cn(
+            'backdrop-blur-xl rounded-2xl p-6 md:p-8 mb-6',
+            'dark:bg-white/[0.08] dark:border dark:border-white/[0.1] dark:text-white',
+            'bg-white border border-black/10 shadow-2xl text-slate-900'
+          )}
+        >
           <div key={currentStep} className="animate-in fade-in duration-200">
             {renderStep()}
           </div>

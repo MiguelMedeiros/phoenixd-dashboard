@@ -27,7 +27,7 @@ export function StepBackground({ value, onChange }: StepBackgroundProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">{t('title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <p className="text-slate-600 dark:text-white/60 text-sm">{t('description')}</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -38,7 +38,7 @@ export function StepBackground({ value, onChange }: StepBackgroundProps) {
             className={cn(
               'relative rounded-xl overflow-hidden aspect-video transition-all',
               value === bg.id
-                ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-white dark:ring-offset-transparent'
                 : 'hover:opacity-80'
             )}
           >
@@ -55,7 +55,7 @@ export function StepBackground({ value, onChange }: StepBackgroundProps) {
               {tSettings(bg.labelKey)}
             </span>
             {value === bg.id && (
-              <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+              <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center">
                 <Check className="h-3 w-3 text-white" />
               </div>
             )}
@@ -63,7 +63,7 @@ export function StepBackground({ value, onChange }: StepBackgroundProps) {
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground text-center">{t('preview')}</p>
+      <p className="text-xs text-slate-500 dark:text-white/50 text-center">{t('preview')}</p>
     </div>
   );
 }

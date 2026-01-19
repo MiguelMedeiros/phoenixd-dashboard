@@ -102,7 +102,7 @@ export function StepReview({ config }: StepReviewProps) {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">{t('title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <p className="text-slate-600 dark:text-white/60 text-sm">{t('description')}</p>
       </div>
 
       <div className="space-y-3">
@@ -112,23 +112,25 @@ export function StepReview({ config }: StepReviewProps) {
           return (
             <div
               key={section.title}
-              className="flex items-center gap-4 p-4 rounded-xl border border-border bg-muted/30"
+              className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5"
             >
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Icon className="h-5 w-5 text-primary" />
+              <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                <Icon className="h-5 w-5 text-orange-500" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-sm">{section.title}</h3>
-                <p className="text-sm text-muted-foreground truncate">{section.value}</p>
+                <p className="text-sm text-slate-600 dark:text-white/60 truncate">
+                  {section.value}
+                </p>
               </div>
-              <Check className="h-5 w-5 text-success flex-shrink-0" />
+              <Check className="h-5 w-5 text-emerald-500 flex-shrink-0" />
             </div>
           );
         })}
       </div>
 
-      <div className="p-4 rounded-lg bg-success/10 border border-success/20">
-        <p className="text-sm text-success text-center">{t('ready')}</p>
+      <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+        <p className="text-sm text-emerald-700 dark:text-emerald-400 text-center">{t('ready')}</p>
       </div>
     </div>
   );

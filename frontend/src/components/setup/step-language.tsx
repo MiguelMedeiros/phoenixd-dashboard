@@ -26,7 +26,7 @@ export function StepLanguage({ value, onChange, onLocaleChange }: StepLanguagePr
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">{t('title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
+        <p className="text-slate-600 dark:text-white/60 text-sm">{t('description')}</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -40,12 +40,12 @@ export function StepLanguage({ value, onChange, onLocaleChange }: StepLanguagePr
               className={cn(
                 'flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left',
                 isSelected
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                  ? 'border-orange-500 bg-orange-500/10 dark:bg-orange-500/5'
+                  : 'border-slate-200 dark:border-white/10 hover:border-orange-400 hover:bg-slate-50 dark:hover:bg-white/5'
               )}
             >
               <span className="text-2xl">{localeFlags[locale as Locale]}</span>
-              <span className={cn('font-medium text-sm', isSelected && 'text-primary')}>
+              <span className={cn('font-medium text-sm', isSelected && 'text-orange-500')}>
                 {localeNames[locale as Locale]}
               </span>
             </button>
