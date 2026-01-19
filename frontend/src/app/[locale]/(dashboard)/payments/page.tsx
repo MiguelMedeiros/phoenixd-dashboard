@@ -279,6 +279,7 @@ export default function PaymentsPage() {
     };
   }, [
     activeTab,
+    loading,
     loadMoreIncoming,
     loadMoreOutgoing,
     hasMoreIncoming,
