@@ -83,7 +83,9 @@
     "noNote": "No note",
     "categories": "Categories",
     "contact": "Contact",
-    "or": "or"
+    "or": "or",
+    "controlCenter": "Centre de Contrôle",
+    "preferences": "Préférences"
   },
   "navigation": {
     "overview": "Aperçu",

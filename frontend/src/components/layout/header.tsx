@@ -13,8 +13,6 @@ import {
   Wrench,
   Link2,
   Settings,
-  Globe,
-  DollarSign,
   Users,
 } from 'lucide-react';
 import { getBalance } from '@/lib/api';
@@ -23,11 +21,7 @@ import { useCurrencyContext } from '@/components/currency-provider';
 import { cn } from '@/lib/utils';
 import { SearchDialog } from '@/components/search-dialog';
 import { NotificationsPopover, type Notification } from '@/components/notifications-popover';
-import { LanguageSwitcher } from '@/components/language-switcher';
-import { CurrencySwitcher } from '@/components/currency-switcher';
-import { NetworkStatusButton } from '@/components/network-status-button';
-import { BitcoinNetworkButton } from '@/components/bitcoin-network-button';
-import { ConnectionSwitcher } from '@/components/connection-switcher';
+import { ControlCenter } from '@/components/control-center';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 
@@ -182,6 +176,18 @@ export function Header({
               </button>
             </div>
 
+            {/* Mobile Search Bar */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setTimeout(() => setSearchOpen(true), 150);
+              }}
+              className="flex items-center gap-3 px-4 py-2.5 mb-4 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+            >
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{t('search')}...</span>
+            </button>
+
             {/* Navigation */}
             <nav className="flex-1 space-y-1">
               {mobileNavItems.map((item) => {
@@ -205,22 +211,17 @@ export function Header({
               })}
             </nav>
 
-            {/* Currency & Language Switchers */}
-            <div className="border-t border-white/10 pt-4 mt-4 space-y-2">
-              <div className="flex items-center gap-3 px-4 py-2">
-                <DollarSign className="h-5 w-5 text-muted-foreground" />
-                <CurrencySwitcher openUp />
-              </div>
-              <div className="flex items-center gap-3 px-4 py-2">
-                <Globe className="h-5 w-5 text-muted-foreground" />
-                <LanguageSwitcher openUp />
-              </div>
+            {/* Settings link at bottom */}
+            <div className="border-t border-white/10 pt-4 mt-4">
+              <p className="px-4 py-2 text-xs text-muted-foreground">
+                {t('controlCenter') || 'Control Center'}
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 py-3 md:py-6 bg-background/95 backdrop-blur-xl border-b border-white/5">
+      <header className="sticky top-0 z-30 flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 md:py-6 bg-background/95 backdrop-blur-xl border-b border-white/5">
         {/* Left - Menu Button (mobile) / Title (desktop) */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Mobile menu button */}
@@ -237,35 +238,35 @@ export function Header({
           </div>
         </div>
 
+        {/* Spacer - pushes everything to the right */}
+        <div className="hidden md:block flex-1" />
+
         {/* Right - Actions */}
-        <div className="flex items-center gap-1.5 md:gap-2">
-          {/* Currency Switcher - Desktop only */}
-          <div className="hidden lg:block">
-            <CurrencySwitcher />
-          </div>
-
-          {/* Language Switcher - Desktop only */}
-          <div className="hidden lg:block">
-            <LanguageSwitcher />
-          </div>
-
-          {/* Search - Tablet and up */}
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          {/* Search Bar (tablet+) */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="hidden md:flex icon-circle group"
+            className="hidden md:flex w-56 lg:w-72 h-11 items-center gap-3 px-4 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.15] transition-all cursor-text group"
+          >
+            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="flex-1 text-left text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
+              {t('search')}...
+            </span>
+            <kbd className="hidden lg:inline-flex h-5 items-center gap-0.5 rounded border border-white/[0.08] bg-white/[0.05] px-1.5 font-mono text-[10px] text-muted-foreground shrink-0">
+              <span className="text-xs">&#8984;</span>K
+            </kbd>
+          </button>
+          {/* Mobile search icon */}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="md:hidden icon-circle !w-9 !h-9 group"
             title={t('search')}
           >
-            <Search className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>
 
-          {/* Bitcoin Network - Desktop only */}
-          <BitcoinNetworkButton className="hidden lg:block" />
-
-          {/* Connection Switcher - Tablet and up (component handles null when only 1 connection) */}
-          <ConnectionSwitcher className="hidden md:block" />
-
-          {/* Network Status - Tablet and up */}
-          <NetworkStatusButton className="hidden md:block" />
+          {/* Control Center - Consolidated settings & status */}
+          <ControlCenter />
 
           {/* Notifications - Always visible */}
           <div className="relative">

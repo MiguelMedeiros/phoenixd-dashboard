@@ -83,7 +83,9 @@
     "noNote": "No note",
     "categories": "Categories",
     "contact": "Contact",
-    "or": "or"
+    "or": "or",
+    "controlCenter": "नियंत्रण केंद्र",
+    "preferences": "प्राथमिकताएं"
   },
   "navigation": {
     "overview": "अवलोकन",

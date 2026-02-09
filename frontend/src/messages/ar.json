@@ -83,7 +83,9 @@
     "noNote": "No note",
     "categories": "Categories",
     "contact": "Contact",
-    "or": "or"
+    "or": "or",
+    "controlCenter": "مركز التحكم",
+    "preferences": "التفضيلات"
   },
   "navigation": {
     "overview": "نظرة عامة",

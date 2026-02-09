@@ -83,7 +83,9 @@
     "noNote": "No note",
     "categories": "Categories",
     "contact": "Contact",
-    "or": "or"
+    "or": "or",
+    "controlCenter": "コントロールセンター",
+    "preferences": "設定"
   },
   "navigation": {
     "overview": "概要",

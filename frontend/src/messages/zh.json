@@ -83,7 +83,9 @@
     "noNote": "No note",
     "categories": "Categories",
     "contact": "Contact",
-    "or": "or"
+    "or": "or",
+    "controlCenter": "控制中心",
+    "preferences": "偏好设置"
   },
   "navigation": {
     "overview": "概览",

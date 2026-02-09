@@ -83,7 +83,9 @@
     "terminal": "Terminal",
     "logs": "Logs",
     "node": "Nó",
-    "or": "ou"
+    "or": "ou",
+    "controlCenter": "Central de Controle",
+    "preferences": "Preferências"
   },
   "navigation": {
     "overview": "Visão Geral",
