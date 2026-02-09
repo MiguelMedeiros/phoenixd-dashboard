@@ -23,16 +23,6 @@
   <img src="https://img.shields.io/github/license/MiguelMedeiros/phoenixd-dashboard?style=flat-square" alt="License">
 </p>
 
-<p align="center">
-  <a href="https://railway.com/deploy/5Sg2f0?referralCode=rBePXa"><img src="https://railway.com/button.svg" alt="Deploy on Railway" height="32"></a>
-  &nbsp;&nbsp;
-  <a href="https://render.com/deploy?repo=https://github.com/MiguelMedeiros/phoenixd-dashboard"><img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" height="32"></a>
-  &nbsp;&nbsp;
-  <a href="https://cloud.digitalocean.com/apps/new?repo=https://github.com/MiguelMedeiros/phoenixd-dashboard/tree/main"><img src="https://www.deploytodo.com/do-btn-blue.svg" alt="Deploy to DigitalOcean" height="32"></a>
-  &nbsp;&nbsp;
-  <a href="https://heroku.com/deploy?template=https://github.com/MiguelMedeiros/phoenixd-dashboard"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku" height="32"></a>
-</p>
-
 <br>
 
 <p align="center">
