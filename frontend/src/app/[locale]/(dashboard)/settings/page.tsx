@@ -105,7 +105,7 @@ import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/page-header';
 import { PageTabs, type TabItem } from '@/components/ui/page-tabs';
 
-type SettingsTab = 'security' | 'network' | 'display' | 'wallet' | 'notifications';
+type SettingsTab = 'security' | 'network' | 'session' | 'display' | 'wallet' | 'notifications';
 
 export default function SettingsPage() {
   const t = useTranslations('settings');
@@ -126,6 +126,7 @@ export default function SettingsPage() {
   const tabs: TabItem[] = [
     { id: 'security', label: t('security'), icon: Shield },
     { id: 'network', label: t('network'), icon: Globe },
+    { id: 'session', label: t('nodeConnections') || 'Session', icon: Link },
     { id: 'display', label: t('display'), icon: Palette },
     { id: 'wallet', label: t('walletSeed'), icon: Wallet },
     { id: 'notifications', label: t('notifications'), icon: Bell },
@@ -159,6 +160,7 @@ export default function SettingsPage() {
       {/* Tab Content */}
       {activeTab === 'security' && <SecurityTab />}
       {activeTab === 'network' && <NetworkTab />}
+      {activeTab === 'session' && <SessionTab />}
       {activeTab === 'display' && <DisplayTab />}
       {activeTab === 'wallet' && <WalletTab />}
       {activeTab === 'notifications' && <NotificationsTab />}
@@ -711,16 +713,12 @@ function ResetWizardSection() {
   );
 }
 
-// ============= NETWORK TAB =============
-function NetworkTab() {
+// ============= SESSION TAB =============
+function SessionTab() {
   const t = useTranslations('settings');
   const tc = useTranslations('common');
-  const { isDesktopMode, loading: desktopLoading } = useDesktopMode();
 
-  // Initial loading state
   const [initialLoading, setInitialLoading] = useState(true);
-
-  // Phoenixd connections state (multi-instance)
   const [connections, setConnections] = useState<PhoenixdConnection[]>([]);
   const [activeStatus, setActiveStatus] = useState<ActiveConnectionStatus | null>(null);
   const [phoenixdLoading, setPhoenixdLoading] = useState(false);
@@ -739,58 +737,15 @@ function NetworkTab() {
     useState<PhoenixdContainerStatus | null>(null);
   const [containerLoading, setContainerLoading] = useState(false);
 
-  // Tor state
-  const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
-  const [torLoading, setTorLoading] = useState(false);
-  const [torError, setTorError] = useState<string | null>(null);
-  const [showTorQR, setShowTorQR] = useState(false);
-  const { copied: torUrlCopied, copy: copyTorUrl } = useCopyToClipboard();
-
-  // Tailscale state
-  const [tailscaleStatus, setTailscaleStatus] = useState<TailscaleStatus | null>(null);
-  const [tailscaleLoading, setTailscaleLoading] = useState(false);
-  const [tailscaleError, setTailscaleError] = useState<string | null>(null);
-  const [tailscaleAuthKey, setTailscaleAuthKey] = useState('');
-  const [tailscaleHostname, setTailscaleHostname] = useState('phoenixd-dashboard');
-  const [showTailscaleAuthKey, setShowTailscaleAuthKey] = useState(false);
-  const [tailscaleAuthKeySaved, setTailscaleAuthKeySaved] = useState(false);
-  const [showTailscaleQR, setShowTailscaleQR] = useState(false);
-  const { copied: tailscaleUrlCopied, copy: copyTailscaleUrl } = useCopyToClipboard();
-
-  // Cloudflared state
-  const [cloudflaredStatus, setCloudflaredStatus] = useState<CloudflaredStatus | null>(null);
-  const [cloudflaredLoading, setCloudflaredLoading] = useState(false);
-  const [cloudflaredError, setCloudflaredError] = useState<string | null>(null);
-  const [cloudflaredToken, setCloudflaredToken] = useState('');
-  const [showCloudflaredToken, setShowCloudflaredToken] = useState(false);
-  const [cloudflaredTokenSaved, setCloudflaredTokenSaved] = useState(false);
-  const [showCloudflaredQR, setShowCloudflaredQR] = useState(false);
-  const { copied: cloudflaredUrlCopied, copy: copyCloudflaredUrl } = useCopyToClipboard();
-
-  // Fetch status on mount
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const [tor, tailscale, cloudflared, conns, activeConn, containerStatus] = await Promise.all(
-          [
-            getTorStatus().catch(() => null),
-            getTailscaleStatus().catch(() => null),
-            getCloudflaredStatus().catch(() => null),
-            getPhoenixdConnections().catch(() => []),
-            getActiveConnection().catch(() => null),
-            getPhoenixdContainerStatus().catch(() => null),
-          ]
-        );
-        if (tor) setTorStatus(tor);
-        if (tailscale) {
-          setTailscaleStatus(tailscale);
-          if (tailscale.hasAuthKey) setTailscaleAuthKeySaved(true);
-          if (tailscale.hostname) setTailscaleHostname(tailscale.hostname);
-        }
-        if (cloudflared) {
-          setCloudflaredStatus(cloudflared);
-          if (cloudflared.hasToken) setCloudflaredTokenSaved(true);
-        }
+        const [conns, activeConn, containerStatus] = await Promise.all([
+          getPhoenixdConnections().catch(() => []),
+          getActiveConnection().catch(() => null),
+          getPhoenixdContainerStatus().catch(() => null),
+        ]);
+
         if (conns) {
           setConnections(conns);
         }
@@ -801,15 +756,15 @@ function NetworkTab() {
           setDockerContainerStatus(containerStatus);
         }
       } catch (err) {
-        console.error('Failed to fetch network status:', err);
+        console.error('Failed to fetch session status:', err);
       } finally {
         setInitialLoading(false);
       }
     };
+
     fetchStatus();
   }, []);
 
-  // Phoenixd connection handlers
   const refreshConnections = async () => {
     try {
       const [conns, activeConn] = await Promise.all([
@@ -878,13 +833,11 @@ function NetworkTab() {
         });
         setPhoenixdSuccess('Connection saved!');
       }
-      // Reset form
       setNewConnectionName('');
       setNewConnectionUrl('');
       setNewConnectionPassword('');
       setShowAddConnection(false);
       setEditingConnection(null);
-      // Refresh list
       await refreshConnections();
     } catch (err) {
       setPhoenixdError(err instanceof Error ? err.message : 'Failed to save connection');
@@ -900,9 +853,7 @@ function NetworkTab() {
     try {
       const result = await activatePhoenixdConnection(id);
       setPhoenixdSuccess(result.message);
-      // Refresh list to update active status
       await refreshConnections();
-      // Notify other components to refresh (balance, node info, etc.)
       window.dispatchEvent(new CustomEvent('phoenixd:connection-changed'));
     } catch (err) {
       setPhoenixdError(err instanceof Error ? err.message : 'Failed to activate connection');
@@ -951,13 +902,10 @@ function NetworkTab() {
     try {
       await startPhoenixdContainer();
       setPhoenixdSuccess('Docker container started');
-      // Refresh container status
       const status = await getPhoenixdContainerStatus();
       setDockerContainerStatus(status);
-      // Wait a bit and refresh connections
       await new Promise((r) => setTimeout(r, 2000));
       await refreshConnections();
-      // Notify other components to refresh
       window.dispatchEvent(new CustomEvent('phoenixd:connection-changed'));
     } catch (err) {
       setPhoenixdError(err instanceof Error ? err.message : 'Failed to start container');
@@ -972,7 +920,6 @@ function NetworkTab() {
     try {
       await stopPhoenixdContainer();
       setPhoenixdSuccess('Docker container stopped');
-      // Refresh container status
       const status = await getPhoenixdContainerStatus();
       setDockerContainerStatus(status);
       await refreshConnections();
@@ -982,6 +929,442 @@ function NetworkTab() {
       setContainerLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="glass-card rounded-xl p-8 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="glass-card rounded-xl p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                'h-10 w-10 rounded-lg flex items-center justify-center',
+                activeStatus?.status?.connected ? 'bg-success/10' : 'bg-warning/10'
+              )}
+            >
+              {activeStatus?.status?.connected ? (
+                <Link className="h-5 w-5 text-success" />
+              ) : (
+                <Unlink className="h-5 w-5 text-warning" />
+              )}
+            </div>
+            <div>
+              <p className="font-medium">{t('nodeConnections') || 'Node Connections'}</p>
+              <p className="text-sm text-muted-foreground">
+                {activeStatus?.status?.connected
+                  ? `${t('connectedTo') || 'Connected to'} ${activeStatus.connection?.name || 'Phoenixd'}`
+                  : t('disconnectedNode') || 'Not connected'}
+              </p>
+              {activeStatus?.status?.connected && activeStatus?.status?.nodeId && (
+                <p className="text-xs text-success/80 mt-1 flex items-center gap-1 font-mono">
+                  <Server className="h-3 w-3" />
+                  {activeStatus.status.nodeId.slice(0, 16)}...
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setShowAddConnection(true);
+              setEditingConnection(null);
+              setNewConnectionName('');
+              setNewConnectionUrl('');
+              setNewConnectionPassword('');
+              setPhoenixdError(null);
+              setPhoenixdSuccess(null);
+            }}
+            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+          >
+            + {t('addConnection') || 'Add Connection'}
+          </button>
+        </div>
+
+        {phoenixdError && (
+          <div className="flex items-center gap-2 text-sm text-destructive p-3 rounded-lg bg-destructive/10">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            {phoenixdError}
+          </div>
+        )}
+        {phoenixdSuccess && (
+          <div className="flex items-center gap-2 text-sm text-success p-3 rounded-lg bg-success/10">
+            <Check className="h-4 w-4 flex-shrink-0" />
+            {phoenixdSuccess}
+          </div>
+        )}
+
+        {showAddConnection && (
+          <div className="p-4 rounded-lg bg-black/5 dark:bg-white/5 space-y-4 border border-black/10 dark:border-white/10">
+            <div className="flex items-center justify-between">
+              <p className="font-medium">
+                {editingConnection
+                  ? t('editConnection') || 'Edit Connection'
+                  : t('newConnection') || 'New Connection'}
+              </p>
+              <button
+                onClick={handleCancelEdit}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <AlertCircle className="h-4 w-4" />
+              </button>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                {t('connectionName') || 'Connection Name'}
+              </label>
+              <input
+                type="text"
+                value={newConnectionName}
+                onChange={(e) => setNewConnectionName(e.target.value)}
+                placeholder={t('connectionNamePlaceholder') || 'e.g., Mainnet Server'}
+                className="w-full px-4 py-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                disabled={editingConnection?.isDocker}
+              />
+            </div>
+            {!editingConnection?.isDocker && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    {t('phoenixdUrl') || 'Phoenixd URL'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newConnectionUrl}
+                    onChange={(e) => setNewConnectionUrl(e.target.value)}
+                    placeholder="http://192.168.1.100:9740"
+                    className="w-full px-4 py-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium">
+                      {t('phoenixdPassword') || 'API Password'}
+                    </label>
+                    {editingConnection && !newConnectionPassword && (
+                      <span className="flex items-center gap-1 text-xs text-success">
+                        <Lock className="h-3 w-3" />
+                        {t('passwordSaved') || 'Password saved'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showNewConnectionPassword ? 'text' : 'password'}
+                      value={newConnectionPassword}
+                      onChange={(e) => setNewConnectionPassword(e.target.value)}
+                      placeholder={
+                        editingConnection
+                          ? '••••••••'
+                          : t('phoenixdPasswordPlaceholder') || 'From phoenix.conf'
+                      }
+                      className="w-full px-4 py-2.5 pr-10 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
+                      autoComplete="off"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewConnectionPassword(!showNewConnectionPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                    >
+                      {showNewConnectionPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {editingConnection
+                      ? t('enterNewPasswordToChange') || 'Enter a new password to change it'
+                      : t('findPasswordIn') ||
+                        'Find this in your phoenix.conf file (http-password)'}
+                  </p>
+                </div>
+                <button
+                  onClick={handleTestNewConnection}
+                  disabled={testingConnection || !newConnectionUrl.trim()}
+                  className={cn(
+                    'w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10',
+                    (testingConnection || !newConnectionUrl.trim()) &&
+                      'opacity-50 cursor-not-allowed'
+                  )}
+                >
+                  {testingConnection && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {t('testConnection') || 'Test Connection'}
+                </button>
+              </>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={handleCancelEdit}
+                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10"
+              >
+                {tc('cancel')}
+              </button>
+              <button
+                onClick={handleSaveConnection}
+                disabled={
+                  phoenixdLoading ||
+                  (!editingConnection?.isDocker &&
+                    (!newConnectionName.trim() || !newConnectionUrl.trim()))
+                }
+                className={cn(
+                  'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90',
+                  (phoenixdLoading ||
+                    (!editingConnection?.isDocker &&
+                      (!newConnectionName.trim() || !newConnectionUrl.trim()))) &&
+                    'opacity-50 cursor-not-allowed'
+                )}
+              >
+                {phoenixdLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {tc('save')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-2">
+          {connections.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              {t('noConnections') || 'No connections configured'}
+            </p>
+          ) : (
+            connections.map((conn) => (
+              <div
+                key={conn.id}
+                className={cn(
+                  'p-4 rounded-lg border transition-colors',
+                  conn.isActive
+                    ? 'bg-success/5 border-success/20'
+                    : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10'
+                )}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="mt-0.5">
+                      {conn.isActive ? (
+                        <div className="h-4 w-4 rounded-full bg-success flex items-center justify-center">
+                          <Check className="h-2.5 w-2.5 text-white" />
+                        </div>
+                      ) : (
+                        <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium truncate">{conn.name}</p>
+                        {conn.isDocker && (
+                          <span className="px-1.5 py-0.5 text-xs rounded bg-primary/10 text-primary">
+                            Docker
+                          </span>
+                        )}
+                        {conn.isDocker && dockerContainerStatus && (
+                          <span
+                            className={cn(
+                              'px-1.5 py-0.5 text-xs rounded',
+                              dockerContainerStatus.running
+                                ? 'bg-success/10 text-success'
+                                : 'bg-warning/10 text-warning'
+                            )}
+                          >
+                            {dockerContainerStatus.running
+                              ? t('running') || 'Running'
+                              : t('stopped') || 'Stopped'}
+                          </span>
+                        )}
+                        {conn.isActive && (
+                          <span className="px-1.5 py-0.5 text-xs rounded bg-success/10 text-success">
+                            {t('active') || 'Active'}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground font-mono truncate mt-0.5">
+                        {conn.url}
+                      </p>
+                      {conn.nodeId && (
+                        <p className="text-xs text-muted-foreground/70 mt-1 flex items-center gap-1">
+                          <Server className="h-3 w-3" />
+                          {conn.nodeId.slice(0, 12)}... {conn.chain && `(${conn.chain})`}
+                        </p>
+                      )}
+                      {conn.isDocker && !dockerContainerStatus?.running && (
+                        <p className="text-xs text-warning mt-1">
+                          {t('containerNotRunning') || 'Container not running'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {!conn.isActive && (
+                      <button
+                        onClick={() => handleActivateConnection(conn.id)}
+                        disabled={activatingConnection === conn.id}
+                        className={cn(
+                          'px-2.5 py-1.5 text-xs font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-1',
+                          activatingConnection === conn.id && 'opacity-50 cursor-not-allowed'
+                        )}
+                      >
+                        {activatingConnection === conn.id && (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        )}
+                        {t('activate') || 'Activate'}
+                      </button>
+                    )}
+                    {conn.isDocker && dockerContainerStatus && (
+                      <>
+                        {dockerContainerStatus.running ? (
+                          <button
+                            onClick={handleStopDockerContainer}
+                            disabled={containerLoading || conn.isActive}
+                            className={cn(
+                              'px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1',
+                              conn.isActive
+                                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                                : 'bg-warning/10 text-warning hover:bg-warning/20'
+                            )}
+                            title={
+                              conn.isActive
+                                ? t('cannotStopActive') || 'Cannot stop active connection'
+                                : t('stopContainer') || 'Stop Container'
+                            }
+                          >
+                            {containerLoading ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Ban className="h-3 w-3" />
+                            )}
+                            {t('stop') || 'Stop'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleStartDockerContainer}
+                            disabled={containerLoading}
+                            className={cn(
+                              'px-2.5 py-1.5 text-xs font-medium rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors flex items-center gap-1',
+                              containerLoading && 'opacity-50 cursor-not-allowed'
+                            )}
+                          >
+                            {containerLoading ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Play className="h-3 w-3" />
+                            )}
+                            {t('start') || 'Start'}
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {!conn.isDocker && (
+                      <>
+                        <button
+                          onClick={() => handleEditConnection(conn)}
+                          className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                          title={tc('edit') || 'Edit'}
+                        >
+                          <Sparkles className="h-3.5 w-3.5" />
+                        </button>
+                        {!conn.isActive && (
+                          <button
+                            onClick={() => handleDeleteConnection(conn.id)}
+                            disabled={deletingConnection === conn.id}
+                            className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                            title={tc('delete') || 'Delete'}
+                          >
+                            {deletingConnection === conn.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Ban className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <p className="text-xs text-muted-foreground pt-2 border-t border-black/5 dark:border-white/5">
+          {t('nodeConnectionsDescription') ||
+            'Manage multiple phoenixd instances and quickly switch between them. Docker (Local) is always available as the default option.'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ============= NETWORK TAB =============
+function NetworkTab() {
+  const t = useTranslations('settings');
+  const { isDesktopMode, loading: desktopLoading } = useDesktopMode();
+
+  // Initial loading state
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // Tor state
+  const [torStatus, setTorStatus] = useState<TorStatus | null>(null);
+  const [torLoading, setTorLoading] = useState(false);
+  const [torError, setTorError] = useState<string | null>(null);
+  const [showTorQR, setShowTorQR] = useState(false);
+  const { copied: torUrlCopied, copy: copyTorUrl } = useCopyToClipboard();
+
+  // Tailscale state
+  const [tailscaleStatus, setTailscaleStatus] = useState<TailscaleStatus | null>(null);
+  const [tailscaleLoading, setTailscaleLoading] = useState(false);
+  const [tailscaleError, setTailscaleError] = useState<string | null>(null);
+  const [tailscaleAuthKey, setTailscaleAuthKey] = useState('');
+  const [tailscaleHostname, setTailscaleHostname] = useState('phoenixd-dashboard');
+  const [showTailscaleAuthKey, setShowTailscaleAuthKey] = useState(false);
+  const [tailscaleAuthKeySaved, setTailscaleAuthKeySaved] = useState(false);
+  const [showTailscaleQR, setShowTailscaleQR] = useState(false);
+  const { copied: tailscaleUrlCopied, copy: copyTailscaleUrl } = useCopyToClipboard();
+
+  // Cloudflared state
+  const [cloudflaredStatus, setCloudflaredStatus] = useState<CloudflaredStatus | null>(null);
+  const [cloudflaredLoading, setCloudflaredLoading] = useState(false);
+  const [cloudflaredError, setCloudflaredError] = useState<string | null>(null);
+  const [cloudflaredToken, setCloudflaredToken] = useState('');
+  const [showCloudflaredToken, setShowCloudflaredToken] = useState(false);
+  const [cloudflaredTokenSaved, setCloudflaredTokenSaved] = useState(false);
+  const [showCloudflaredQR, setShowCloudflaredQR] = useState(false);
+  const { copied: cloudflaredUrlCopied, copy: copyCloudflaredUrl } = useCopyToClipboard();
+
+  // Fetch status on mount
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const [tor, tailscale, cloudflared] = await Promise.all([
+          getTorStatus().catch(() => null),
+          getTailscaleStatus().catch(() => null),
+          getCloudflaredStatus().catch(() => null),
+        ]);
+        if (tor) setTorStatus(tor);
+        if (tailscale) {
+          setTailscaleStatus(tailscale);
+          if (tailscale.hasAuthKey) setTailscaleAuthKeySaved(true);
+          if (tailscale.hostname) setTailscaleHostname(tailscale.hostname);
+        }
+        if (cloudflared) {
+          setCloudflaredStatus(cloudflared);
+          if (cloudflared.hasToken) setCloudflaredTokenSaved(true);
+        }
+      } catch (err) {
+        console.error('Failed to fetch network status:', err);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+    fetchStatus();
+  }, []);
 
   // Tor handlers
   const handleTorToggle = async () => {
@@ -1267,367 +1650,6 @@ function NetworkTab() {
 
   return (
     <div className="space-y-6">
-      {/* Node Connections Section */}
-      <div className="glass-card rounded-xl p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                'h-10 w-10 rounded-lg flex items-center justify-center',
-                activeStatus?.status?.connected ? 'bg-success/10' : 'bg-warning/10'
-              )}
-            >
-              {activeStatus?.status?.connected ? (
-                <Link className="h-5 w-5 text-success" />
-              ) : (
-                <Unlink className="h-5 w-5 text-warning" />
-              )}
-            </div>
-            <div>
-              <p className="font-medium">{t('nodeConnections') || 'Node Connections'}</p>
-              <p className="text-sm text-muted-foreground">
-                {activeStatus?.status?.connected
-                  ? `${t('connectedTo') || 'Connected to'} ${activeStatus.connection?.name || 'Phoenixd'}`
-                  : t('disconnectedNode') || 'Not connected'}
-              </p>
-              {activeStatus?.status?.connected && activeStatus?.status?.nodeId && (
-                <p className="text-xs text-success/80 mt-1 flex items-center gap-1 font-mono">
-                  <Server className="h-3 w-3" />
-                  {activeStatus.status.nodeId.slice(0, 16)}...
-                </p>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              setShowAddConnection(true);
-              setEditingConnection(null);
-              setNewConnectionName('');
-              setNewConnectionUrl('');
-              setNewConnectionPassword('');
-              setPhoenixdError(null);
-              setPhoenixdSuccess(null);
-            }}
-            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
-          >
-            + {t('addConnection') || 'Add Connection'}
-          </button>
-        </div>
-
-        {/* Error/Success Messages */}
-        {phoenixdError && (
-          <div className="flex items-center gap-2 text-sm text-destructive p-3 rounded-lg bg-destructive/10">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
-            {phoenixdError}
-          </div>
-        )}
-        {phoenixdSuccess && (
-          <div className="flex items-center gap-2 text-sm text-success p-3 rounded-lg bg-success/10">
-            <Check className="h-4 w-4 flex-shrink-0" />
-            {phoenixdSuccess}
-          </div>
-        )}
-
-        {/* Add/Edit Connection Form */}
-        {showAddConnection && (
-          <div className="p-4 rounded-lg bg-black/5 dark:bg-white/5 space-y-4 border border-black/10 dark:border-white/10">
-            <div className="flex items-center justify-between">
-              <p className="font-medium">
-                {editingConnection
-                  ? t('editConnection') || 'Edit Connection'
-                  : t('newConnection') || 'New Connection'}
-              </p>
-              <button
-                onClick={handleCancelEdit}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <AlertCircle className="h-4 w-4" />
-              </button>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                {t('connectionName') || 'Connection Name'}
-              </label>
-              <input
-                type="text"
-                value={newConnectionName}
-                onChange={(e) => setNewConnectionName(e.target.value)}
-                placeholder={t('connectionNamePlaceholder') || 'e.g., Mainnet Server'}
-                className="w-full px-4 py-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
-                disabled={editingConnection?.isDocker}
-              />
-            </div>
-            {!editingConnection?.isDocker && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {t('phoenixdUrl') || 'Phoenixd URL'}
-                  </label>
-                  <input
-                    type="text"
-                    value={newConnectionUrl}
-                    onChange={(e) => setNewConnectionUrl(e.target.value)}
-                    placeholder="http://192.168.1.100:9740"
-                    className="w-full px-4 py-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium">
-                      {t('phoenixdPassword') || 'API Password'}
-                    </label>
-                    {editingConnection && !newConnectionPassword && (
-                      <span className="flex items-center gap-1 text-xs text-success">
-                        <Lock className="h-3 w-3" />
-                        {t('passwordSaved') || 'Password saved'}
-                      </span>
-                    )}
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showNewConnectionPassword ? 'text' : 'password'}
-                      value={newConnectionPassword}
-                      onChange={(e) => setNewConnectionPassword(e.target.value)}
-                      placeholder={
-                        editingConnection
-                          ? '••••••••'
-                          : t('phoenixdPasswordPlaceholder') || 'From phoenix.conf'
-                      }
-                      className="w-full px-4 py-2.5 pr-10 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
-                      autoComplete="off"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewConnectionPassword(!showNewConnectionPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      {showNewConnectionPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {editingConnection
-                      ? t('enterNewPasswordToChange') || 'Enter a new password to change it'
-                      : t('findPasswordIn') ||
-                        'Find this in your phoenix.conf file (http-password)'}
-                  </p>
-                </div>
-                <button
-                  onClick={handleTestNewConnection}
-                  disabled={testingConnection || !newConnectionUrl.trim()}
-                  className={cn(
-                    'w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10',
-                    (testingConnection || !newConnectionUrl.trim()) &&
-                      'opacity-50 cursor-not-allowed'
-                  )}
-                >
-                  {testingConnection && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {t('testConnection') || 'Test Connection'}
-                </button>
-              </>
-            )}
-            <div className="flex gap-2">
-              <button
-                onClick={handleCancelEdit}
-                className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10"
-              >
-                {tc('cancel')}
-              </button>
-              <button
-                onClick={handleSaveConnection}
-                disabled={
-                  phoenixdLoading ||
-                  (!editingConnection?.isDocker &&
-                    (!newConnectionName.trim() || !newConnectionUrl.trim()))
-                }
-                className={cn(
-                  'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary/90',
-                  (phoenixdLoading ||
-                    (!editingConnection?.isDocker &&
-                      (!newConnectionName.trim() || !newConnectionUrl.trim()))) &&
-                    'opacity-50 cursor-not-allowed'
-                )}
-              >
-                {phoenixdLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {tc('save')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Connections List */}
-        <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-2">
-          {connections.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              {t('noConnections') || 'No connections configured'}
-            </p>
-          ) : (
-            connections.map((conn) => (
-              <div
-                key={conn.id}
-                className={cn(
-                  'p-4 rounded-lg border transition-colors',
-                  conn.isActive
-                    ? 'bg-success/5 border-success/20'
-                    : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10'
-                )}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 min-w-0 flex-1">
-                    <div className="mt-0.5">
-                      {conn.isActive ? (
-                        <div className="h-4 w-4 rounded-full bg-success flex items-center justify-center">
-                          <Check className="h-2.5 w-2.5 text-white" />
-                        </div>
-                      ) : (
-                        <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium truncate">{conn.name}</p>
-                        {conn.isDocker && (
-                          <span className="px-1.5 py-0.5 text-xs rounded bg-primary/10 text-primary">
-                            Docker
-                          </span>
-                        )}
-                        {conn.isDocker && dockerContainerStatus && (
-                          <span
-                            className={cn(
-                              'px-1.5 py-0.5 text-xs rounded',
-                              dockerContainerStatus.running
-                                ? 'bg-success/10 text-success'
-                                : 'bg-warning/10 text-warning'
-                            )}
-                          >
-                            {dockerContainerStatus.running
-                              ? t('running') || 'Running'
-                              : t('stopped') || 'Stopped'}
-                          </span>
-                        )}
-                        {conn.isActive && (
-                          <span className="px-1.5 py-0.5 text-xs rounded bg-success/10 text-success">
-                            {t('active') || 'Active'}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground font-mono truncate mt-0.5">
-                        {conn.url}
-                      </p>
-                      {conn.nodeId && (
-                        <p className="text-xs text-muted-foreground/70 mt-1 flex items-center gap-1">
-                          <Server className="h-3 w-3" />
-                          {conn.nodeId.slice(0, 12)}... {conn.chain && `(${conn.chain})`}
-                        </p>
-                      )}
-                      {conn.isDocker && !dockerContainerStatus?.running && (
-                        <p className="text-xs text-warning mt-1">
-                          {t('containerNotRunning') || 'Container not running'}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    {!conn.isActive && (
-                      <button
-                        onClick={() => handleActivateConnection(conn.id)}
-                        disabled={activatingConnection === conn.id}
-                        className={cn(
-                          'px-2.5 py-1.5 text-xs font-medium rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-1',
-                          activatingConnection === conn.id && 'opacity-50 cursor-not-allowed'
-                        )}
-                      >
-                        {activatingConnection === conn.id && (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        )}
-                        {t('activate') || 'Activate'}
-                      </button>
-                    )}
-                    {conn.isDocker && dockerContainerStatus && (
-                      <>
-                        {dockerContainerStatus.running ? (
-                          <button
-                            onClick={handleStopDockerContainer}
-                            disabled={containerLoading || conn.isActive}
-                            className={cn(
-                              'px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1',
-                              conn.isActive
-                                ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                                : 'bg-warning/10 text-warning hover:bg-warning/20'
-                            )}
-                            title={
-                              conn.isActive
-                                ? t('cannotStopActive') || 'Cannot stop active connection'
-                                : t('stopContainer') || 'Stop Container'
-                            }
-                          >
-                            {containerLoading ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Ban className="h-3 w-3" />
-                            )}
-                            {t('stop') || 'Stop'}
-                          </button>
-                        ) : (
-                          <button
-                            onClick={handleStartDockerContainer}
-                            disabled={containerLoading}
-                            className={cn(
-                              'px-2.5 py-1.5 text-xs font-medium rounded-lg bg-success/10 text-success hover:bg-success/20 transition-colors flex items-center gap-1',
-                              containerLoading && 'opacity-50 cursor-not-allowed'
-                            )}
-                          >
-                            {containerLoading ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Play className="h-3 w-3" />
-                            )}
-                            {t('start') || 'Start'}
-                          </button>
-                        )}
-                      </>
-                    )}
-                    {!conn.isDocker && (
-                      <>
-                        <button
-                          onClick={() => handleEditConnection(conn)}
-                          className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                          title={tc('edit') || 'Edit'}
-                        >
-                          <Sparkles className="h-3.5 w-3.5" />
-                        </button>
-                        {!conn.isActive && (
-                          <button
-                            onClick={() => handleDeleteConnection(conn.id)}
-                            disabled={deletingConnection === conn.id}
-                            className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
-                            title={tc('delete') || 'Delete'}
-                          >
-                            {deletingConnection === conn.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Ban className="h-3.5 w-3.5" />
-                            )}
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <p className="text-xs text-muted-foreground pt-2 border-t border-black/5 dark:border-white/5">
-          {t('nodeConnectionsDescription') ||
-            'Manage multiple phoenixd instances and quickly switch between them. Docker (Local) is always available as the default option.'}
-        </p>
-      </div>
-
       {/* Tor Section */}
       <div className="glass-card rounded-xl p-5 space-y-4">
         <div className="flex items-center justify-between">

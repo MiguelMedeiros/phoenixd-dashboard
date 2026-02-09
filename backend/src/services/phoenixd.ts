@@ -126,8 +126,12 @@ export class PhoenixdService {
     chain?: string;
     version?: string;
   }> {
-    const testUrl = `${url}/getinfo`;
-    const authHeader = 'Basic ' + Buffer.from(`:${password}`).toString('base64');
+    // Normalize URL: remove trailing slashes and trim whitespace
+    const normalizedUrl = url.trim().replace(/\/+$/, '');
+    const trimmedPassword = password.trim();
+    const testUrl = `${normalizedUrl}/getinfo`;
+    const authHeader = 'Basic ' + Buffer.from(`:${trimmedPassword}`).toString('base64');
+    console.log(`[testConnection] URL: ${testUrl}, password length: ${trimmedPassword.length}`);
 
     const response = await fetch(testUrl, {
       method: 'GET',
