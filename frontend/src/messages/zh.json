@@ -237,6 +237,7 @@
   "payments": {
     "title": "交易记录",
     "subtitle": "您的交易历史",
+    "all": "全部",
     "incoming": "收入",
     "outgoing": "支出",
     "received": "已收款",
@@ -246,6 +247,9 @@
     "exported": "已导出！",
     "paymentsExported": "交易已导出为 CSV",
     "exportFailed": "导出失败",
+    "searchPlaceholder": "按金额、描述、哈希搜索...",
+    "noSearchResults": "未找到匹配的交易",
+    "noPayments": "暂无交易记录",
     "noIncomingPayments": "暂无收款记录",
     "noOutgoingPayments": "暂无付款记录",
     "allPaymentsLoaded": "所有交易已加载",

@@ -237,6 +237,11 @@ export function StepPhoenixd({ value, onChange }: StepPhoenixdProps) {
                     value={conn.password}
                     onChange={(e) => updateConnection(index, { password: e.target.value })}
                     placeholder={t('passwordPlaceholder')}
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-bwignore="true"
+                    data-form-type="other"
                   />
                 </div>
 

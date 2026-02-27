@@ -237,6 +237,7 @@
   "payments": {
     "title": "Pagamentos",
     "subtitle": "Seu histórico de pagamentos",
+    "all": "Todos",
     "incoming": "Entrada",
     "outgoing": "Saída",
     "received": "Recebido",
@@ -246,6 +247,9 @@
     "exported": "Exportado!",
     "paymentsExported": "Pagamentos exportados para CSV",
     "exportFailed": "Falha ao exportar",
+    "searchPlaceholder": "Buscar por valor, descrição, hash...",
+    "noSearchResults": "Nenhum pagamento encontrado",
+    "noPayments": "Nenhum pagamento ainda",
     "noIncomingPayments": "Nenhum pagamento recebido ainda",
     "noOutgoingPayments": "Nenhum pagamento enviado ainda",
     "allPaymentsLoaded": "Todos os pagamentos carregados",

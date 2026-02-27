@@ -237,6 +237,7 @@
   "payments": {
     "title": "المدفوعات",
     "subtitle": "سجل مدفوعاتك",
+    "all": "الكل",
     "incoming": "الواردة",
     "outgoing": "الصادرة",
     "received": "مستلمة",
@@ -246,6 +247,9 @@
     "exported": "تم التصدير!",
     "paymentsExported": "تم تصدير المدفوعات إلى CSV",
     "exportFailed": "فشل التصدير",
+    "searchPlaceholder": "البحث بالمبلغ، الوصف، الهاش...",
+    "noSearchResults": "لم يتم العثور على مدفوعات",
+    "noPayments": "لا توجد مدفوعات بعد",
     "noIncomingPayments": "لا توجد مدفوعات واردة بعد",
     "noOutgoingPayments": "لا توجد مدفوعات صادرة بعد",
     "allPaymentsLoaded": "تم تحميل جميع المدفوعات",

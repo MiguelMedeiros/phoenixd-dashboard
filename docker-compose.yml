@@ -1,16 +1,10 @@
 services:
   phoenixd:
-    image: acinq/phoenixd:latest
+    image: acinq/phoenixd:0.7.2
     container_name: phoenixd
     restart: unless-stopped
-    networks:
-      - phoenixd-network
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
-    command: '--agree-to-terms-of-service --http-bind-ip 0.0.0.0 ${PHOENIXD_CHAIN:+--chain=${PHOENIXD_CHAIN}}'
-    ports:
-      - '9740:9740'
+    network_mode: host
+    command: '--agree-to-terms-of-service --http-bind-ip 0.0.0.0 --http-bind-port 9740 ${PHOENIXD_CHAIN:+--chain=${PHOENIXD_CHAIN}}'
     volumes:
       - ./data/phoenixd:/phoenix/.phoenix
     healthcheck:
@@ -54,11 +48,13 @@ services:
       - phoenixd-network
     # Run as root to access Docker socket (required for Tor/Tailscale container management)
     user: root
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 4000
       DATABASE_URL: postgresql://${POSTGRES_USER:-phoenixd}:${POSTGRES_PASSWORD:-phoenixd_secret}@postgres:5432/${POSTGRES_DB:-phoenixd_dashboard}?schema=public
-      PHOENIXD_URL: http://phoenixd:9740
+      PHOENIXD_URL: http://host.docker.internal:9740
       PHOENIXD_PASSWORD: ${PHOENIXD_PASSWORD:-}
       DOCKER_HOST: unix:///var/run/docker.sock
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
@@ -67,8 +63,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      phoenixd:
-        condition: service_started
     volumes:
       - ./backend/src:/app/src:ro
       - ./data/phoenixd:/phoenix-data:ro

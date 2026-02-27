@@ -113,6 +113,11 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
                   value={value.tailscale?.authKey ?? ''}
                   onChange={(e) => updateTailscale({ authKey: e.target.value })}
                   placeholder={t('tailscale.authKeyPlaceholder')}
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-bwignore="true"
+                  data-form-type="other"
                 />
               </div>
               <div className="space-y-1.5">
@@ -177,6 +182,11 @@ export function StepNetwork({ value, onChange }: StepNetworkProps) {
                   value={value.cloudflared?.token ?? ''}
                   onChange={(e) => updateCloudflared({ token: e.target.value })}
                   placeholder={t('cloudflared.tokenPlaceholder')}
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-bwignore="true"
+                  data-form-type="other"
                 />
               </div>
             </div>

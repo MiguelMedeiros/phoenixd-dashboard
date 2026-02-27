@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
+  ArrowDownUp,
   Download,
   Loader2,
   Copy,
@@ -17,6 +18,8 @@ import {
   TrendingUp,
   TrendingDown,
   ExternalLink,
+  Search,
+  X,
 } from 'lucide-react';
 import {
   getIncomingPayments,
@@ -65,7 +68,8 @@ export default function PaymentsPage() {
   const tl = useTranslations('paymentLabels');
   const tcat = useTranslations('categories');
   const { formatValue } = useCurrencyContext();
-  const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing'>('incoming');
+  const [activeTab, setActiveTab] = useState<'all' | 'incoming' | 'outgoing'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [incomingPayments, setIncomingPayments] = useState<IncomingPayment[]>([]);
   const [outgoingPayments, setOutgoingPayments] = useState<OutgoingPayment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,6 +87,15 @@ export default function PaymentsPage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
+  // ALL payments (fetched once on load, used for stats and search)
+  const allIncomingRef = useRef<IncomingPayment[]>([]);
+  const allOutgoingRef = useRef<OutgoingPayment[]>([]);
+
+  // Fixed stats (calculated once from ALL payments, never changes with pagination)
+  const [fixedStatsReceived, setFixedStatsReceived] = useState(0);
+  const [fixedStatsSent, setFixedStatsSent] = useState(0);
+  const [fixedStatsFees, setFixedStatsFees] = useState(0);
+
   // Category and metadata state
   const [categories, setCategories] = useState<PaymentCategory[]>([]);
   const [paymentMetadataMap, setPaymentMetadataMap] = useState<Record<string, PaymentMetadata>>({});
@@ -95,29 +108,46 @@ export default function PaymentsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [incoming, outgoing, nodeInfo, cats] = await Promise.all([
-        getIncomingPayments({ limit: PAGE_SIZE }),
-        getOutgoingPayments({ limit: PAGE_SIZE }),
+      // Fetch ALL payments (for accurate stats) plus node info and categories
+      const [allIncoming, allOutgoing, nodeInfo, cats] = await Promise.all([
+        getIncomingPayments({ all: true }),
+        getOutgoingPayments({ all: true }),
         getNodeInfo(),
         getCategories(),
       ]);
 
       // Sort by newest first
-      const sortedIncoming = sortByNewest(incoming || []);
-      const sortedOutgoing = sortByNewest(outgoing || []);
+      const sortedIncoming = sortByNewest(allIncoming || []);
+      const sortedOutgoing = sortByNewest(allOutgoing || []);
 
-      setIncomingPayments(sortedIncoming);
-      setOutgoingPayments(sortedOutgoing);
+      // Store ALL payments in refs (for search and stats)
+      allIncomingRef.current = sortedIncoming;
+      allOutgoingRef.current = sortedOutgoing;
+
+      // Calculate fixed stats from ALL payments (these never change with pagination)
+      setFixedStatsReceived(
+        sortedIncoming.filter((p) => p.isPaid).reduce((acc, p) => acc + p.receivedSat, 0)
+      );
+      setFixedStatsSent(sortedOutgoing.filter((p) => p.isPaid).reduce((acc, p) => acc + p.sent, 0));
+      setFixedStatsFees(
+        Math.floor(
+          sortedOutgoing.filter((p) => p.isPaid).reduce((acc, p) => acc + p.fees, 0) / 1000
+        )
+      );
+
+      // Only keep first page for display (infinite scroll loads the rest)
+      setIncomingPayments(sortedIncoming.slice(0, PAGE_SIZE));
+      setOutgoingPayments(sortedOutgoing.slice(0, PAGE_SIZE));
       setChain(nodeInfo.chain || 'mainnet');
       setCategories(cats || []);
 
       // Set hasMore flags
-      setHasMoreIncoming((incoming || []).length >= PAGE_SIZE);
-      setHasMoreOutgoing((outgoing || []).length >= PAGE_SIZE);
+      setHasMoreIncoming(sortedIncoming.length > PAGE_SIZE);
+      setHasMoreOutgoing(sortedOutgoing.length > PAGE_SIZE);
 
-      // Fetch metadata for all payments
-      const paymentHashes = (incoming || []).map((p) => p.paymentHash).filter(Boolean);
-      const paymentIds = (outgoing || []).map((p) => p.paymentId).filter(Boolean);
+      // Fetch metadata for ALL payments (needed for search across all data)
+      const paymentHashes = sortedIncoming.map((p) => p.paymentHash).filter(Boolean);
+      const paymentIds = sortedOutgoing.map((p) => p.paymentId).filter(Boolean);
 
       if (paymentHashes.length > 0 || paymentIds.length > 0) {
         try {
@@ -247,15 +277,48 @@ export default function PaymentsPage() {
     }
   }, [loadingMoreOutgoing, hasMoreOutgoing, outgoingPayments.length]);
 
+  // Load more for "all" tab (loads both)
+  const loadMoreAll = useCallback(async () => {
+    const promises: Promise<void>[] = [];
+    if (hasMoreIncoming && !loadingMoreIncoming) promises.push(loadMoreIncoming());
+    if (hasMoreOutgoing && !loadingMoreOutgoing) promises.push(loadMoreOutgoing());
+    await Promise.all(promises);
+  }, [
+    hasMoreIncoming,
+    hasMoreOutgoing,
+    loadingMoreIncoming,
+    loadingMoreOutgoing,
+    loadMoreIncoming,
+    loadMoreOutgoing,
+  ]);
+
   // Intersection Observer for infinite scroll
   useEffect(() => {
-    const loadMore = activeTab === 'incoming' ? loadMoreIncoming : loadMoreOutgoing;
-    const hasMore = activeTab === 'incoming' ? hasMoreIncoming : hasMoreOutgoing;
-    const isLoading = activeTab === 'incoming' ? loadingMoreIncoming : loadingMoreOutgoing;
+    const loadMore =
+      activeTab === 'all'
+        ? loadMoreAll
+        : activeTab === 'incoming'
+          ? loadMoreIncoming
+          : loadMoreOutgoing;
+    const hasMore =
+      activeTab === 'all'
+        ? hasMoreIncoming || hasMoreOutgoing
+        : activeTab === 'incoming'
+          ? hasMoreIncoming
+          : hasMoreOutgoing;
+    const isLoading =
+      activeTab === 'all'
+        ? loadingMoreIncoming || loadingMoreOutgoing
+        : activeTab === 'incoming'
+          ? loadingMoreIncoming
+          : loadingMoreOutgoing;
 
     if (observerRef.current) {
       observerRef.current.disconnect();
     }
+
+    // Disable infinite scroll when searching (search only works on already loaded data)
+    if (searchQuery.trim()) return;
 
     if (!hasMore || isLoading) return;
 
@@ -280,6 +343,8 @@ export default function PaymentsPage() {
   }, [
     activeTab,
     loading,
+    searchQuery,
+    loadMoreAll,
     loadMoreIncoming,
     loadMoreOutgoing,
     hasMoreIncoming,
@@ -383,15 +448,10 @@ export default function PaymentsPage() {
     return `${hash.slice(0, 8)}...${hash.slice(-8)}`;
   };
 
-  // Calculate stats
-  const totalReceived = incomingPayments
-    .filter((p) => p.isPaid)
-    .reduce((acc, p) => acc + p.receivedSat, 0);
-  const totalSent = outgoingPayments.filter((p) => p.isPaid).reduce((acc, p) => acc + p.sent, 0);
-  // Note: fees come from phoenixd API in millisatoshis (msat), need to convert to sats
-  const totalFees = Math.floor(
-    outgoingPayments.filter((p) => p.isPaid).reduce((acc, p) => acc + p.fees, 0) / 1000
-  );
+  // Use fixed stats (calculated once from ALL payments on initial load)
+  const totalReceived = fixedStatsReceived;
+  const totalSent = fixedStatsSent;
+  const totalFees = fixedStatsFees;
 
   if (loading) {
     return (
@@ -411,17 +471,97 @@ export default function PaymentsPage() {
     );
   }
 
-  // Filter payments by category if selected
-  const getFilteredPayments = () => {
-    const payments = activeTab === 'incoming' ? incomingPayments : outgoingPayments;
+  // Search helper: check if a payment matches the search query
+  const matchesSearch = (payment: Payment, query: string): boolean => {
+    if (!query) return true;
+    const q = query.toLowerCase();
+
+    const isIncoming = 'receivedSat' in payment;
+
+    // Match amount (sats)
+    if (isIncoming) {
+      const incoming = payment as IncomingPayment;
+      if (String(incoming.receivedSat).includes(q)) return true;
+      if (incoming.requestedSat && String(incoming.requestedSat).includes(q)) return true;
+    } else {
+      const outgoing = payment as OutgoingPayment;
+      if (String(outgoing.sent).includes(q)) return true;
+    }
+
+    // Match description / payer note
+    if ('description' in payment && payment.description?.toLowerCase().includes(q)) return true;
+    if ('payerNote' in payment && (payment as IncomingPayment).payerNote?.toLowerCase().includes(q))
+      return true;
+
+    // Match payment hash / id
+    if ('paymentHash' in payment && payment.paymentHash?.toLowerCase().includes(q)) return true;
+    if ('paymentId' in payment && (payment as OutgoingPayment).paymentId?.toLowerCase().includes(q))
+      return true;
+
+    // Match type / subType
+    if (payment.type?.toLowerCase().includes(q)) return true;
+    if (payment.subType?.toLowerCase().includes(q)) return true;
+
+    // Match invoice
+    if ('invoice' in payment && payment.invoice?.toLowerCase().includes(q)) return true;
+
+    // Match preimage
+    if ('preimage' in payment && payment.preimage?.toLowerCase().includes(q)) return true;
+
+    // Match txId (on-chain)
+    if ('txId' in payment && (payment as OutgoingPayment).txId?.toLowerCase().includes(q))
+      return true;
+
+    // Match metadata note
+    const identifier = isIncoming
+      ? (payment as IncomingPayment).paymentHash
+      : (payment as OutgoingPayment).paymentId;
+    if (identifier) {
+      const metadata = paymentMetadataMap[identifier];
+      if (metadata?.note?.toLowerCase().includes(q)) return true;
+      // Match category names
+      if (metadata?.categories?.some((c) => c.name.toLowerCase().includes(q))) return true;
+    }
+
+    // Match date
+    const timestamp = payment.completedAt || payment.createdAt;
+    if (timestamp) {
+      const dateStr = new Date(timestamp).toLocaleString().toLowerCase();
+      if (dateStr.includes(q)) return true;
+    }
+
+    return false;
+  };
+
+  // Filter payments by search and category
+  const getFilteredPayments = (): Payment[] => {
+    const isSearching = searchQuery.trim().length > 0;
+
+    // When searching, use ALL payments (from refs); otherwise use paginated data
+    let payments: Payment[];
+    if (activeTab === 'all') {
+      const incoming = isSearching ? allIncomingRef.current : incomingPayments;
+      const outgoing = isSearching ? allOutgoingRef.current : outgoingPayments;
+      payments = sortByNewest([...incoming, ...outgoing]);
+    } else if (activeTab === 'incoming') {
+      payments = isSearching ? allIncomingRef.current : incomingPayments;
+    } else {
+      payments = isSearching ? allOutgoingRef.current : outgoingPayments;
+    }
+
+    // Apply search filter
+    if (isSearching) {
+      payments = payments.filter((payment) => matchesSearch(payment, searchQuery.trim()));
+    }
+
+    // Apply category filter
     if (!selectedCategoryFilter) return payments;
 
     return payments.filter((payment) => {
-      // For incoming payments, use paymentHash. For outgoing, use paymentId.
-      const identifier =
-        activeTab === 'incoming'
-          ? (payment as IncomingPayment).paymentHash
-          : (payment as OutgoingPayment).paymentId;
+      const isIncoming = 'receivedSat' in payment;
+      const identifier = isIncoming
+        ? (payment as IncomingPayment).paymentHash
+        : (payment as OutgoingPayment).paymentId;
       if (!identifier) return false;
       const metadata = paymentMetadataMap[identifier];
       return metadata?.categories?.some((c) => c.id === selectedCategoryFilter) || false;
@@ -470,6 +610,13 @@ export default function PaymentsPage() {
           tabs={
             [
               {
+                id: 'all',
+                label: t('all'),
+                icon: ArrowDownUp,
+                activeClassName:
+                  'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25',
+              },
+              {
                 id: 'incoming',
                 label: t('incoming'),
                 icon: ArrowDownToLine,
@@ -486,8 +633,28 @@ export default function PaymentsPage() {
             ] as TabItem[]
           }
           activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as 'incoming' | 'outgoing')}
+          onTabChange={(tab) => setActiveTab(tab as 'all' | 'incoming' | 'outgoing')}
         />
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('searchPlaceholder')}
+            className="w-full glass-card rounded-xl py-2.5 pl-10 pr-10 text-sm bg-transparent border border-white/[0.06] placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-md hover:bg-white/10 transition-colors"
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
+        </div>
 
         {/* Category Filter */}
         {categories.length > 0 && (
@@ -541,69 +708,81 @@ export default function PaymentsPage() {
             <div className="glass-card rounded-3xl p-16 text-center">
               <div className="flex flex-col items-center gap-4">
                 <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/5">
-                  {activeTab === 'incoming' ? (
+                  {searchQuery.trim() ? (
+                    <Search className="h-10 w-10 text-muted-foreground" />
+                  ) : activeTab === 'all' ? (
+                    <ArrowDownUp className="h-10 w-10 text-muted-foreground" />
+                  ) : activeTab === 'incoming' ? (
                     <ArrowDownToLine className="h-10 w-10 text-muted-foreground" />
                   ) : (
                     <ArrowUpFromLine className="h-10 w-10 text-muted-foreground" />
                   )}
                 </div>
                 <p className="text-lg text-muted-foreground">
-                  {activeTab === 'incoming' ? t('noIncomingPayments') : t('noOutgoingPayments')}
+                  {searchQuery.trim()
+                    ? t('noSearchResults')
+                    : activeTab === 'all'
+                      ? t('noPayments')
+                      : activeTab === 'incoming'
+                        ? t('noIncomingPayments')
+                        : t('noOutgoingPayments')}
                 </p>
               </div>
             </div>
           ) : (
             <div className="space-y-3">
-              {activeTab === 'incoming'
-                ? (currentPayments as IncomingPayment[]).map((payment, index) => {
-                    const metadata = paymentMetadataMap[payment.paymentHash];
-                    return (
-                      <PaymentListItem
-                        key={payment.paymentHash}
-                        payment={payment}
-                        metadata={metadata}
-                        formatValue={formatValue}
-                        onClick={() => setSelectedPayment(payment)}
-                        variant="default"
-                        showCategories={true}
-                        showFees={true}
-                        showArrow={true}
-                        animationDelay={index * 30}
-                      />
-                    );
-                  })
-                : (currentPayments as OutgoingPayment[]).map((payment, index) => {
-                    // Check both paymentId and paymentHash for backwards compatibility
-                    // (old data was saved with paymentHash instead of paymentId)
-                    const metadata =
-                      paymentMetadataMap[payment.paymentId] ||
-                      (payment.paymentHash ? paymentMetadataMap[payment.paymentHash] : undefined);
-                    return (
-                      <PaymentListItem
-                        key={payment.paymentId}
-                        payment={payment}
-                        metadata={metadata}
-                        formatValue={formatValue}
-                        onClick={() => setSelectedPayment(payment)}
-                        variant="default"
-                        showCategories={true}
-                        showFees={true}
-                        showArrow={true}
-                        animationDelay={index * 30}
-                      />
-                    );
-                  })}
+              {currentPayments.map((payment, index) => {
+                const isIncoming = 'receivedSat' in payment;
+                let key: string;
+                let metadata: PaymentMetadata | undefined;
 
-              {/* Infinite Scroll Loader */}
-              {!selectedCategoryFilter && (
+                if (isIncoming) {
+                  const incoming = payment as IncomingPayment;
+                  key = incoming.paymentHash;
+                  metadata = paymentMetadataMap[incoming.paymentHash];
+                } else {
+                  const outgoing = payment as OutgoingPayment;
+                  key = outgoing.paymentId;
+                  // Check both paymentId and paymentHash for backwards compatibility
+                  metadata =
+                    paymentMetadataMap[outgoing.paymentId] ||
+                    (outgoing.paymentHash ? paymentMetadataMap[outgoing.paymentHash] : undefined);
+                }
+
+                return (
+                  <PaymentListItem
+                    key={key}
+                    payment={payment}
+                    metadata={metadata}
+                    formatValue={formatValue}
+                    onClick={() => setSelectedPayment(payment)}
+                    variant="default"
+                    showCategories={true}
+                    showFees={true}
+                    showArrow={true}
+                    animationDelay={index * 30}
+                  />
+                );
+              })}
+
+              {/* Infinite Scroll Loader (hidden during search) */}
+              {!selectedCategoryFilter && !searchQuery.trim() && (
                 <div ref={loadMoreRef} className="py-4">
-                  {(activeTab === 'incoming' ? loadingMoreIncoming : loadingMoreOutgoing) && (
+                  {(activeTab === 'all'
+                    ? loadingMoreIncoming || loadingMoreOutgoing
+                    : activeTab === 'incoming'
+                      ? loadingMoreIncoming
+                      : loadingMoreOutgoing) && (
                     <div className="flex items-center justify-center gap-2 text-muted-foreground">
                       <Loader2 className="h-5 w-5 animate-spin" />
                       <span className="text-sm">{tc('loading')}</span>
                     </div>
                   )}
-                  {!(activeTab === 'incoming' ? hasMoreIncoming : hasMoreOutgoing) &&
+                  {!(activeTab === 'all'
+                    ? hasMoreIncoming || hasMoreOutgoing
+                    : activeTab === 'incoming'
+                      ? hasMoreIncoming
+                      : hasMoreOutgoing) &&
                     currentPayments.length > 0 && (
                       <p className="text-center text-sm text-muted-foreground">
                         {t('allPaymentsLoaded')}

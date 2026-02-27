@@ -237,6 +237,7 @@
   "payments": {
     "title": "Платежи",
     "subtitle": "История ваших платежей",
+    "all": "Все",
     "incoming": "Входящие",
     "outgoing": "Исходящие",
     "received": "Получено",
@@ -246,6 +247,9 @@
     "exported": "Экспортировано!",
     "paymentsExported": "Платежи экспортированы в CSV",
     "exportFailed": "Ошибка экспорта",
+    "searchPlaceholder": "Поиск по сумме, описанию, хешу...",
+    "noSearchResults": "Платежи не найдены",
+    "noPayments": "Платежей пока нет",
     "noIncomingPayments": "Входящих платежей пока нет",
     "noOutgoingPayments": "Исходящих платежей пока нет",
     "allPaymentsLoaded": "Все платежи загружены",

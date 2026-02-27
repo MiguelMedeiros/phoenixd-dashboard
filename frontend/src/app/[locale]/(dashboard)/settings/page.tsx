@@ -371,7 +371,11 @@ function SecurityTab() {
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder={t('currentPassword')}
                       className="w-full px-4 py-2.5 pr-10 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      autoComplete="current-password"
+                      autoComplete="off"
+                      data-lpignore="true"
+                      data-1p-ignore="true"
+                      data-bwignore="true"
+                      data-form-type="other"
                     />
                     <button
                       type="button"
@@ -396,7 +400,11 @@ function SecurityTab() {
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder={t('newPassword')}
                         className="w-full px-4 py-2.5 pr-10 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        autoComplete="new-password"
+                        autoComplete="off"
+                        data-lpignore="true"
+                        data-1p-ignore="true"
+                        data-bwignore="true"
+                        data-form-type="other"
                       />
                       <button
                         type="button"
@@ -416,7 +424,11 @@ function SecurityTab() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder={t('confirmPassword')}
                       className="w-full px-4 py-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                      autoComplete="new-password"
+                      autoComplete="off"
+                      data-lpignore="true"
+                      data-1p-ignore="true"
+                      data-bwignore="true"
+                      data-form-type="other"
                     />
                   </>
                 )}

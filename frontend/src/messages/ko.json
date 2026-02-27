@@ -237,6 +237,7 @@
   "payments": {
     "title": "결제 내역",
     "subtitle": "결제 이력",
+    "all": "전체",
     "incoming": "수신",
     "outgoing": "발송",
     "received": "수신됨",
@@ -246,6 +247,9 @@
     "exported": "내보내기 완료!",
     "paymentsExported": "결제가 CSV로 내보내졌습니다",
     "exportFailed": "내보내기 실패",
+    "searchPlaceholder": "금액, 설명, 해시로 검색...",
+    "noSearchResults": "검색 결과 없음",
+    "noPayments": "결제 없음",
     "noIncomingPayments": "수신 결제 없음",
     "noOutgoingPayments": "발송 결제 없음",
     "allPaymentsLoaded": "모든 결제가 로드되었습니다",

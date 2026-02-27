@@ -237,6 +237,7 @@
   "payments": {
     "title": "भुगतान",
     "subtitle": "आपका भुगतान इतिहास",
+    "all": "सभी",
     "incoming": "आने वाले",
     "outgoing": "जाने वाले",
     "received": "प्राप्त",
@@ -246,6 +247,9 @@
     "exported": "निर्यात हो गया!",
     "paymentsExported": "भुगतान CSV में निर्यात किए गए",
     "exportFailed": "निर्यात विफल",
+    "searchPlaceholder": "राशि, विवरण, हैश से खोजें...",
+    "noSearchResults": "कोई भुगतान नहीं मिला",
+    "noPayments": "अभी तक कोई भुगतान नहीं",
     "noIncomingPayments": "अभी तक कोई आने वाला भुगतान नहीं",
     "noOutgoingPayments": "अभी तक कोई जाने वाला भुगतान नहीं",
     "allPaymentsLoaded": "सभी भुगतान लोड हो गए",

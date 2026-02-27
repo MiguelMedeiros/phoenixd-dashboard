@@ -237,6 +237,7 @@
   "payments": {
     "title": "取引履歴",
     "subtitle": "あなたの支払い履歴",
+    "all": "すべて",
     "incoming": "受取",
     "outgoing": "送金",
     "received": "受取済み",
@@ -246,6 +247,9 @@
     "exported": "エクスポート完了！",
     "paymentsExported": "取引がCSVにエクスポートされました",
     "exportFailed": "エクスポートに失敗しました",
+    "searchPlaceholder": "金額、説明、ハッシュで検索...",
+    "noSearchResults": "該当する取引がありません",
+    "noPayments": "取引がありません",
     "noIncomingPayments": "受取取引がありません",
     "noOutgoingPayments": "送金取引がありません",
     "allPaymentsLoaded": "すべての取引を読み込みました",

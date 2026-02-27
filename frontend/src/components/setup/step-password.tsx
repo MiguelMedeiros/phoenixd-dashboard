@@ -64,6 +64,11 @@ export function StepPassword({ value, onChange }: StepPasswordProps) {
               onChange={(e) => onChange(e.target.value)}
               placeholder={t('passwordPlaceholder')}
               className="pr-10"
+              autoComplete="off"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-bwignore="true"
+              data-form-type="other"
             />
             <button
               type="button"
@@ -104,6 +109,11 @@ export function StepPassword({ value, onChange }: StepPasswordProps) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder={t('confirmPlaceholder')}
               className="pr-10"
+              autoComplete="off"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-bwignore="true"
+              data-form-type="other"
             />
             {confirmPassword.length > 0 && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
