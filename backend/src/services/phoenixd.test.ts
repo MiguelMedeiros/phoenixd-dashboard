@@ -121,6 +121,24 @@ describe('PhoenixdService', () => {
       });
     });
 
+    describe('getSwapInAddress', () => {
+      it('should return the current swap-in address', async () => {
+        const mockResponse = { address: 'bc1qswapin', index: 7 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          headers: { get: () => 'application/json' },
+          json: () => Promise.resolve(mockResponse),
+        });
+
+        await expect(service.getSwapInAddress()).resolves.toEqual(mockResponse);
+        expect(mockFetch).toHaveBeenCalledWith(
+          expect.stringContaining('/getswapinaddress'),
+          expect.objectContaining({ method: 'GET' })
+        );
+      });
+    });
+
     describe('listChannels', () => {
       it('should return empty array when no channels', async () => {
         // listChannels now calls getInfo internally

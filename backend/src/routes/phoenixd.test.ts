@@ -7,6 +7,7 @@ const {
   mockCreateInvoice,
   mockCreateOffer,
   mockGetLnAddress,
+  mockGetSwapInAddress,
   mockPayInvoice,
   mockPayOffer,
   mockPayLnAddress,
@@ -19,6 +20,7 @@ const {
   mockCreateInvoice: vi.fn(),
   mockCreateOffer: vi.fn(),
   mockGetLnAddress: vi.fn(),
+  mockGetSwapInAddress: vi.fn(),
   mockPayInvoice: vi.fn(),
   mockPayOffer: vi.fn(),
   mockPayLnAddress: vi.fn(),
@@ -41,6 +43,7 @@ vi.mock('../index.js', () => ({
     createInvoice: mockCreateInvoice,
     createOffer: mockCreateOffer,
     getLnAddress: mockGetLnAddress,
+    getSwapInAddress: mockGetSwapInAddress,
     payInvoice: mockPayInvoice,
     payOffer: mockPayOffer,
     payLnAddress: mockPayLnAddress,
@@ -58,6 +61,7 @@ const mockPhoenixd = {
   createInvoice: mockCreateInvoice,
   createOffer: mockCreateOffer,
   getLnAddress: mockGetLnAddress,
+  getSwapInAddress: mockGetSwapInAddress,
   payInvoice: mockPayInvoice,
   payOffer: mockPayOffer,
   payLnAddress: mockPayLnAddress,
@@ -194,6 +198,20 @@ describe('Phoenixd Routes', () => {
       const response = await request(app).get('/api/phoenixd/getlnaddress');
 
       expect(response.status).toBe(500);
+    });
+  });
+
+  describe('GET /getswapinaddress', () => {
+    it('should return the current swap-in address', async () => {
+      mockPhoenixd.getSwapInAddress.mockResolvedValueOnce({
+        address: 'bc1qswapin',
+        index: 7,
+      });
+
+      const response = await request(app).get('/api/phoenixd/getswapinaddress');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ address: 'bc1qswapin', index: 7 });
     });
   });
 

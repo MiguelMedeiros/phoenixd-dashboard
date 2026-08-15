@@ -172,7 +172,16 @@ export class PhoenixdService {
     return this.request<{
       balanceSat: number;
       feeCreditSat: number;
+      swapIn?: {
+        unconfirmedBalanceSat: number;
+        weaklyConfirmedBalanceSat: number;
+        deeplyConfirmedBalanceSat: number;
+      } | null;
     }>('GET', '/getbalance');
+  }
+
+  async getSwapInAddress() {
+    return this.request<{ address: string; index: number }>('GET', '/getswapinaddress');
   }
 
   async listChannels() {
