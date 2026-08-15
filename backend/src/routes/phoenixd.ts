@@ -64,6 +64,21 @@ phoenixdRouter.get(
   }
 );
 
+// Get current on-chain swap-in deposit address (phoenixd v0.9+)
+phoenixdRouter.get(
+  '/getswapinaddress',
+  requireAuth,
+  async (_req: AuthenticatedRequest, res: Response) => {
+    try {
+      const result = await phoenixd.getSwapInAddress();
+      res.json(result);
+    } catch (error) {
+      console.error('Error getting swap-in address:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  }
+);
+
 // Pay Bolt11 Invoice
 phoenixdRouter.post(
   '/payinvoice',
