@@ -7,6 +7,25 @@ on:
     branches: [main]
 
 jobs:
+  compatibility:
+    name: Phoenixd Compatibility
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check bundled phoenixd version
+        run: npm run test:compat
+
+      - name: Validate Docker Compose
+        run: docker compose config -q
+
   frontend:
     name: Frontend Checks
     runs-on: ubuntu-latest

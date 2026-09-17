@@ -12,7 +12,7 @@ on:
         type: string
 
 env:
-  PHOENIXD_VERSION: '0.7.1'
+  PHOENIXD_VERSION: '0.9.1'
 
 permissions:
   contents: write

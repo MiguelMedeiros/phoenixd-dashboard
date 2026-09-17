@@ -39,3 +39,17 @@ test('bundled deployment paths use the supported phoenixd version', () => {
     desktopScript: PHOENIXD_VERSION,
   });
 });
+
+test('desktop downloader uses asset names published by phoenixd v0.9.1', () => {
+  const downloader = read('desktop/scripts/download-phoenixd.sh');
+
+  for (const platform of ['macos-arm64', 'macos-x64', 'linux-x64']) {
+    assert.match(
+      downloader,
+      new RegExp(`phoenixd-\\$\\{PHOENIXD_VERSION\\}-${platform}\\.zip`),
+      `missing upstream archive name for ${platform}`,
+    );
+  }
+
+  assert.doesNotMatch(downloader, /windows-x64/i);
+});
