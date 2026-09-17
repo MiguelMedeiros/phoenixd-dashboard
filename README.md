@@ -97,6 +97,9 @@ open http://localhost:3000
 
 > **Note:** Requires Docker and Docker Compose. See [Installation](docs/installation.md) for detailed instructions.
 
+The bundled Docker and desktop distributions track **phoenixd v0.9.1**. External
+nodes should run phoenixd v0.9.0 or later for the complete dashboard API surface.
+
 <br>
 
 ## Documentation

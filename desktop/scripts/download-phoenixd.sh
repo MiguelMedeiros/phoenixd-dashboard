@@ -1,5 +1,5 @@
 #!/bin/bash
-# Download phoenixd binaries for all platforms
+# Download phoenixd binaries for supported desktop platforms
 
 set -e
 
@@ -8,7 +8,7 @@ DESKTOP_DIR="$(dirname "$SCRIPT_DIR")"
 BINARIES_DIR="$DESKTOP_DIR/binaries"
 
 # Phoenixd release version - update this to get newer versions
-PHOENIXD_VERSION="${PHOENIXD_VERSION:-0.3.4}"
+PHOENIXD_VERSION="${PHOENIXD_VERSION:-0.9.1}"
 PHOENIXD_REPO="ACINQ/phoenixd"
 
 echo "Downloading phoenixd v${PHOENIXD_VERSION} binaries..."
@@ -76,30 +76,23 @@ download_phoenixd() {
 # macOS ARM64 (Apple Silicon)
 download_phoenixd \
     "macOS-arm64" \
-    "phoenix-${PHOENIXD_VERSION}-macos-arm64.zip" \
+    "phoenixd-${PHOENIXD_VERSION}-macos-arm64.zip" \
     "phoenixd-aarch64-apple-darwin" \
-    "phoenix-${PHOENIXD_VERSION}-macos-arm64"
+    "phoenixd-${PHOENIXD_VERSION}-macos-arm64"
 
 # macOS x86_64 (Intel)
 download_phoenixd \
     "macOS-x64" \
-    "phoenix-${PHOENIXD_VERSION}-macos-x64.zip" \
+    "phoenixd-${PHOENIXD_VERSION}-macos-x64.zip" \
     "phoenixd-x86_64-apple-darwin" \
-    "phoenix-${PHOENIXD_VERSION}-macos-x64"
+    "phoenixd-${PHOENIXD_VERSION}-macos-x64"
 
 # Linux x86_64
 download_phoenixd \
     "Linux-x64" \
-    "phoenix-${PHOENIXD_VERSION}-linux-x64.zip" \
+    "phoenixd-${PHOENIXD_VERSION}-linux-x64.zip" \
     "phoenixd-x86_64-unknown-linux-gnu" \
-    "phoenix-${PHOENIXD_VERSION}-linux-x64"
-
-# Windows x86_64
-download_phoenixd \
-    "Windows-x64" \
-    "phoenix-${PHOENIXD_VERSION}-windows-x64.zip" \
-    "phoenixd-x86_64-pc-windows-msvc.exe" \
-    "phoenix-${PHOENIXD_VERSION}-windows-x64"
+    "phoenixd-${PHOENIXD_VERSION}-linux-x64"
 
 echo ""
 echo "Download complete!"

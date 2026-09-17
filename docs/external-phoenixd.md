@@ -12,7 +12,7 @@ By default, the dashboard connects to its bundled Docker-based phoenixd. However
 
 ## Prerequisites
 
-1. A running phoenixd instance (v0.4.0 or later recommended)
+1. A running phoenixd instance (v0.9.0 or later; v0.9.1 is the bundled baseline)
 2. Network access between the dashboard and phoenixd
 3. The API password from your phoenixd configuration
 
