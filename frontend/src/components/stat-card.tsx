@@ -5,13 +5,7 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export type StatCardVariant =
-  | 'success'
-  | 'primary'
-  | 'warning'
-  | 'error'
-  | 'muted'
-  | 'info'
-  | 'accent';
+  'success' | 'primary' | 'warning' | 'error' | 'muted' | 'info' | 'accent';
 
 interface StatCardProps {
   label: string;
