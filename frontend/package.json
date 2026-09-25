@@ -44,8 +44,8 @@
     "date-fns": "^4.1.0",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.469.0",
-    "next": "^15.1.3",
-    "next-intl": "^4.6.1",
+    "next": "^15.5.26",
+    "next-intl": "^4.14.7",
     "next-themes": "^0.4.4",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
@@ -65,18 +65,28 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^5.2.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.4.20",
     "cypress": "^15.8.1",
     "eslint": "^9.17.0",
-    "eslint-config-next": "^15.1.3",
+    "eslint-config-next": "^15.5.26",
     "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.4",
     "start-server-and-test": "^2.1.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vite": "^7.3.6",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "browserslist": "4.29.1",
+    "postcss": "$postcss",
+    "vite": "$vite",
+    "minimatch@3.1.5": {
+      "brace-expansion": "1.1.21"
+    }
   }
 }
