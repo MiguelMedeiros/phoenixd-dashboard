@@ -71,7 +71,7 @@
     "cypress": "^15.8.1",
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.5.26",
-    "jsdom": "^25.0.1",
+    "jsdom": "^30.1.1",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
     "sharp": "^0.35.4",
