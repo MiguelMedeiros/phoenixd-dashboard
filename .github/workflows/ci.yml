@@ -92,11 +92,11 @@ jobs:
         run: npm run build
 
       - name: Run Cypress E2E tests
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@4ce68f262a3888d22cf3175d62010a145ba737ee # v7.4.8
         with:
           working-directory: ./e2e
           start: npm run start --prefix ../frontend
-          wait-on: 'http://127.0.0.1:3000'
+          wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
           browser: chrome
           record: false
