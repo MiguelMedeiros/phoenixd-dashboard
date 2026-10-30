@@ -92,7 +92,7 @@ jobs:
         run: npm run build
 
       - name: Run Cypress E2E tests
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@4ce68f262a3888d22cf3175d62010a145ba737ee # v7.4.8
         with:
           working-directory: ./e2e
           start: npm run start --prefix ../frontend
@@ -138,6 +138,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Generate Prisma Client
         run: npm run db:generate
