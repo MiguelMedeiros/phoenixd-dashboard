@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { WebSocket } from 'ws';
 
 // Test utility functions for WebSocket and broadcast functionality
 describe('WebSocket Utilities', () => {
   describe('broadcastPayment', () => {
     it('should broadcast to all connected clients', () => {
-      const clients = new Set<{ readyState: number; send: ReturnType<typeof vi.fn> }>();
+      const clients = new Set<{ readyState: number; send: Mock<(message: string) => void> }>();
 
       const client1 = { readyState: WebSocket.OPEN, send: vi.fn() };
       const client2 = { readyState: WebSocket.OPEN, send: vi.fn() };
@@ -31,7 +31,7 @@ describe('WebSocket Utilities', () => {
     });
 
     it('should handle empty client set', () => {
-      const clients = new Set<{ readyState: number; send: ReturnType<typeof vi.fn> }>();
+      const clients = new Set<{ readyState: number; send: Mock<(message: string) => void> }>();
       const event = { type: 'payment_received', amountSat: 500 };
 
       // Should not throw when broadcasting to empty set
