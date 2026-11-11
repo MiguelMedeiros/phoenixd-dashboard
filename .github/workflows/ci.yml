@@ -156,3 +156,24 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  desktop-advisories:
+    name: Desktop Rust Advisories
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./desktop/src-tauri
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
+        with:
+          tool: cargo-audit
+
+      # Fails on RustSec vulnerabilities in the desktop lockfile. Unmaintained /
+      # unsound notices (e.g. glib 0.18 via Tauri's GTK3 stack) stay warnings.
+      - name: Audit desktop Cargo.lock
+        run: cargo audit
