@@ -48,6 +48,8 @@ const floors = {
   'frontend/package-lock.json': {
     '@vitest/mocker': [4, 1, 12],
     systeminformation: [5, 33, 16],
+    // GHSA-4528-x5fx-h6hg (wait-on, dev)
+    joi: [18, 3, 1],
   },
   'e2e/package-lock.json': {
     systeminformation: [5, 33, 16],
@@ -59,6 +61,40 @@ for (const [path, packages] of Object.entries(floors)) {
   for (const [name, minimum] of Object.entries(packages)) {
     test(`${path} resolves ${name} at or past ${minimum.join('.')}`, () => {
       assertFloor(path, name, minimum);
+    });
+  }
+}
+
+// Advisories whose vulnerable range has a lower bound: older major lines that
+// are outside the range (e.g. minimatch 3.x for eslint) stay allowed.
+function assertOutsideRange(path, name, introduced, fixed) {
+  const vulnerable = lockedVersions(lockfile(path), name).filter(
+    ({ version }) => !below(version, introduced) && below(version, fixed)
+  );
+  assert.deepEqual(
+    vulnerable,
+    [],
+    `${path}: ${name} must not be in >= ${introduced.join('.')} < ${fixed.join('.')}`
+  );
+}
+
+const vulnerableRanges = {
+  'backend/package-lock.json': {
+    // GHSA-g3hv-75wg-m249
+    minimatch: [[7, 0, 0], [11, 0, 1]],
+  },
+  'frontend/package-lock.json': {
+    // GHSA-g3hv-75wg-m249
+    minimatch: [[7, 0, 0], [11, 0, 1]],
+    // GHSA-3g3m-2fjr-6pw4
+    glob: [[9, 0, 0], [14, 0, 2]],
+  },
+};
+
+for (const [path, packages] of Object.entries(vulnerableRanges)) {
+  for (const [name, [introduced, fixed]] of Object.entries(packages)) {
+    test(`${path} keeps ${name} outside ${introduced.join('.')} - ${fixed.join('.')}`, () => {
+      assertOutsideRange(path, name, introduced, fixed);
     });
   }
 }
