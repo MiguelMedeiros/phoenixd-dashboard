@@ -43,6 +43,16 @@ test('frontend lockfile resolves Next.js and sharp past the October 2026 RCE adv
   assertAtLeast(lockedVersion('frontend/package-lock.json', 'sharp'), [0, 35, 5], 'sharp');
 });
 
+test('frontend lockfile resolves Next.js past the November 2026 Edge cookie and SVG advisories', () => {
+  // Edge runtime HttpOnly cookie exposure + image-optimizer SVG rejection bypass: fixed in next 15.5.29
+  assertAtLeast(lockedVersion('frontend/package-lock.json', 'next'), [15, 5, 29], 'next');
+  assertAtLeast(
+    lockedVersion('frontend/package-lock.json', 'eslint-config-next'),
+    [15, 5, 29],
+    'eslint-config-next'
+  );
+});
+
 test('backend CI blocks high-severity production advisories', () => {
   const workflow = read('.github/workflows/ci.yml');
 
