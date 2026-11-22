@@ -34,6 +34,8 @@ const FLOORS = {
   serde_with: '3.21.0',
   'quick-xml': '0.41.0',
   anyhow: '1.0.103',
+  // RUSTSEC-2026-0592: stack overflow in Url::origin() on nested blob: URLs
+  url: '2.5.9',
 };
 
 for (const [name, floor] of Object.entries(FLOORS)) {

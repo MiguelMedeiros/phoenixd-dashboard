@@ -44,6 +44,8 @@ const floors = {
     tinypool: [2, 1, 2],
     esbuild: [0, 25, 0],
     uuid: [11, 1, 1],
+    // GHSA-7589-6fvf-x4pw (effect ReDoS, via prisma -> @prisma/config)
+    effect: [3, 22, 1],
   },
   'frontend/package-lock.json': {
     '@vitest/mocker': [4, 1, 12],
